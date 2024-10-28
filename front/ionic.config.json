@@ -1,0 +1,7 @@
+{
+  "name": "libro-sync-frontend",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
