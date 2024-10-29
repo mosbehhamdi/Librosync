@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import { ref, markRaw } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import type { Router } from 'vue-router';
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
@@ -11,7 +11,7 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 // Create axios instance with base configuration
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/api', // Remove /auth from here
+  baseURL: 'http://localhost:8000/api',
   withCredentials: true,
   headers: {
     'Accept': 'application/json',
@@ -20,22 +20,38 @@ const axiosInstance = axios.create({
 });
 
 export const useAuthStore = defineStore('auth', () => {
-  const router = markRaw(useRouter()); // Mark router as raw to avoid reactivity issues
+  console.log('Initializing auth store');
+  console.log('Stored user:', localStorage.getItem('user'));
+  console.log('Stored auth:', localStorage.getItem('auth'));
 
-  const user = ref(JSON.parse(localStorage.getItem('user') || 'null'));
+  const user = ref(null);
   const token = ref(null);
+  let router: Router | null = null;
 
-  // Initialize token from localStorage
-  const savedAuth = localStorage.getItem('auth');
-  if (savedAuth) {
-    const auth = JSON.parse(savedAuth);
-    token.value = auth.authorization?.token;
+  // Try to load stored data
+  try {
+    const storedUser = localStorage.getItem('user');
+    const storedAuth = localStorage.getItem('auth');
+    
+    if (storedUser && storedAuth) {
+      user.value = JSON.parse(storedUser);
+      const auth = JSON.parse(storedAuth);
+      token.value = auth.authorization?.token;
+    }
+  } catch (error) {
+    console.error('Error loading stored auth data:', error);
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth');
   }
 
   // Set auth header if token exists
   if (token.value) {
     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
   }
+
+  const setRouter = (r: Router) => {
+    router = r;
+  };
 
   // Helper function to handle API responses
   const handleAuthResponse = (response: any) => {
@@ -58,7 +74,15 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null;
     localStorage.removeItem('user');
     localStorage.removeItem('auth');
+    localStorage.clear();
     delete axiosInstance.defaults.headers.common['Authorization'];
+    
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+
+    console.log('Auth state cleared');
   };
 
   const login = async (email: string, password: string) => {
@@ -88,17 +112,101 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      await axiosInstance.post('/auth/logout');
+      // Try to call logout API
+      await axiosInstance.post('/auth/logout').catch(() => {
+        // Ignore API errors during logout
+        console.log('Logout API call failed, continuing with local cleanup');
+      });
+    } finally {
+      // Always clear local state, even if API call fails
       clearAuthState();
-      await router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
+      if (router) {
+        await router.push('/login');
+      }
     }
   };
 
   const isAuthenticated = () => {
-    return !!token.value && !!user.value;
+    const hasValidToken = !!token.value && typeof token.value === 'string';
+    const hasValidUser = !!user.value && 
+                        typeof user.value === 'object' && 
+                        'id' in user.value;
+
+    console.log('Authentication check:', {
+      hasValidToken,
+      hasValidUser,
+      token: token.value,
+      user: user.value
+    });
+
+    return hasValidToken && hasValidUser;
+  };
+
+  const verifyEmail = async (code: string) => {
+    try {
+      const response = await axiosInstance.post('/email/verify', { code });
+      if (response.data.message === 'Email verified successfully') {
+        // Update user state to reflect verification
+        const userResponse = await axiosInstance.get('/auth/user');
+        user.value = userResponse.data.user;
+      }
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const resendVerification = async () => {
+    try {
+      const response = await axiosInstance.post('/email/resend');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const isVerified = () => {
+    return !!user.value?.email_verified_at;
+  };
+
+  const forgotPassword = async (email: string) => {
+    try {
+      const response = await axiosInstance.post('/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const verifyResetCode = async (email: string, code: string) => {
+    try {
+      console.log('Verifying code:', { email, code });
+      const response = await axiosInstance.post('/verify-reset-code', { 
+        email,
+        code 
+      });
+      console.log('Verification response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Verification error:', error);
+      throw error;
+    }
+  };
+
+  const resetPassword = async (data: {
+    email: string;
+    token: string;
+    password: string;
+    password_confirmation: string;
+  }) => {
+    try {
+      console.log('Resetting password with data:', data);
+      const response = await axiosInstance.post('/reset-password', data);
+      return response.data;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
   };
 
   return {
@@ -107,7 +215,15 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    isAuthenticated
+    isAuthenticated,
+    isVerified,
+    verifyEmail,
+    resendVerification,
+    setRouter,
+    clearAuthState,
+    forgotPassword,
+    verifyResetCode,
+    resetPassword
   };
 });
 
@@ -116,7 +232,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  email_verified_at: string | null;
+  email_verified_at: string;
   created_at: string;
   updated_at: string;
 }
@@ -137,8 +253,11 @@ axios.interceptors.response.use(
     if (error.response?.status === 401) {
       const authStore = useAuthStore();
       await authStore.logout();
-      router.push('/login');
+      if (authStore.router) {
+        await authStore.router.push('/login');
+      }
     }
     return Promise.reject(error);
   }
 );
+

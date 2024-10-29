@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -45,3 +46,24 @@ Route::prefix('auth')->group(function () {
         Route::get('user', [AuthController::class, 'user']);
     });
 });
+
+// Email Verification Routes
+Route::middleware(['auth:api'])->group(function () {
+    Route::post('/email/verify', [VerificationController::class, 'verify'])
+        ->name('verification.verify');
+    Route::post('/email/resend', [VerificationController::class, 'resend'])
+        ->name('verification.resend');
+});
+
+// Password Reset Routes
+Route::post('forgot-password', [PasswordResetController::class, 'forgotPassword'])
+    ->middleware('throttle:6,1')
+    ->name('password.email');
+
+Route::post('verify-reset-code', [PasswordResetController::class, 'verifyCode'])
+    ->middleware('throttle:6,1')
+    ->name('password.code.verify');
+
+Route::post('reset-password', [PasswordResetController::class, 'reset'])
+    ->middleware('throttle:6,1')
+    ->name('password.update');

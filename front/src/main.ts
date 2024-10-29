@@ -41,6 +41,14 @@ const app = createApp(App)
   .use(pinia)
   .use(router);
 
+// Import and use auth store after pinia is installed
+import { useAuthStore } from '@/stores/auth';
+const authStore = useAuthStore();
+
+// Clear auth state and set router
+authStore.clearAuthState();
+authStore.setRouter(router);
+
 router.isReady().then(() => {
   app.mount('#app');
 });

@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ResetPasswordNotification extends Notification implements ShouldQueue
+class VerifyEmailNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -26,11 +26,10 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Reset Password Notification')
-            ->line('You are receiving this email because we received a password reset request for your account.')
-            ->line('Your password reset code is:')
+            ->subject('Verify Your Email Address')
+            ->line('Your email verification code is:')
             ->line($this->code)
-            ->line('This code will expire in 60 minutes.')
-            ->line('If you did not request a password reset, no further action is required.');
+            ->line('This code will expire in 10 minutes.')
+            ->line('If you did not create an account, no further action is required.');
     }
-}
+} 

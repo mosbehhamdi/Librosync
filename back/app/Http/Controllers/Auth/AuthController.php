@@ -4,52 +4,63 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\VerificationCode;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6|confirmed',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8']
+        ]);
 
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-
-            $token = Auth::guard('api')->login($user);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'User created successfully',
-                'user' => $user,
-                'authorization' => [
-                    'token' => $token,
-                    'type' => 'bearer',
-                ]
-            ], 201); // Added proper status code for resource creation
-        } catch (ValidationException $e) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validation failed',
-                'errors' => $e->errors()
+                'errors' => $validator->errors()
             ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Registration failed',
-                'error' => $e->getMessage()
-            ], 500);
         }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Generate verification code
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        
+        // Save verification code
+        VerificationCode::create([
+            'user_id' => $user->id,
+            'code' => $code,
+            'expires_at' => now()->addMinutes(10)
+        ]);
+
+        // Send verification email with code
+        $user->notify(new VerifyEmailNotification($code));
+
+        $token = Auth::guard('api')->login($user);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User created successfully. Please verify your email.',
+            'user' => $user,
+            'authorization' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ],
+            'verified' => false
+        ]);
     }
 
     public function login(Request $request)

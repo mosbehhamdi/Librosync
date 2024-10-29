@@ -8,9 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -76,5 +75,10 @@ class User extends Authenticatable implements JWTSubject
         $url = config('app.url') . '/reset-password?token=' . $token . '&email=' . $this->email;
         
         $this->notify(new \App\Notifications\ResetPasswordNotification($url));
+    }
+
+    public function verificationCodes()
+    {
+        return $this->hasMany(VerificationCode::class);
     }
 }
