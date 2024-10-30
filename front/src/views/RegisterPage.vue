@@ -159,7 +159,7 @@ const handleRegister = async () => {
       password_confirmation: passwordConfirmation.value,
     });
     await presentToast('Registration successful!', 'success');
-    await router.replace({ name: 'dashboard' }); // Use replace instead of push
+    await router.replace('/books');
   } catch (error: any) {
     console.error('Registration error:', error);
     let errorMessage = 'Registration failed';

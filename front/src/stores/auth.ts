@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 import type { Router } from 'vue-router';
 
@@ -24,8 +24,8 @@ export const useAuthStore = defineStore('auth', () => {
   console.log('Stored user:', localStorage.getItem('user'));
   console.log('Stored auth:', localStorage.getItem('auth'));
 
-  const user = ref(null);
-  const token = ref(null);
+  const user = ref<User | null>(null);
+  const token = ref<string | null>(null);
   let router: Router | null = null;
 
   // Initialize auth state
@@ -39,18 +39,15 @@ export const useAuthStore = defineStore('auth', () => {
         const auth = JSON.parse(storedAuth);
         token.value = auth.authorization?.token;
         
-        // Set auth header
         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
         
-        // Verify token validity with backend
         await refreshUser();
         
-        // Only redirect if we're on login or root path
         if (router && (window.location.pathname === '/login' || window.location.pathname === '/')) {
-          if (user.value.is_admin) {
-            router.push('/admin/dashboard');
+          if (user.value?.is_admin) {
+            await router.push('/admin/dashboard');
           } else {
-            router.push('/dashboard');
+            await router.push('/books');
           }
         }
         return true;
@@ -58,7 +55,7 @@ export const useAuthStore = defineStore('auth', () => {
         console.error('Auth initialization error:', error);
         clearAuthState();
         if (router && window.location.pathname !== '/login') {
-          router.push('/login');
+          await router.push('/login');
         }
         return false;
       }
@@ -92,16 +89,18 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   // Helper function to handle API responses
-  const handleAuthResponse = (response: any) => {
+  const handleAuthResponse = (response: any): AuthResponse => {
     if (response.data.status === 'success' && response.data.user && response.data.authorization) {
       user.value = response.data.user;
       token.value = response.data.authorization.token;
+      
       localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('auth', JSON.stringify({
         authorization: response.data.authorization
       }));
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.authorization.token}`;
-      return response;
+      
+      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
+      return response.data;
     }
     throw new Error('Invalid response format');
   };
@@ -150,13 +149,12 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      // Try to call logout API
-      await axiosInstance.post('/auth/logout').catch(() => {
-        // Ignore API errors during logout
-        console.log('Logout API call failed, continuing with local cleanup');
-      });
+      if (token.value) {
+        await axiosInstance.post('/auth/logout').catch(() => {
+          console.log('Logout API call failed, continuing with local cleanup');
+        });
+      }
     } finally {
-      // Always clear local state, even if API call fails
       clearAuthState();
       if (router) {
         await router.push('/login');
@@ -164,11 +162,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  const isAuthenticated = () => {
-    const hasValidToken = !!token.value && typeof token.value === 'string';
-    const hasValidUser = !!user.value && typeof user.value === 'object' && 'id' in user.value;
-    return hasValidToken && hasValidUser;
-  };
+  const isAuthenticated = computed(() => {
+    return !!token.value && !!user.value;
+  });
+
+  const isAdmin = computed(() => {
+    return user.value?.is_admin === true;
+  });
+
+  const isVerified = computed(() => {
+    return !!user.value?.email_verified_at;
+  });
 
   const verifyEmail = async (code: string) => {
     try {
@@ -191,10 +195,6 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (error) {
       throw error;
     }
-  };
-
-  const isVerified = () => {
-    return !!user.value?.email_verified_at;
   };
 
   const forgotPassword = async (email: string) => {
@@ -253,6 +253,25 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  const updateProfile = async (data: any) => {
+    try {
+      const response = await axiosInstance.put('/user/profile', data);
+      user.value = response.data;
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await axiosInstance.get('/user/stats');
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     user,
     token,
@@ -260,6 +279,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     isAuthenticated,
+    isAdmin,
     isVerified,
     verifyEmail,
     resendVerification,
@@ -269,11 +289,13 @@ export const useAuthStore = defineStore('auth', () => {
     verifyResetCode,
     resetPassword,
     initializeAuth,
-    refreshUser
+    refreshUser,
+    updateProfile,
+    fetchUserStats
   };
 });
 
-// Add type safety
+// Updated interfaces
 interface User {
   id: number;
   name: string;
@@ -291,16 +313,20 @@ interface AuthResponse {
   };
 }
 
-// Add error handling for token expiration
-axios.interceptors.response.use(
+// Updated axios interceptor
+axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('user');
-      localStorage.removeItem('auth');
-      window.location.href = '/login';
+      const authStore = useAuthStore();
+      await authStore.clearAuthState();
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
+
+export type { User, AuthResponse };
 

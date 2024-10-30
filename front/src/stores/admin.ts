@@ -31,8 +31,9 @@ export const useAdminStore = defineStore('admin', {
       total_books: 0,
       available_books: 0
     },
+    reservations: [] as any[],
     isLoading: false,
-    error: null as any
+    error: null as string | null
   }),
 
   actions: {
@@ -154,6 +155,32 @@ export const useAdminStore = defineStore('admin', {
         return response.data;
       } catch (error) {
         this.error = error;
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async fetchAllReservations() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/admin/reservations');
+        this.reservations = response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Error fetching reservations';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async cancelReservation(id: number) {
+      this.isLoading = true;
+      try {
+        await api.post(`/admin/reservations/${id}/cancel`);
+        this.reservations = this.reservations.filter(r => r.id !== id);
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Error cancelling reservation';
         throw error;
       } finally {
         this.isLoading = false;

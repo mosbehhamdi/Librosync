@@ -159,7 +159,17 @@ const openAddModal = () => {
 };
 
 const openEditModal = (book) => {
-  selectedBook.value = book;
+  selectedBook.value = {
+    ...book,
+    authors: book.authors || [], // Ensure authors is an array
+    publication_date: book.publication_date ? book.publication_date.split('T')[0] : '', // Format date for input
+    acquisition_date: book.acquisition_date ? book.acquisition_date.split('T')[0] : '',
+    price: book.price ? Number(book.price) : 0,
+    copies_count: Number(book.copies_count),
+    available_copies: Number(book.available_copies),
+    parts_count: Number(book.parts_count),
+    edition_number: Number(book.edition_number)
+  };
   showFormModal.value = true;
 };
 

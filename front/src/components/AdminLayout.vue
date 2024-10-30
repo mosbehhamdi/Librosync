@@ -34,20 +34,28 @@
                 Dashboard
               </ion-item>
               <ion-item 
-                router-link="/admin/users" 
-                :class="{ 'selected-item': $route.path === '/admin/users' }"
-                lines="none"
-              >
-                <ion-icon :icon="peopleOutline" slot="start"></ion-icon>
-                Users
-              </ion-item>
-              <ion-item 
                 router-link="/admin/books" 
                 :class="{ 'selected-item': $route.path === '/admin/books' }"
                 lines="none"
               >
                 <ion-icon :icon="libraryOutline" slot="start"></ion-icon>
                 Books
+              </ion-item>
+              <ion-item 
+                router-link="/admin/reservations" 
+                :class="{ 'selected-item': $route.path === '/admin/reservations' }"
+                lines="none"
+              >
+                <ion-icon :icon="bookmarkOutline" slot="start"></ion-icon>
+                Reservations
+              </ion-item>
+              <ion-item 
+                router-link="/admin/users" 
+                :class="{ 'selected-item': $route.path === '/admin/users' }"
+                lines="none"
+              >
+                <ion-icon :icon="peopleOutline" slot="start"></ion-icon>
+                Users
               </ion-item>
             </ion-menu-toggle>
           </ion-list>
@@ -68,20 +76,28 @@
                 Dashboard
               </ion-item>
               <ion-item 
-                router-link="/admin/users" 
-                :class="{ 'selected-item': $route.path === '/admin/users' }"
-                lines="none"
-              >
-                <ion-icon :icon="peopleOutline" slot="start"></ion-icon>
-                Users
-              </ion-item>
-              <ion-item 
                 router-link="/admin/books" 
                 :class="{ 'selected-item': $route.path === '/admin/books' }"
                 lines="none"
               >
                 <ion-icon :icon="libraryOutline" slot="start"></ion-icon>
                 Books
+              </ion-item>
+              <ion-item 
+                router-link="/admin/reservations" 
+                :class="{ 'selected-item': $route.path === '/admin/reservations' }"
+                lines="none"
+              >
+                <ion-icon :icon="bookmarkOutline" slot="start"></ion-icon>
+                Reservations
+              </ion-item>
+              <ion-item 
+                router-link="/admin/users" 
+                :class="{ 'selected-item': $route.path === '/admin/users' }"
+                lines="none"
+              >
+                <ion-icon :icon="peopleOutline" slot="start"></ion-icon>
+                Users
               </ion-item>
             </ion-list>
           </div>
@@ -101,7 +117,10 @@ import {
   IonMenu, IonList, IonItem, IonIcon, IonButtons, 
   IonButton, IonMenuButton, IonMenuToggle
 } from '@ionic/vue';
-import { gridOutline, peopleOutline, logOutOutline, libraryOutline } from 'ionicons/icons';
+import { 
+  gridOutline, peopleOutline, logOutOutline, 
+  libraryOutline, bookmarkOutline 
+} from 'ionicons/icons';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { ref, onMounted, onUnmounted } from 'vue';

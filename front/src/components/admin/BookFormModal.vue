@@ -252,11 +252,31 @@ const formData = ref({
 // Watch for book prop changes to update form
 watch(() => props.book, (newBook) => {
   if (newBook) {
-    formData.value = { ...newBook };
+    // Format dates properly
+    const publicationDate = newBook.publication_date ? new Date(newBook.publication_date).toISOString().split('T')[0] : '';
+    const acquisitionDate = newBook.acquisition_date ? new Date(newBook.acquisition_date).toISOString().split('T')[0] : '';
+
+    formData.value = {
+      ...newBook,
+      // Ensure all fields are properly formatted
+      authors: Array.isArray(newBook.authors) ? newBook.authors : [newBook.authors || ''],
+      copies_count: Number(newBook.copies_count) || 1,
+      available_copies: Number(newBook.available_copies) || 1,
+      parts_count: Number(newBook.parts_count) || 1,
+      edition_number: Number(newBook.edition_number) || 1,
+      price: Number(newBook.price) || 0,
+      publication_date: publicationDate,
+      acquisition_date: acquisitionDate,
+      // Ensure optional fields are not undefined
+      comments: newBook.comments || '',
+      dewey_subcategory: newBook.dewey_subcategory || '',
+      central_number: newBook.central_number || '',
+      local_number: newBook.local_number || ''
+    };
   } else {
     resetForm();
   }
-}, { immediate: true });
+}, { immediate: true, deep: true });
 
 const addAuthor = () => {
   formData.value.authors.push('');

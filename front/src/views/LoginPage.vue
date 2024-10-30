@@ -84,8 +84,12 @@ const authStore = useAuthStore();
 
 // Add onMounted to check authentication status
 onMounted(() => {
-  if (authStore.isAuthenticated()) {
-    router.replace({ name: 'dashboard' });
+  if (authStore.isAuthenticated) {
+    if (authStore.isAdmin) {
+      router.replace('/admin/dashboard');
+    } else {
+      router.replace('/books');
+    }
   }
 });
 
@@ -106,22 +110,22 @@ const handleLogin = async () => {
 
   isLoading.value = true;
   try {
-    const response = await authStore.login(email.value, password.value);
-    if (response.data.status === 'success') {
-      await presentToast('Login successful!', 'success');
-      // Redirect based on user role
-      if (response.data.user.is_admin) {
-        await router.replace('/admin/dashboard');
-      } else {
-        await router.replace('/dashboard');
-      }
+    await authStore.login(email.value, password.value);
+    await presentToast('Login successful!', 'success');
+    
+    // Redirect based on user role
+    if (authStore.user?.is_admin) {
+      await router.replace('/admin/dashboard');
+    } else {
+      await router.replace('/books');
     }
   } catch (error: any) {
     console.error('Login error:', error);
     await presentToast(
       error.response?.data?.message || 
       error.message || 
-      'Login failed'
+      'Login failed',
+      'danger'
     );
   } finally {
     isLoading.value = false;

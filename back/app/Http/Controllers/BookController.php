@@ -87,9 +87,18 @@ class BookController extends Controller
         }
 
         if ($request->has('author')) {
-            $query->where('authors', 'like', "%{$request->author}%");
+            $query->whereJsonContains('authors', $request->author);
         }
 
-        return response()->json($query->paginate(10));
+        if ($request->has('query')) {
+            $search = $request->query;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhereJsonContains('authors', $search)
+                  ->orWhere('isbn', 'like', "%{$search}%");
+            });
+        }
+
+        return response()->json(['data' => $query->paginate(10)]);
     }
 } 

@@ -38,4 +38,27 @@ class Book extends Model
         'parts_count' => 'integer',
         'edition_number' => 'integer',
     ];
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    public function activeReservations()
+    {
+        return $this->reservations()
+            ->whereIn('status', ['pending', 'ready'])
+            ->orderBy('queue_position');
+    }
+
+    public function getWaitingTimeAttribute()
+    {
+        $activeReservationsCount = $this->activeReservations()->count();
+        if ($activeReservationsCount === 0 || $this->available_copies > 0) {
+            return 0;
+        }
+        
+        // Estimation basée sur le temps moyen d'emprunt (par exemple, 14 jours)
+        return ceil($activeReservationsCount / $this->copies_count) * 14;
+    }
 } 
