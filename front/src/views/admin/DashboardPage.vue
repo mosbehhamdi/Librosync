@@ -1,7 +1,7 @@
 <template>
   <admin-layout>
     <ion-content class="ion-padding">
-      <h1>Admin Dashboard</h1>
+      <h1 class="text-2xl font-bold mb-6">Admin Dashboard</h1>
       
       <ion-grid>
         <ion-row>
@@ -11,7 +11,7 @@
                 <ion-card-title>Total Users</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <h2>{{ adminStore.stats.total_users }}</h2>
+                <h2 class="text-3xl font-bold">{{ adminStore.stats.total_users }}</h2>
               </ion-card-content>
             </ion-card>
           </ion-col>
@@ -22,7 +22,7 @@
                 <ion-card-title>Verified Users</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <h2>{{ adminStore.stats.verified_users }}</h2>
+                <h2 class="text-3xl font-bold">{{ adminStore.stats.verified_users }}</h2>
               </ion-card-content>
             </ion-card>
           </ion-col>
@@ -33,7 +33,7 @@
                 <ion-card-title>Unverified Users</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <h2>{{ adminStore.stats.unverified_users }}</h2>
+                <h2 class="text-3xl font-bold">{{ adminStore.stats.unverified_users }}</h2>
               </ion-card-content>
             </ion-card>
           </ion-col>
@@ -44,11 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import AdminLayout from '@/components/AdminLayout.vue';
 import { useAdminStore } from '@/stores/admin';
-import { IonContent, IonGrid, IonRow, IonCol, IonCard, 
-         IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/vue';
+import { onMounted } from 'vue';
+import { 
+  IonContent, IonGrid, IonRow, IonCol,
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent 
+} from '@ionic/vue';
 
 const adminStore = useAdminStore();
 
