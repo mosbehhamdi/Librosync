@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BookController;
 use Illuminate\Support\Facades\Route;
 
 // Public auth routes
@@ -36,4 +37,11 @@ Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function () {
     Route::get('/users', [AdminController::class, 'users']);
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
+});
+
+// Books routes
+Route::middleware(['auth:api', 'admin'])->group(function () {
+    Route::apiResource('books', BookController::class);
+    Route::put('books/{book}/copies', [BookController::class, 'updateCopies']);
+    Route::get('books/search', [BookController::class, 'search']);
 });

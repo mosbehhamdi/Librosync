@@ -21,5 +21,10 @@ class DatabaseSeeder extends Seeder
 
         // Create some regular users if needed
         User::factory(10)->create();
+
+        // Run the BookSeeder
+        $this->call([
+            BookSeeder::class
+        ]);
     }
 }
