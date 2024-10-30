@@ -3,67 +3,37 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\VerificationController;
-use App\Mail\TestMail;
-use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
-// Test routes
-Route::get('/test', fn() => response()->json(['message' => 'API is working']));
-Route::get('/ping', fn() => response()->json(['message' => 'pong']));
-Route::get('/test-mail', function () {
-    try {
-        Mail::to('mesbahhamdidsi@gmail.com')->send(new TestMail());
-        return response()->json(['message' => 'Test email sent successfully!']);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
-        ], 500);
-    }
-});
 
-// Public auth routes with rate limiting
-Route::middleware('throttle:6,1')->group(function () {
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
-    Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])
-        ->middleware('throttle:6,1')
-        ->name('password.email');
-    Route::post('/reset-password', [PasswordResetController::class, 'reset'])
-        ->middleware('throttle:6,1')
-        ->name('password.reset');
-});
+// Public auth routes
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+Route::post('/verify-reset-code', [PasswordResetController::class, 'verifyCode']);
+Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 
-// Protected routes
+// Auth routes
 Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
-    
+    // Public routes
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+
     // Protected routes
     Route::middleware('auth:api')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::post('refresh', [AuthController::class, 'refresh']);
-        Route::get('user', [AuthController::class, 'user']);
+        Route::get('/user', [AuthController::class, 'user']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
     });
 });
 
-// Email Verification Routes
-Route::middleware(['auth:api'])->group(function () {
-    Route::post('/email/verify', [VerificationController::class, 'verify'])
-        ->name('verification.verify');
-    Route::post('/email/resend', [VerificationController::class, 'resend'])
-        ->name('verification.resend');
+// Email verification routes (protected)
+Route::middleware('auth:api')->group(function () {
+    Route::post('/email/verify', [VerificationController::class, 'verify']);
+    Route::post('/email/resend', [VerificationController::class, 'resend']);
 });
 
-// Password Reset Routes
-Route::post('forgot-password', [PasswordResetController::class, 'forgotPassword'])
-    ->middleware('throttle:6,1')
-    ->name('password.email');
-
-Route::post('verify-reset-code', [PasswordResetController::class, 'verifyCode'])
-    ->middleware('throttle:6,1')
-    ->name('password.code.verify');
-
-Route::post('reset-password', [PasswordResetController::class, 'reset'])
-    ->middleware('throttle:6,1')
-    ->name('password.update');
+// Admin routes
+Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/users', [AdminController::class, 'users']);
+    Route::get('/dashboard', [AdminController::class, 'dashboard']);
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
+});
