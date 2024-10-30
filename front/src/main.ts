@@ -46,9 +46,10 @@ import { useAuthStore } from '@/stores/auth';
 const authStore = useAuthStore();
 
 // Clear auth state and set router
-authStore.clearAuthState();
 authStore.setRouter(router);
 
 router.isReady().then(() => {
-  app.mount('#app');
+  authStore.initializeAuth().finally(() => {
+    app.mount('#app');
+  });
 });

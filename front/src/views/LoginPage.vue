@@ -109,7 +109,12 @@ const handleLogin = async () => {
     const response = await authStore.login(email.value, password.value);
     if (response.data.status === 'success') {
       await presentToast('Login successful!', 'success');
-      await router.replace({ name: 'dashboard' });
+      // Redirect based on user role
+      if (response.data.user.is_admin) {
+        await router.replace('/admin/dashboard');
+      } else {
+        await router.replace('/dashboard');
+      }
     }
   } catch (error: any) {
     console.error('Login error:', error);

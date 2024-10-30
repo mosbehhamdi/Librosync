@@ -28,6 +28,44 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(null);
   let router: Router | null = null;
 
+  // Initialize auth state
+  const initializeAuth = async () => {
+    const storedUser = localStorage.getItem('user');
+    const storedAuth = localStorage.getItem('auth');
+    
+    if (storedUser && storedAuth) {
+      try {
+        user.value = JSON.parse(storedUser);
+        const auth = JSON.parse(storedAuth);
+        token.value = auth.authorization?.token;
+        
+        // Set auth header
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
+        
+        // Verify token validity with backend
+        await refreshUser();
+        
+        // Only redirect if we're on login or root path
+        if (router && (window.location.pathname === '/login' || window.location.pathname === '/')) {
+          if (user.value.is_admin) {
+            router.push('/admin/dashboard');
+          } else {
+            router.push('/dashboard');
+          }
+        }
+        return true;
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        clearAuthState();
+        if (router && window.location.pathname !== '/login') {
+          router.push('/login');
+        }
+        return false;
+      }
+    }
+    return false;
+  };
+
   // Try to load stored data
   try {
     const storedUser = localStorage.getItem('user');
@@ -128,17 +166,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = () => {
     const hasValidToken = !!token.value && typeof token.value === 'string';
-    const hasValidUser = !!user.value && 
-                        typeof user.value === 'object' && 
-                        'id' in user.value;
-
-    console.log('Authentication check:', {
-      hasValidToken,
-      hasValidUser,
-      token: token.value,
-      user: user.value
-    });
-
+    const hasValidUser = !!user.value && typeof user.value === 'object' && 'id' in user.value;
     return hasValidToken && hasValidUser;
   };
 
@@ -209,6 +237,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await axiosInstance.get('/auth/user');
+      if (response.data.user) {
+        user.value = response.data.user;
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        return true;
+      }
+      throw new Error('Failed to refresh user data');
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+      clearAuthState();
+      throw error;
+    }
+  };
+
   return {
     user,
     token,
@@ -223,7 +267,9 @@ export const useAuthStore = defineStore('auth', () => {
     clearAuthState,
     forgotPassword,
     verifyResetCode,
-    resetPassword
+    resetPassword,
+    initializeAuth,
+    refreshUser
   };
 });
 
@@ -232,9 +278,8 @@ interface User {
   id: number;
   name: string;
   email: string;
-  email_verified_at: string;
-  created_at: string;
-  updated_at: string;
+  is_admin: boolean;
+  email_verified_at: string | null;
 }
 
 interface AuthResponse {
@@ -251,11 +296,9 @@ axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      const authStore = useAuthStore();
-      await authStore.logout();
-      if (authStore.router) {
-        await authStore.router.push('/login');
-      }
+      localStorage.removeItem('user');
+      localStorage.removeItem('auth');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

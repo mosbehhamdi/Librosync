@@ -52,6 +52,21 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/:pathMatch(.*)*',
     redirect: '/login'
+  },
+  {
+    path: '/admin',
+    redirect: '/admin/dashboard',
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/dashboard',
+    component: () => import('@/views/admin/DashboardPage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/users',
+    component: () => import('@/views/admin/UsersPage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
   }
 ];
 
@@ -64,25 +79,13 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const isAuthenticated = authStore.isAuthenticated();
 
-  console.log('Navigation guard:', {
-    to: to.path,
-    isAuthenticated,
-    user: authStore.user
-  });
-
   // Handle guest routes (login, register)
   if (to.meta.requiresGuest) {
     if (isAuthenticated) {
-      // If authenticated, check verification status
-      const isVerified = authStore.isVerified();
-      return next(isVerified ? '/dashboard' : '/verify-email');
+      // Redirect based on user role
+      return next(authStore.user?.is_admin ? '/admin/dashboard' : '/dashboard');
     }
-    return next(); // Allow access to guest routes if not authenticated
-  }
-
-  // Handle verification route
-  if (to.name === 'verification.verify') {
-    return next(); // Always allow access to verification link
+    return next();
   }
 
   // Handle protected routes
@@ -91,9 +94,20 @@ router.beforeEach(async (to, from, next) => {
       return next('/login');
     }
 
+    // Check verification status
     const isVerified = authStore.isVerified();
     if (to.meta.requiresVerification && !isVerified) {
       return next('/verify-email');
+    }
+
+    // Handle admin routes
+    if (to.meta.requiresAdmin) {
+      if (!authStore.user?.is_admin) {
+        return next('/dashboard');
+      }
+    } else if (authStore.user?.is_admin && to.path === '/dashboard') {
+      // Redirect admin to admin dashboard if trying to access user dashboard
+      return next('/admin/dashboard');
     }
   }
 
