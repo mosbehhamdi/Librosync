@@ -179,6 +179,18 @@
               required
             ></ion-input>
           </ion-item>
+
+          <ion-item>
+            <ion-input
+              v-model="formData.publication_year"
+              type="number"
+              label="Publication Year"
+              label-placement="floating"
+              :min="1000"
+              :max="new Date().getFullYear()"
+              required
+            ></ion-input>
+          </ion-item>
         </ion-list>
 
         <div class="p-4">
@@ -227,6 +239,7 @@ const resetForm = () => {
     central_number: '',
     local_number: '',
     publication_date: '',
+    publication_year: new Date().getFullYear(),
     acquisition_date: new Date().toISOString().split('T')[0]
   };
 };
@@ -246,19 +259,19 @@ const formData = ref({
   central_number: '',
   local_number: '',
   publication_date: '',
+  publication_year: new Date().getFullYear(),
   acquisition_date: new Date().toISOString().split('T')[0]
 });
 
 // Watch for book prop changes to update form
 watch(() => props.book, (newBook) => {
   if (newBook) {
-    // Format dates properly
     const publicationDate = newBook.publication_date ? new Date(newBook.publication_date).toISOString().split('T')[0] : '';
     const acquisitionDate = newBook.acquisition_date ? new Date(newBook.acquisition_date).toISOString().split('T')[0] : '';
+    const publicationYear = newBook.publication_year || new Date().getFullYear();
 
     formData.value = {
       ...newBook,
-      // Ensure all fields are properly formatted
       authors: Array.isArray(newBook.authors) ? newBook.authors : [newBook.authors || ''],
       copies_count: Number(newBook.copies_count) || 1,
       available_copies: Number(newBook.available_copies) || 1,
@@ -266,8 +279,8 @@ watch(() => props.book, (newBook) => {
       edition_number: Number(newBook.edition_number) || 1,
       price: Number(newBook.price) || 0,
       publication_date: publicationDate,
+      publication_year: publicationYear,
       acquisition_date: acquisitionDate,
-      // Ensure optional fields are not undefined
       comments: newBook.comments || '',
       dewey_subcategory: newBook.dewey_subcategory || '',
       central_number: newBook.central_number || '',

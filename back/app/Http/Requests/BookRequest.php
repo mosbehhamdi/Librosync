@@ -17,6 +17,7 @@ class BookRequest extends FormRequest
             'title' => 'required|string|max:255',
             'authors' => 'required|array',
             'authors.*' => 'string|max:255',
+            'isbn' => $this->isMethod('PUT') ? 'sometimes|string|max:13' : 'required|string|max:13',
             'copies_count' => 'required|integer|min:1',
             'available_copies' => 'required|integer|min:0|lte:copies_count',
             'parts_count' => 'required|integer|min:1',
@@ -30,6 +31,7 @@ class BookRequest extends FormRequest
             'local_number' => 'required|string|max:255|unique:books,local_number,' . $this->book?->id,
             'publication_date' => 'required|date',
             'acquisition_date' => 'required|date',
+            'publication_year' => 'required|integer|min:1000|max:' . (date('Y') + 1),
         ];
 
         return $rules;

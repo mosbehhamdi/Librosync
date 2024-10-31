@@ -39,6 +39,8 @@ class Book extends Model
         'edition_number' => 'integer',
     ];
 
+    protected $appends = ['waiting_time'];
+
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
@@ -57,8 +59,21 @@ class Book extends Model
         if ($activeReservationsCount === 0 || $this->available_copies > 0) {
             return 0;
         }
-        
-        // Estimation basée sur le temps moyen d'emprunt (par exemple, 14 jours)
+        // Estimation based on average borrowing time (e.g., 14 days)
         return ceil($activeReservationsCount / $this->copies_count) * 14;
+    }
+
+    // Add a scope for searching
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+              ->orWhereJsonContains('authors', $search)
+              ->orWhere('dewey_category', $search)
+              ->orWhere('dewey_subcategory', 'like', "%{$search}%")
+              ->orWhere('publisher', 'like', "%{$search}%")
+              ->orWhere('central_number', 'like', "%{$search}%")
+              ->orWhere('local_number', 'like', "%{$search}%");
+        });
     }
 } 

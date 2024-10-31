@@ -27,6 +27,15 @@
             </ion-item>
 
             <ion-item v-if="isEditing">
+              <ion-label position="stacked">Current Password</ion-label>
+              <ion-input
+                v-model="profileData.current_password"
+                type="password"
+                required
+              ></ion-input>
+            </ion-item>
+
+            <ion-item v-if="isEditing">
               <ion-label position="stacked">New Password</ion-label>
               <ion-input
                 v-model="profileData.password"
@@ -36,7 +45,7 @@
             </ion-item>
 
             <ion-item v-if="isEditing">
-              <ion-label position="stacked">Confirm Password</ion-label>
+              <ion-label position="stacked">Confirm New Password</ion-label>
               <ion-input
                 v-model="profileData.password_confirmation"
                 type="password"
@@ -57,7 +66,7 @@
               v-if="isEditing"
               expand="block"
               color="primary"
-              @click="saveProfile"
+              @click="validateForm() && saveProfile()"
               :disabled="isSaving"
             >
               <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
@@ -128,6 +137,7 @@ const isSaving = ref(false);
 const profileData = ref({
   name: authStore.user?.name || '',
   email: authStore.user?.email || '',
+  current_password: '',
   password: '',
   password_confirmation: ''
 });
@@ -137,6 +147,16 @@ const stats = ref({
   totalReservations: 0
 });
 
+const presentToast = async (message: string, color: 'success' | 'danger' = 'success') => {
+  const toast = await toastController.create({
+    message,
+    duration: 3000,
+    color,
+    position: 'bottom'
+  });
+  await toast.present();
+};
+
 const startEditing = () => {
   isEditing.value = true;
 };
@@ -144,8 +164,8 @@ const startEditing = () => {
 const cancelEditing = () => {
   isEditing.value = false;
   profileData.value.password = '';
+  profileData.value.current_password = '';
   profileData.value.password_confirmation = '';
-  // Reset name to original value
   profileData.value.name = authStore.user?.name || '';
 };
 
@@ -155,32 +175,67 @@ const saveProfile = async () => {
   try {
     isSaving.value = true;
     
-    const updateData: any = {
-      name: profileData.value.name
+    // First handle profile update
+    const updateData = {
+      name: profileData.value.name,
+      email: profileData.value.email
     };
-
-    if (profileData.value.password) {
-      updateData.password = profileData.value.password;
-      updateData.password_confirmation = profileData.value.password_confirmation;
-    }
 
     await authStore.updateProfile(updateData);
 
-    const toast = await toastController.create({
-      message: 'Profile updated successfully',
-      duration: 2000,
-      color: 'success'
-    });
-    await toast.present();
+    // Then handle password update if provided
+    if (profileData.value.password) {
+      if (!profileData.value.current_password) {
+        await presentToast('Current password is required to change password', 'danger');
+        return;
+      }
+      
+      await authStore.updatePassword({
+        current_password: profileData.value.current_password,
+        password: profileData.value.password,
+        password_confirmation: profileData.value.password_confirmation
+      });
+    }
+
+    isEditing.value = false;
+    await presentToast('Profile updated successfully', 'success');
   } catch (error: any) {
-    const toast = await toastController.create({
-      message: 'Failed to update profile',
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
+    console.error('Profile update error:', error);
+    await presentToast(
+      error.response?.data?.message || 
+      error.response?.data?.errors?.current_password?.[0] ||
+      'Error updating profile', 
+      'danger'
+    );
   } finally {
     isSaving.value = false;
   }
 };
+
+// Add validation before save
+const validateForm = () => {
+  if (!profileData.value.name.trim()) {
+    presentToast('Name is required', 'danger');
+    return false;
+  }
+  
+  if (profileData.value.password && profileData.value.password.length < 8) {
+    presentToast('Password must be at least 8 characters', 'danger');
+    return false;
+  }
+  
+  if (profileData.value.password !== profileData.value.password_confirmation) {
+    presentToast('Passwords do not match', 'danger');
+    return false;
+  }
+  
+  return true;
+};
+
+onMounted(() => {
+  if (authStore.user) {
+    profileData.value.name = authStore.user.name;
+    profileData.value.email = authStore.user.email;
+  }
+});
 </script> 

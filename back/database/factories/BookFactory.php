@@ -2,34 +2,32 @@
 
 namespace Database\Factories;
 
+use App\Models\Book;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory
 {
-    public function definition(): array
+    protected $model = Book::class;
+
+    public function definition()
     {
-        $deweyCategories = ['000', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
-        $copies = $this->faker->numberBetween(1, 10);
-        
+        $copiesCount = $this->faker->numberBetween(1, 5);
         return [
-            'title' => $this->faker->sentence(4),
-            'authors' => [
-                $this->faker->name(),
-                $this->faker->optional(0.3)->name(),
-            ],
-            'copies_count' => $copies,
-            'available_copies' => $this->faker->numberBetween(0, $copies),
-            'parts_count' => $this->faker->numberBetween(1, 5),
+            'title' => $this->faker->sentence(3),
+            'authors' => [$this->faker->name(), $this->faker->name()],
+            'dewey_category' => $this->faker->numberBetween(100, 900),
+            'dewey_subcategory' => $this->faker->numberBetween(10, 99),
+            'copies_count' => $copiesCount,
+            'available_copies' => $this->faker->numberBetween(0, $copiesCount),
+            'parts_count' => $this->faker->numberBetween(1, 3),
             'publisher' => $this->faker->company(),
             'edition_number' => $this->faker->numberBetween(1, 5),
-            'dewey_category' => $this->faker->randomElement($deweyCategories),
-            'dewey_subcategory' => $this->faker->numberBetween(10, 99),
-            'price' => $this->faker->randomFloat(2, 10, 200),
-            'comments' => $this->faker->optional(0.7)->paragraph(),
-            'central_number' => $this->faker->unique()->numerify('CN-#####'),
-            'local_number' => $this->faker->unique()->numerify('LN-#####'),
-            'publication_date' => $this->faker->dateTimeBetween('-30 years', 'now'),
-            'acquisition_date' => $this->faker->dateTimeBetween('-5 years', 'now'),
+            'price' => $this->faker->randomFloat(2, 10, 100),
+            'comments' => $this->faker->optional()->sentence(),
+            'central_number' => $this->faker->unique()->numerify('CN###'),
+            'local_number' => $this->faker->unique()->numerify('LN###'),
+            'publication_date' => $this->faker->date(),
+            'acquisition_date' => $this->faker->date()
         ];
     }
 

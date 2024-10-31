@@ -255,7 +255,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const updateProfile = async (data: any) => {
     try {
-      const response = await axiosInstance.put('/user/profile', data);
+      const response = await axiosInstance.put('/profile', data);
       user.value = response.data;
       return response;
     } catch (error) {

@@ -1,5 +1,14 @@
 <template>
   <ion-content class="ion-padding">
+    <ion-toolbar>
+      <ion-buttons slot="end">
+        <ion-button router-link="/reservations/history">
+          View History
+          <ion-icon :icon="timeOutline" slot="end"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+
     <ion-list>
       <!-- Active Reservations -->
       <ion-item-group>

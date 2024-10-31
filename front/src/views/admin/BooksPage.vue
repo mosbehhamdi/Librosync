@@ -48,13 +48,16 @@
         </ion-card-content>
       </ion-card>
 
-      <!-- Loading State -->
-      <div v-if="adminStore.isLoading" class="flex justify-center p-4">
-        <ion-spinner></ion-spinner>
-      </div>
+      <!-- Show error message -->
+      <ion-toast
+        :is-open="!!adminStore.error"
+        :message="adminStore.error"
+        :duration="3000"
+        color="danger"
+      ></ion-toast>
 
       <!-- Books List -->
-      <ion-list v-else>
+      <ion-list v-if="adminStore.books.length">
         <ion-item v-for="book in adminStore.books" :key="book.id" class="mb-2">
           <ion-label>
             <h2 class="text-lg font-semibold">{{ book.title }}</h2>
@@ -83,14 +86,20 @@
             </ion-button>
           </div>
         </ion-item>
-
-        <!-- Empty State -->
-        <ion-item v-if="adminStore.books.length === 0">
-          <ion-label class="text-center py-4 text-gray-500">
-            No books found
-          </ion-label>
-        </ion-item>
       </ion-list>
+
+      <!-- Empty state -->
+      <ion-text v-else-if="!adminStore.isLoading" color="medium" class="text-center p-4">
+        <p>{{ adminStore.error || 'No books found' }}</p>
+      </ion-text>
+
+      <!-- Pagination -->
+      <ion-infinite-scroll
+        v-if="adminStore.pagination.currentPage < adminStore.pagination.lastPage"
+        @ionInfinite="loadMore($event)"
+      >
+        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+      </ion-infinite-scroll>
 
       <!-- Book Form Modal -->
       <book-form-modal
@@ -103,8 +112,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useDebounce } from '@vueuse/core';
+import { ref, onMounted, watch } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 import AdminLayout from '@/components/AdminLayout.vue';
 import BookFormModal from '@/components/admin/BookFormModal.vue';
 import { useAdminStore } from '@/stores/admin';
@@ -113,7 +122,7 @@ import {
   IonContent, IonButton, IonIcon, IonList, IonItem, IonLabel,
   IonCard, IonCardContent, IonGrid, IonRow, IonCol,
   IonInput, IonSelect, IonSelectOption, alertController,
-  IonSpinner
+  IonSpinner, IonToast, IonLoading, IonText, IonInfiniteScroll, IonInfiniteScrollContent
 } from '@ionic/vue';
 import { 
   addOutline, createOutline, trashOutline, 
@@ -131,22 +140,50 @@ const filters = ref({
 
 const debug = ref(null);
 
-// Définir handleSearch avant de l'utiliser dans debouncedSearch
+// Define handleSearch before using it in debouncedSearch
 const handleSearch = async () => {
   try {
-    const response = await adminStore.fetchBooks({
+    adminStore.pagination.currentPage = 1; // Reset to first page for new searches
+    await adminStore.fetchBooks({
       search: filters.value.search,
-      category: filters.value.category
+      category: filters.value.category,
+      page: 1
     });
-    debug.value = response; // Pour le débogage
   } catch (error) {
     console.error('Error searching books:', error);
-    debug.value = { error: error.message };
   }
 };
 
-// Maintenant on peut utiliser handleSearch dans debouncedSearch
-const debouncedSearch = useDebounce(handleSearch, 300);
+// Load more books
+const loadMore = async (event: any) => {
+  try {
+    if (adminStore.pagination.currentPage >= adminStore.pagination.lastPage) {
+      event.target.complete();
+      return;
+    }
+
+    const nextPage = adminStore.pagination.currentPage + 1;
+    await adminStore.fetchBooks({
+      page: nextPage,
+      search: filters.value.search,
+      category: filters.value.category
+    });
+  } finally {
+    event.target.complete();
+  }
+};
+
+// Initialize
+onMounted(async () => {
+  await adminStore.fetchBooks();
+});
+
+const debouncedSearch = useDebounceFn(handleSearch, 300);
+
+// Watch for filter changes
+watch([() => filters.value.search, () => filters.value.category], () => {
+  debouncedSearch();
+}, { immediate: true });
 
 const getDeweyCategory = (code: string) => {
   const category = deweyCategories.find(cat => cat.code === code);
