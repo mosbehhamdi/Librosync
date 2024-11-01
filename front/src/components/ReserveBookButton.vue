@@ -1,6 +1,7 @@
 <template>
   <div>
     <ion-button
+      v-if="isUserReservation"
       :disabled="isLoading"
       :color="getButtonColor"
       @click="handleReserveClick"
@@ -11,12 +12,25 @@
         {{ buttonText }}
       </template>
     </ion-button>
+    <ion-button
+      v-else
+      :disabled="isLoading"
+      color="warning"
+      @click="handleJoinWaitlist"
+    >
+      <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
+      <template v-else>
+        <ion-icon :icon="timeOutline" slot="start"></ion-icon>
+        Join Waitlist
+      </template>
+    </ion-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useReservationStore } from '@/stores/reservation';
+import { useAuthStore } from '@/stores/auth';
 import { toastController } from '@ionic/vue';
 import { bookmarkOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
@@ -28,7 +42,12 @@ const props = defineProps<{
 }>();
 
 const reservationStore = useReservationStore();
+const authStore = useAuthStore();
 const isLoading = ref(false);
+
+const isUserReservation = computed(() => {
+  return props.existingReservation && props.existingReservation.user_id === authStore.user?.id;
+});
 
 const handleReserve = async () => {
   try {
@@ -46,6 +65,29 @@ const handleReserve = async () => {
   } catch (error: any) {
     const toast = await toastController.create({
       message: error.response?.data?.message || 'Failed to reserve book',
+      duration: 3000,
+      color: 'danger'
+    });
+    await toast.present();
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleJoinWaitlist = async () => {
+  try {
+    isLoading.value = true;
+    await reservationStore.joinWaitlist(props.bookId);
+    
+    const toast = await toastController.create({
+      message: 'Added to waitlist. We\'ll notify you when the book is available.',
+      duration: 3000,
+      color: 'success'
+    });
+    await toast.present();
+  } catch (error: any) {
+    const toast = await toastController.create({
+      message: error.response?.data?.message || 'Failed to join waitlist',
       duration: 3000,
       color: 'danger'
     });
