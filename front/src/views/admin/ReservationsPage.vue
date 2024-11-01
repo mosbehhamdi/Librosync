@@ -17,7 +17,7 @@
             <ion-label>Active Reservations</ion-label>
           </ion-item-divider>
 
-          <ion-item v-for="reservation in activeReservations" :key="reservation.id">
+          <ion-item v-for="reservation in adminStore.activeReservations" :key="reservation.id">
             <ion-label>
               <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
               <p>Reserved by: {{ reservation.user.name }}</p>
@@ -50,7 +50,7 @@
             <ion-label>Past Reservations</ion-label>
           </ion-item-divider>
 
-          <ion-item v-for="reservation in pastReservations" :key="reservation.id">
+          <ion-item v-for="reservation in adminStore.pastReservations" :key="reservation.id">
             <ion-label>
               <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
               <p>Reserved by: {{ reservation.user.name }}</p>
@@ -76,6 +76,8 @@ import {
   IonContent, IonList, IonItem, IonLabel, IonBadge,
   IonSpinner, IonButton, IonItemGroup, IonItemDivider
 } from '@ionic/vue';
+import { format } from 'date-fns';
+
 
 const adminStore = useAdminStore();
 
@@ -103,6 +105,33 @@ const formatDate = (date: string) => {
   return format(new Date(date), 'MMM dd, yyyy');
 };
 
+
+const confirmCancel = async (reservation) => {
+  const alert = await alertController.create({
+    header: 'Cancel Reservation',
+    message: 'Are you sure you want to cancel this reservation?',
+    buttons: [
+      {
+        text: 'No',
+        role: 'cancel'
+      },
+      {
+        text: 'Yes',
+        role: 'confirm',
+        handler: () => cancelReservation(reservation.id)
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const cancelReservation = async (id: number) => {
+  try {
+    await adminStore.cancelReservation(id);
+  } catch (error) {
+    console.error('Error cancelling reservation:', error);
+  }
+};
 const formatExpiry = (date: string) => {
   return format(new Date(date), 'MMM dd, yyyy');
 };

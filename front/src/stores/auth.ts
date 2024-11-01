@@ -20,9 +20,7 @@ const axiosInstance = axios.create({
 });
 
 export const useAuthStore = defineStore('auth', () => {
-  console.log('Initializing auth store');
-  console.log('Stored user:', localStorage.getItem('user'));
-  console.log('Stored auth:', localStorage.getItem('auth'));
+
 
   const user = ref<User | null>(null);
   const token = ref<string | null>(null);
