@@ -72,7 +72,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import AdminLayout from '@/components/AdminLayout.vue';
+import AdminLayout from '@/components/admin/AdminLayout.vue';
 import { useAdminStore } from '@/stores/admin';
 import { alertController } from '@ionic/vue';
 import {

@@ -2,7 +2,7 @@
   <ion-content class="ion-padding">
     <ion-toolbar>
       <ion-buttons slot="end">
-        <ion-button router-link="/admin/reservations/history">
+        <ion-button router-link="/user/reservations/history">
           View Reservation History
         </ion-button>
         <ion-button router-link="/reservations/expired">

@@ -117,7 +117,7 @@
   import { ref, watch } from 'vue';
   import { useBookStore } from '@/stores/book';
   import { deweyCategories } from '@/constants/dewey';
-  import ReserveBookButton from '@/components/ReserveBookButton.vue';
+  import ReserveBookButton from '@/components/user/ReserveBookButton.vue';
   import { searchOutline } from 'ionicons/icons';
   import { useDebounceFn } from '@vueuse/core';
   

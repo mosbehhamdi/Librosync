@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import AdminLayout from '@/components/AdminLayout.vue';
+import AdminLayout from '@/components/admin/AdminLayout.vue';
 import { useAdminStore } from '@/stores/admin';
 import { IonContent, IonList, IonItem, IonLabel, 
          IonButton, alertController } from '@ionic/vue';

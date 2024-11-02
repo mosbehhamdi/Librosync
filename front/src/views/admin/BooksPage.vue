@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
-import AdminLayout from '@/components/AdminLayout.vue';
+import AdminLayout from '@/components/admin/AdminLayout.vue';
 import BookFormModal from '@/components/admin/BookFormModal.vue';
 import { useAdminStore } from '@/stores/admin';
 import { deweyCategories } from '@/constants/dewey';

@@ -26,6 +26,7 @@
 import { onMounted } from 'vue';
 import { useAdminStore } from '@/stores/admin';
 import { format } from 'date-fns';
+import AdminLayout from '@/components/admin/AdminLayout.vue';
 
 const adminStore = useAdminStore();
 

@@ -188,4 +188,14 @@ class ReservationController extends Controller
             ], 500);
         }
     }
+
+    public function history(): JsonResponse
+    {
+        $reservations = auth()->user()->reservations()
+            ->with(['book'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($reservations);
+    }
 } 

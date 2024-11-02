@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { IonApp } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
-import UserLayout from '@/components/UserLayout.vue';
+import UserLayout from '@/components/user/UserLayout.vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 

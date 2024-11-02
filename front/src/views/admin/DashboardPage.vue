@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import AdminLayout from '@/components/AdminLayout.vue';
+import AdminLayout from '@/components/admin/AdminLayout.vue';
 import { useAdminStore } from '@/stores/admin';
 import { onMounted } from 'vue';
 import { 

@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import ExpiredReservationsPage from '@/views/ExpiredReservationsPage.vue';
+import ExpiredReservationsPage from '@/views/user/ExpiredReservationsPage.vue';
 import AdminReservationHistoryPage from '@/views/admin/ReservationHistoryPage.vue';
-import UserReservationHistoryPage from '@/views/ReservationHistoryPage.vue';
-import MyReservationsPage from '@/views/MyReservationsPage.vue';
+import UserReservationHistoryPage from '@/views/user/ReservationHistoryPage.vue';
+import MyReservationsPage from '@/views/user/MyReservationsPage.vue';
 import AdminReservationsPage from '@/views/admin/ReservationsPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
@@ -25,25 +25,25 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/register',
     name: 'register',
-    component: () => import('@/views/RegisterPage.vue'),
+    component: () => import('@/views/user/RegisterPage.vue'),
     meta: { requiresGuest: true }
   },
   {
     path: '/verify-email',
     name: 'verify-email',
-    component: () => import('@/views/VerificationPendingPage.vue'),
+    component: () => import('@/views/user/VerificationPendingPage.vue'),
     meta: { requiresAuth: true, requiresVerification: false }
   },
   {
     path: '/email/verify/:id/:hash',
     name: 'verification.verify',
-    component: () => import('@/views/EmailVerificationPage.vue'),
+    component: () => import('@/views/user/EmailVerificationPage.vue'),
     meta: { requiresAuth: false }
   },
   {
     path: '/forgot-password',
     name: 'forgot-password',
-    component: () => import('@/views/ForgotPasswordPage.vue'),
+    component: () => import('@/views/user/ForgotPasswordPage.vue'),
     meta: { requiresGuest: true }
   },
   
@@ -51,7 +51,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/books',
     name: 'books',
-    component: () => import('@/views/BooksPage.vue'),
+    component: () => import('@/views/user/BooksPage.vue'),
     meta: { requiresAuth: true, requiresVerification: true }
   },
   {
@@ -63,14 +63,14 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/my-profile',
     name: 'my-profile',
-    component: () => import('@/views/MyProfilePage.vue'),
+    component: () => import('@/views/user/MyProfilePage.vue'),
     meta: { requiresAuth: true, requiresVerification: true }
   },
   {
-    path: '/reservations/history',
+    path: '/user/reservations/history',
     name: 'user-reservation-history',
     component: UserReservationHistoryPage,
-    meta: { requiresAuth: true, requiresVerification: true }
+    meta: { requiresAuth: true }
   },
   {
     path: '/reservations/expired',
