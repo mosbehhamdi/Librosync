@@ -19,29 +19,31 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create regular users
-        $users = User::factory(5)->create();
+        $users = User::factory(50)->create();
 
-        // Create books first
-        $books = Book::factory(20)->create();
+        // Create books with diverse categories
+        $books = Book::factory(100)->create();
 
-        // Create some reservations for each user
+        // Create reservations with realistic patterns
         foreach ($users as $user) {
-            // Create 1-2 pending reservations
-            Reservation::factory()
-                ->pending()
-                ->count(rand(1, 2))
-                ->create([
-                    'user_id' => $user->id,
-                    'book_id' => $books->random()->id,
-                ]);
+            $randomBooks = $books->random(rand(1, 5));
 
-            // Create 1 ready reservation
-            Reservation::factory()
-                ->ready()
-                ->create([
+            foreach ($randomBooks as $book) {
+                $status = $this->getRandomStatus();
+                Reservation::factory()->create([
                     'user_id' => $user->id,
-                    'book_id' => $books->random()->id,
+                    'book_id' => $book->id,
+                    'status' => $status,
+                    'queue_position' => in_array($status, ['pending', 'ready']) ? rand(1, 5) : null,
+                    'expires_at' => $status === 'ready' ? now()->addDays(2) : null,
                 ]);
+            }
         }
+    }
+
+    private function getRandomStatus(): string
+    {
+        return collect(['pending', 'ready', 'completed', 'cancelled'])
+            ->random();
     }
 }

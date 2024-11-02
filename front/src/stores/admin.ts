@@ -185,7 +185,7 @@ export const useAdminStore = defineStore('admin', {
       this.isLoading = true;
       try {
         const response = await api.post(`/admin/reservations/${reservationId}/cancel`);
-        // Optionally, refresh the reservations list or handle the response
+        this.removeReservation(reservationId);
         return response.data;
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to cancel reservation';
@@ -195,17 +195,28 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    async markAsReady(reservationId: number) {
+    async acceptReservation(reservationId: number) {
       this.isLoading = true;
       try {
-        const response = await api.post(`/admin/reservations/${reservationId}/markAsReady`);
-        // Optionally, refresh the reservations list or handle the response
+        const response = await api.post(`/admin/reservations/${reservationId}/accept`);
+        this.updateReservationStatus(reservationId, 'accepted');
         return response.data;
       } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to mark reservation as ready';
+        this.error = error.response?.data?.message || 'Failed to accept reservation';
         throw error;
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    removeReservation(reservationId: number) {
+      this.reservations = this.reservations.filter(reservation => reservation.id !== reservationId);
+    },
+
+    updateReservationStatus(reservationId: number, status: string) {
+      const reservation = this.reservations.find(reservation => reservation.id === reservationId);
+      if (reservation) {
+        reservation.status = status;
       }
     },
 
@@ -220,19 +231,20 @@ export const useAdminStore = defineStore('admin', {
       } finally {
         this.isLoading = false;
       }
-    },
+    }
+  },
 
-    async acceptReservation(reservationId: number) {
-      this.isLoading = true;
-      try {
-        const response = await api.post(`/admin/reservations/${reservationId}/accept`);
-        await this.fetchAllReservations(); // Refresh the reservations list
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to accept reservation';
-        throw error;
-      } finally {
-        this.isLoading = false;
+  mutations: {
+    SET_ACTIVE_RESERVATIONS(state, reservations) {
+      state.activeReservations = reservations;
+    },
+    REMOVE_RESERVATION(state, reservationId) {
+      state.activeReservations = state.activeReservations.filter(reservation => reservation.id !== reservationId);
+    },
+    UPDATE_RESERVATION_STATUS(state, { reservationId, status }) {
+      const reservation = state.activeReservations.find(reservation => reservation.id === reservationId);
+      if (reservation) {
+        reservation.status = status;
       }
     }
   }

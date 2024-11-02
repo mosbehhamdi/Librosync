@@ -19,7 +19,7 @@ class ReservationFactory extends Factory
             'user_id' => User::factory(),
             'book_id' => Book::factory(),
             'status' => $status,
-            'queue_position' => $status === 'pending' ? $this->faker->numberBetween(1, 5) : 1,
+            'queue_position' => in_array($status, ['pending', 'ready']) ? $this->faker->numberBetween(1, 5) : null,
             'expires_at' => $status === 'ready' ? now()->addDays(2) : null,
             'created_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
             'updated_at' => now()
