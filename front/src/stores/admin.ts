@@ -220,6 +220,20 @@ export const useAdminStore = defineStore('admin', {
       } finally {
         this.isLoading = false;
       }
+    },
+
+    async acceptReservation(reservationId: number) {
+      this.isLoading = true;
+      try {
+        const response = await api.post(`/admin/reservations/${reservationId}/accept`);
+        await this.fetchAllReservations(); // Refresh the reservations list
+        return response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to accept reservation';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
     }
   }
 }); 

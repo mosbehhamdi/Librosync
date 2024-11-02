@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['pending', 'ready', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'ready', 'completed', 'cancelled', 'accepted'])->default('pending');
             $table->integer('queue_position')->default(1);
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();

@@ -45,6 +45,14 @@
             >
               Cancel
             </ion-button>
+            <ion-button 
+              slot="end" 
+              fill="clear" 
+              color="success"
+              @click="confirmAccept(reservation)"
+            >
+              Accept
+            </ion-button>
           </ion-item>
         </ion-item-group>
 
@@ -137,6 +145,33 @@ const cancelReservation = async (id: number) => {
 };
 const formatExpiry = (date: string) => {
   return format(new Date(date), 'MMM dd, yyyy');
+};
+
+const confirmAccept = async (reservation) => {
+  const alert = await alertController.create({
+    header: 'Accept Reservation',
+    message: 'Are you sure you want to accept this reservation?',
+    buttons: [
+      {
+        text: 'No',
+        role: 'cancel'
+      },
+      {
+        text: 'Yes',
+        role: 'confirm',
+        handler: () => acceptReservation(reservation.id)
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const acceptReservation = async (id: number) => {
+  try {
+    await adminStore.acceptReservation(id);
+  } catch (error) {
+    console.error('Error accepting reservation:', error);
+  }
 };
 
 // Fetch reservations on mount

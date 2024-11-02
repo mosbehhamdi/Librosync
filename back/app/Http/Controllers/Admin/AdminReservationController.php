@@ -59,4 +59,12 @@ class AdminReservationController extends Controller
 
         return response()->json($reservations);
     }
+
+    public function accept(Reservation $reservation): JsonResponse
+    {
+        $reservation->status = 'accepted';
+        $reservation->save();
+
+        return response()->json(['message' => 'Reservation accepted successfully']);
+    }
 } 

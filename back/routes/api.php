@@ -77,6 +77,7 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::get('/admin/statistics/users', [AdminController::class, 'userStatistics']);
     Route::get('/admin/books/search', [BookController::class, 'adminSearch']);
     Route::get('/admin/reservations/history', [AdminReservationController::class, 'history']);
+    Route::post('/admin/reservations/{reservation}/accept', [AdminReservationController::class, 'accept']);
 });
 
 // Waitlist routes
