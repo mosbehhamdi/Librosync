@@ -7,7 +7,8 @@ export const useReservationStore = defineStore('reservation', {
     history: [],
     statistics: null,
     isLoading: false,
-    error: null
+    error: null,
+    expiredReservations: []
   }),
 
   actions: {
@@ -70,6 +71,43 @@ export const useReservationStore = defineStore('reservation', {
         return response.data;
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to fetch statistics';
+        throw error;
+      }
+    },
+
+    async joinWaitlist(bookId: number) {
+      this.isLoading = true;
+      try {
+        const response = await api.post(`/books/${bookId}/waitlist`);
+        await this.fetchUserReservations(); // Refresh reservations after joining waitlist
+        return response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to join waitlist';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async fetchExpiredReservations() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/reservations/expired');
+        this.expiredReservations = response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to fetch expired reservations';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async getQueuePosition(bookId: number) {
+      try {
+        const response = await api.get(`/books/${bookId}/queue-position`);
+        return response.data.queue_position;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to get queue position';
         throw error;
       }
     }

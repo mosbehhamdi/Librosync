@@ -1,17 +1,12 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Reservation History</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content>
+  <admin-layout>
+    <ion-content class="ion-padding">
+      <h1 class="text-2xl font-bold mb-4">Reservation History</h1>
       <ion-list>
-        <ion-item v-for="reservation in reservationStore.history" :key="reservation.id">
+        <ion-item v-for="reservation in adminStore.reservationHistory" :key="reservation.id">
           <ion-label>
-            <h2>{{ reservation.book.title }}</h2>
-            <p>{{ reservation.book.authors.join(', ') }}</p>
+            <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
+            <p>Reserved by: {{ reservation.user.name }}</p>
             <p>
               <ion-badge :color="getStatusColor(reservation.status)">
                 {{ getStatusText(reservation.status) }}
@@ -24,19 +19,15 @@
         </ion-item>
       </ion-list>
     </ion-content>
-  </ion-page>
+  </admin-layout>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useReservationStore } from '@/stores/reservation';
+import { useAdminStore } from '@/stores/admin';
 import { format } from 'date-fns';
 
-const reservationStore = useReservationStore();
-
-onMounted(() => {
-  reservationStore.getReservationHistory();
-});
+const adminStore = useAdminStore();
 
 const getStatusColor = (status: string) => {
   const colors = {
@@ -61,4 +52,8 @@ const getStatusText = (status: string) => {
 const formatDate = (date: string) => {
   return format(new Date(date), 'MMM dd, yyyy');
 };
+
+onMounted(() => {
+  adminStore.fetchReservationHistory();
+});
 </script> 

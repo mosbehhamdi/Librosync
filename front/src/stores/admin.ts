@@ -166,6 +166,60 @@ export const useAdminStore = defineStore('admin', {
       } finally {
         this.isLoading = false;
       }
+    },
+
+    async fetchReservationHistory() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/admin/reservations/history');
+        this.reservationHistory = response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to fetch reservation history';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async cancelReservation(reservationId: number) {
+      this.isLoading = true;
+      try {
+        const response = await api.post(`/admin/reservations/${reservationId}/cancel`);
+        // Optionally, refresh the reservations list or handle the response
+        return response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to cancel reservation';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async markAsReady(reservationId: number) {
+      this.isLoading = true;
+      try {
+        const response = await api.post(`/admin/reservations/${reservationId}/markAsReady`);
+        // Optionally, refresh the reservations list or handle the response
+        return response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to mark reservation as ready';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async fetchReservationStatistics() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/admin/reservations/statistics');
+        this.statistics = response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to fetch reservation statistics';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
     }
   }
 }); 

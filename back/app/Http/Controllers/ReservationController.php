@@ -31,16 +31,18 @@ class ReservationController extends Controller
         return response()->json(['message' => 'Reservation cancelled successfully']);
     }
 
+    private function hasActiveReservation(Book $book): bool
+    {
+        return $book->reservations()
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'ready'])
+            ->exists();
+    }
+
     public function store(Book $book): JsonResponse
     {
         try {
-            // Check for existing reservation
-            $existingReservation = $book->reservations()
-                ->where('user_id', auth()->id())
-                ->whereIn('status', ['pending', 'ready'])
-                ->first();
-
-            if ($existingReservation) {
+            if ($this->hasActiveReservation($book)) {
                 return response()->json([
                     'message' => 'You already have an active reservation for this book'
                 ], 422);
@@ -113,6 +115,77 @@ class ReservationController extends Controller
             
             // Send notification to user
             // TODO: Implement notification system
+        }
+    }
+
+    public function joinWaitlist(Book $book): JsonResponse
+    {
+        try {
+            // Check if the user already has a pending or ready reservation
+            $existingReservation = $book->reservations()
+                ->where('user_id', auth()->id())
+                ->whereIn('status', ['pending', 'ready'])
+                ->first();
+
+            if ($existingReservation) {
+                return response()->json([
+                    'message' => 'You already have an active reservation for this book'
+                ], 422);
+            }
+
+            // Add user to the waitlist
+            $reservation = $book->reservations()->create([
+                'user_id' => auth()->id(),
+                'status' => 'pending',
+                'queue_position' => $book->activeReservations()->count() + 1
+            ]);
+
+            return response()->json([
+                'message' => 'Added to waitlist. We\'ll notify you when the book is available.',
+                'reservation' => $reservation
+            ], 201);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to join waitlist:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to join waitlist',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getQueuePosition(Book $book): JsonResponse
+    {
+        try {
+            $reservation = $book->reservations()
+                ->where('user_id', auth()->id())
+                ->where('status', 'pending')
+                ->first();
+
+            if (!$reservation) {
+                return response()->json([
+                    'queue_position' => null,
+                    'message' => 'No pending reservation found for this book'
+                ]);
+            }
+
+            return response()->json([
+                'queue_position' => $reservation->queue_position
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to get queue position:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to get queue position',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 } 

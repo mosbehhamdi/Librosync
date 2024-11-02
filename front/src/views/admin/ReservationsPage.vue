@@ -3,6 +3,9 @@
     <ion-content class="ion-padding">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Reservations Management</h1>
+        <ion-button router-link="/admin/reservations/history">
+          View Reservation History
+        </ion-button>
       </div>
 
       <!-- Loading State -->

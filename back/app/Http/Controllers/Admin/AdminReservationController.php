@@ -33,4 +33,30 @@ class AdminReservationController extends Controller
         
         return response()->json($reservation);
     }
+
+    public function reservationStatistics(): JsonResponse
+    {
+        $totalReservations = Reservation::count();
+        $activeReservations = Reservation::where('status', 'active')->count();
+        $completedReservations = Reservation::where('status', 'completed')->count();
+        $cancelledReservations = Reservation::where('status', 'cancelled')->count();
+
+        $statistics = [
+            'total' => $totalReservations,
+            'active' => $activeReservations,
+            'completed' => $completedReservations,
+            'cancelled' => $cancelledReservations,
+        ];
+
+        return response()->json($statistics);
+    }
+
+    public function history(): JsonResponse
+    {
+        $reservations = Reservation::with(['user', 'book'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($reservations);
+    }
 } 

@@ -38,6 +38,13 @@
             </ion-card>
           </ion-col>
         </ion-row>
+        <ion-row>
+          <ion-col size="12">
+            <ion-button expand="full" router-link="/admin/reservations/history">
+              View Reservation History
+            </ion-button>
+          </ion-col>
+        </ion-row>
       </ion-grid>
     </ion-content>
   </admin-layout>
@@ -49,7 +56,7 @@ import { useAdminStore } from '@/stores/admin';
 import { onMounted } from 'vue';
 import { 
   IonContent, IonGrid, IonRow, IonCol,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent 
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton 
 } from '@ionic/vue';
 
 const adminStore = useAdminStore();

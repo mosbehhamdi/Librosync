@@ -2,8 +2,11 @@
   <ion-content class="ion-padding">
     <ion-toolbar>
       <ion-buttons slot="end">
-        <ion-button router-link="/reservations/history">
-          View History
+        <ion-button router-link="/admin/reservations/history">
+          View Reservation History
+        </ion-button>
+        <ion-button router-link="/reservations/expired">
+          Expired Reservations
           <ion-icon :icon="timeOutline" slot="end"></ion-icon>
         </ion-button>
       </ion-buttons>

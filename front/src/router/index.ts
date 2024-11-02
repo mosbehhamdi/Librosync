@@ -1,6 +1,11 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import ExpiredReservationsPage from '@/views/ExpiredReservationsPage.vue';
+import AdminReservationHistoryPage from '@/views/admin/ReservationHistoryPage.vue';
+import UserReservationHistoryPage from '@/views/ReservationHistoryPage.vue';
+import MyReservationsPage from '@/views/MyReservationsPage.vue';
+import AdminReservationsPage from '@/views/admin/ReservationsPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -10,7 +15,7 @@ const routes: Array<RouteRecordRaw> = [
       return authStore.user?.is_admin ? '/admin/dashboard' : '/books';
     }
   },
-  // Routes publiques
+  // Public routes
   {
     path: '/login',
     name: 'login',
@@ -27,10 +32,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/verify-email',
     name: 'verify-email',
     component: () => import('@/views/VerificationPendingPage.vue'),
-    meta: { 
-      requiresAuth: true,
-      requiresVerification: false 
-    }
+    meta: { requiresAuth: true, requiresVerification: false }
   },
   {
     path: '/email/verify/:id/:hash',
@@ -45,36 +47,39 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresGuest: true }
   },
   
-  // Routes utilisateur
+  // User routes
   {
     path: '/books',
     name: 'books',
     component: () => import('@/views/BooksPage.vue'),
-    meta: { 
-      requiresAuth: true,
-      requiresVerification: true 
-    }
+    meta: { requiresAuth: true, requiresVerification: true }
   },
   {
     path: '/my-reservations',
     name: 'my-reservations',
-    component: () => import('@/views/MyReservationsPage.vue'),
-    meta: { 
-      requiresAuth: true,
-      requiresVerification: true 
-    }
+    component: MyReservationsPage,
+    meta: { requiresAuth: true, requiresVerification: true }
   },
   {
     path: '/my-profile',
     name: 'my-profile',
     component: () => import('@/views/MyProfilePage.vue'),
-    meta: { 
-      requiresAuth: true,
-      requiresVerification: true 
-    }
+    meta: { requiresAuth: true, requiresVerification: true }
+  },
+  {
+    path: '/reservations/history',
+    name: 'user-reservation-history',
+    component: UserReservationHistoryPage,
+    meta: { requiresAuth: true, requiresVerification: true }
+  },
+  {
+    path: '/reservations/expired',
+    name: 'expired-reservations',
+    component: ExpiredReservationsPage,
+    meta: { requiresAuth: true, requiresVerification: true }
   },
 
-  // Routes admin
+  // Admin routes
   {
     path: '/admin',
     redirect: '/admin/dashboard',
@@ -101,11 +106,17 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/admin/reservations',
     name: 'admin-reservations',
-    component: () => import('@/views/admin/ReservationsPage.vue'),
+    component: AdminReservationsPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/reservations/history',
+    name: 'admin-reservation-history',
+    component: AdminReservationHistoryPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 
-  // Route par défaut
+  // Default route
   {
     path: '/:pathMatch(.*)*',
     redirect: to => {

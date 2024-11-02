@@ -1,36 +1,27 @@
 <template>
   <div>
     <ion-button
-      v-if="isUserReservation"
       :disabled="isLoading"
-      :color="getButtonColor"
+      :color="reservationButton.color"
       @click="handleReserveClick"
     >
       <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
       <template v-else>
-        <ion-icon :icon="getButtonIcon" slot="start"></ion-icon>
-        {{ buttonText }}
+        <ion-icon :icon="reservationButton.icon" slot="start"></ion-icon>
+        {{ reservationButton.text }}
       </template>
     </ion-button>
-    <ion-button
-      v-else
-      :disabled="isLoading"
-      color="warning"
-      @click="handleJoinWaitlist"
-    >
-      <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
-      <template v-else>
-        <ion-icon :icon="timeOutline" slot="start"></ion-icon>
-        Join Waitlist
-      </template>
-    </ion-button>
+    <div v-if="queuePosition !== null">
+      <p>Your current queue position: {{ queuePosition }}</p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useReservationStore } from '@/stores/reservation';
 import { useAuthStore } from '@/stores/auth';
+import { useBookStore } from '@/stores/book';
 import { toastController } from '@ionic/vue';
 import { bookmarkOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
@@ -43,118 +34,114 @@ const props = defineProps<{
 
 const reservationStore = useReservationStore();
 const authStore = useAuthStore();
+const bookStore = useBookStore();
 const isLoading = ref(false);
+const reservation = ref(props.existingReservation);
+const queuePosition = ref<number | null>(null);
 
-const isUserReservation = computed(() => {
-  return props.existingReservation && props.existingReservation.user_id === authStore.user?.id;
+watch(() => props.existingReservation, (newReservation) => {
+  reservation.value = newReservation;
 });
 
+const isUserReservation = computed(() => {
+  return (
+    reservation.value &&
+    reservation.value.user_id === authStore.user?.id &&
+    !['cancelled', 'completed'].includes(reservation.value.status)
+  );
+});
+
+onMounted(async () => {
+  if (reservation.value?.status === 'pending') {
+    queuePosition.value = await reservationStore.getQueuePosition(props.bookId);
+  }
+});
+
+const reservationButton = computed(() => {
+  if (isUserReservation.value) {
+    return {
+      color: 'medium',
+      icon: checkmarkCircleOutline,
+      text: 'Cancel Reservation'
+    };
+  } else if (props.availableCopies > 0) {
+    return {
+      color: 'primary',
+      icon: bookmarkOutline,
+      text: 'Reserve Now'
+    };
+  } else {
+    return {
+      color: 'warning',
+      icon: timeOutline,
+      text: 'Join Waitlist'
+    };
+  }
+});
+
+const showToast = async (message: string, color: string) => {
+  const toast = await toastController.create({
+    message,
+    duration: 3000,
+    color
+  });
+  await toast.present();
+};
+
+const handleReserveClick = () => {
+  if (isUserReservation.value) {
+    handleCancelReservation();
+  } else if (props.availableCopies > 0) {
+    handleReserve();
+  } else {
+    handleJoinWaitlist();
+  }
+};
+
 const handleReserve = async () => {
+  isLoading.value = true;
   try {
-    isLoading.value = true;
     await reservationStore.reserveBook(props.bookId);
-    
-    const toast = await toastController.create({
-      message: props.availableCopies > 0 
-        ? 'Book reserved successfully! Please pick it up within 48 hours.'
-        : 'Added to waitlist. We\'ll notify you when the book is available.',
-      duration: 3000,
-      color: 'success'
-    });
-    await toast.present();
+    const message = props.availableCopies > 0 
+      ? 'Book reserved successfully! Please pick it up within 48 hours.'
+      : 'Added to waitlist. We\'ll notify you when the book is available.';
+    await showToast(message, 'success');
   } catch (error: any) {
-    const toast = await toastController.create({
-      message: error.response?.data?.message || 'Failed to reserve book',
-      duration: 3000,
-      color: 'danger'
-    });
-    await toast.present();
+    await showToast(error.response?.data?.message || 'Failed to reserve book. Please try again later.', 'danger');
   } finally {
     isLoading.value = false;
   }
 };
 
 const handleJoinWaitlist = async () => {
+  isLoading.value = true;
   try {
-    isLoading.value = true;
-    await reservationStore.joinWaitlist(props.bookId);
-    
-    const toast = await toastController.create({
-      message: 'Added to waitlist. We\'ll notify you when the book is available.',
-      duration: 3000,
-      color: 'success'
-    });
-    await toast.present();
+    const response = await reservationStore.joinWaitlist(props.bookId);
+    if (response?.reservation) {
+      reservation.value = response.reservation;
+      await showToast('Added to waitlist. We\'ll notify you when the book is available.', 'success');
+    }
   } catch (error: any) {
-    const toast = await toastController.create({
-      message: error.response?.data?.message || 'Failed to join waitlist',
-      duration: 3000,
-      color: 'danger'
-    });
-    await toast.present();
+    await showToast(error.response?.data?.message || 'Failed to join waitlist', 'danger');
   } finally {
     isLoading.value = false;
-  }
-};
-
-const getButtonColor = computed(() => {
-  if (props.existingReservation) {
-    return 'medium';
-  } else if (props.availableCopies > 0) {
-    return 'primary';
-  } else {
-    return 'warning';
-  }
-});
-
-const getButtonIcon = computed(() => {
-  if (props.existingReservation) {
-    return checkmarkCircleOutline;
-  } else if (props.availableCopies > 0) {
-    return bookmarkOutline;
-  } else {
-    return timeOutline;
-  }
-});
-
-const buttonText = computed(() => {
-  if (props.existingReservation) {
-    return 'Cancel Reservation';
-  } else if (props.availableCopies > 0) {
-    return 'Reserve Now';
-  } else {
-    return 'Join Waitlist';
-  }
-});
-
-const handleReserveClick = () => {
-  if (props.existingReservation) {
-    handleCancelReservation();
-  } else if (props.availableCopies > 0) {
-    handleReserve();
   }
 };
 
 const handleCancelReservation = async () => {
+  isLoading.value = true;
   try {
-    isLoading.value = true;
-    await reservationStore.cancelReservation(props.existingReservation.id);
-    
-    const toast = await toastController.create({
-      message: 'Reservation cancelled successfully',
-      duration: 3000,
-      color: 'success'
-    });
-    await toast.present();
+    const response = await reservationStore.cancelReservation(reservation.value.id);
+    if (response?.message === 'Reservation cancelled successfully') {
+      await showToast(response.message, 'success');
+      reservation.value = null;
+      await bookStore.fetchBooks();
+    }
   } catch (error: any) {
-    const toast = await toastController.create({
-      message: error.response?.data?.message || 'Failed to cancel reservation',
-      duration: 3000,
-      color: 'danger'
-    });
-    await toast.present();
+    console.error('Error cancelling reservation:', error);
+    await showToast(error.response?.data?.message || 'Failed to cancel reservation', 'danger');
   } finally {
     isLoading.value = false;
   }
 };
-</script> 
+</script>
