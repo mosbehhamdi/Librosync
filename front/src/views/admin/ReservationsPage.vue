@@ -46,6 +46,7 @@
               Cancel
             </ion-button>
             <ion-button 
+              v-if="reservation.status === 'ready'"
               slot="end" 
               fill="clear" 
               color="success"
@@ -97,7 +98,8 @@ const getStatusColor = (status: string) => {
     pending: 'warning',
     ready: 'success',
     completed: 'primary',
-    cancelled: 'medium'
+    cancelled: 'medium',
+    accepted: 'tertiary'
   };
   return colors[status] || 'medium';
 };
@@ -107,7 +109,8 @@ const getStatusText = (status: string) => {
     pending: 'Waiting',
     ready: 'Ready for Pickup',
     completed: 'Completed',
-    cancelled: 'Cancelled'
+    cancelled: 'Cancelled',
+    accepted: 'Accepted'
   };
   return texts[status] || status;
 };
