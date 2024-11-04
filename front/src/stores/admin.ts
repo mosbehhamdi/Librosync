@@ -100,6 +100,18 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
+    async fetchBookById(id) {
+      console.log('Fetching book with ID:', id);
+      try {
+        const response = await api.get(`/admin/books/${id}`);
+        console.log('Fetched book data:', response.data);
+        return response.data;
+      } catch (error) {
+        console.log('Error fetching book by ID:', error);
+        throw error;
+      }
+    },
+
     async createBook(bookData) {
       this.isLoading = true;
       try {
@@ -145,7 +157,10 @@ export const useAdminStore = defineStore('admin', {
       this.isLoading = true;
       try {
         const response = await api.put(`/admin/reservations/${id}/status`, { status });
-        await this.fetchAllReservations();
+        const reservation = this.reservations.find(r => r.id === id);
+        if (reservation) {
+          reservation.status = status;
+        }
         return response.data;
       } catch (error) {
         this.error = error;
@@ -185,7 +200,7 @@ export const useAdminStore = defineStore('admin', {
       this.isLoading = true;
       try {
         const response = await api.post(`/admin/reservations/${reservationId}/cancel`);
-        this.removeReservation(reservationId);
+        this.updateReservationStatus(reservationId, 'cancelled');
         return response.data;
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to cancel reservation';
@@ -209,17 +224,6 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    removeReservation(reservationId: number) {
-      this.reservations = this.reservations.filter(reservation => reservation.id !== reservationId);
-    },
-
-    updateReservationStatus(reservationId: number, status: string) {
-      const reservation = this.reservations.find(reservation => reservation.id === reservationId);
-      if (reservation) {
-        reservation.status = status;
-      }
-    },
-
     async fetchReservationStatistics() {
       this.isLoading = true;
       try {
@@ -230,21 +234,6 @@ export const useAdminStore = defineStore('admin', {
         throw error;
       } finally {
         this.isLoading = false;
-      }
-    }
-  },
-
-  mutations: {
-    SET_ACTIVE_RESERVATIONS(state, reservations) {
-      state.activeReservations = reservations;
-    },
-    REMOVE_RESERVATION(state, reservationId) {
-      state.activeReservations = state.activeReservations.filter(reservation => reservation.id !== reservationId);
-    },
-    UPDATE_RESERVATION_STATUS(state, { reservationId, status }) {
-      const reservation = state.activeReservations.find(reservation => reservation.id === reservationId);
-      if (reservation) {
-        reservation.status = status;
       }
     }
   }

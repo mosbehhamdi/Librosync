@@ -172,6 +172,8 @@ const confirmAccept = async (reservation) => {
 const acceptReservation = async (id: number) => {
   try {
     await adminStore.acceptReservation(id);
+    // Optionally, refresh the reservations list
+    await adminStore.fetchAllReservations();
   } catch (error) {
     console.error('Error accepting reservation:', error);
   }

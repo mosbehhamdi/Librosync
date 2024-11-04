@@ -29,13 +29,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/auth/user', [AuthController::class, 'user']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-    
+
     // Books
     Route::get('/books', [BookController::class, 'index']);
     Route::get('/books/search', [BookController::class, 'search']);
     Route::get('/books/category/{category}', [BookController::class, 'getByCategory']);
     Route::post('/books/{book}/reserve', [ReservationController::class, 'store']);
-    
+
     // User reservations
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::get('/reservations/expired', [ReservationController::class, 'handleExpiredReservations']);
@@ -43,7 +43,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
     Route::get('/reservations/history', [ReservationController::class, 'history']);
     Route::get('/reservations/statistics', [ReservationController::class, 'statistics']);
-    
+
     // Profile
     Route::get('/profile', [UserController::class, 'show']);
     Route::put('/profile', [UserController::class, 'update']);
@@ -54,11 +54,11 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware(['auth:api', 'admin'])->group(function () {
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
-    
+
     // Users management
     Route::get('/admin/users', [AdminController::class, 'users']);
     Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser']);
-    
+
     // Books management
     Route::get('/admin/books', [BookController::class, 'adminIndex']);
     Route::post('/admin/books', [BookController::class, 'store']);
@@ -66,7 +66,7 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::put('/admin/books/{book}', [BookController::class, 'update']);
     Route::delete('/admin/books/{book}', [BookController::class, 'destroy']);
     Route::put('/admin/books/{book}/copies', [BookController::class, 'updateCopies']);
-    
+
     // Reservations management
     Route::get('/admin/reservations', [AdminReservationController::class, 'index']);
     Route::post('/admin/reservations/{reservation}/cancel', [AdminReservationController::class, 'cancel']);

@@ -50,6 +50,20 @@ export const useReservationStore = defineStore('reservation', {
       }
     },
 
+    async joinWaitlist(bookId: number) {
+      this.isLoading = true;
+      try {
+        const response = await api.post(`/books/${bookId}/waitlist`);
+        await this.fetchUserReservations(); // Refresh reservations after joining waitlist
+        return response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to join waitlist';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async getReservationHistory() {
       this.isLoading = true;
       try {
@@ -75,19 +89,6 @@ export const useReservationStore = defineStore('reservation', {
       }
     },
 
-    async joinWaitlist(bookId: number) {
-      this.isLoading = true;
-      try {
-        const response = await api.post(`/books/${bookId}/waitlist`);
-        await this.fetchUserReservations(); // Refresh reservations after joining waitlist
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to join waitlist';
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
 
     async fetchExpiredReservations() {
       this.isLoading = true;

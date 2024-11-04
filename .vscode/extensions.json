@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "ionic.ionic",
+        "vue.volar",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.vscode-typescript-next",
+        "amiralizadeh9480.laravel-extra-intellisense",
+        "onecentlin.laravel-blade",
+        "bmewburn.vscode-intelephense-client",
+        "editorconfig.editorconfig"
+    ]
+} 

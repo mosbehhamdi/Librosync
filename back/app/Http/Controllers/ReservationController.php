@@ -127,12 +127,12 @@ class ReservationController extends Controller
                 ->whereIn('status', ['pending', 'ready'])
                 ->first();
 
-            if ($existingReservation) {
+         /*   if ($existingReservation) {
                 return response()->json([
                     'message' => 'You already have an active reservation for this book'
                 ], 422);
             }
-
+ */
             // Add user to the waitlist
             $reservation = $book->reservations()->create([
                 'user_id' => auth()->id(),

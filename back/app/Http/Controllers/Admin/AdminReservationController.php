@@ -62,6 +62,12 @@ class AdminReservationController extends Controller
 
     public function accept(Reservation $reservation): JsonResponse
     {
+        // Ensure the user is an admin
+        if (!auth()->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Update the reservation status to 'accepted'
         $reservation->status = 'accepted';
         $reservation->save();
 

@@ -27,7 +27,9 @@ class BookFactory extends Factory
             'central_number' => $this->faker->unique()->numerify('CN###'),
             'local_number' => $this->faker->unique()->numerify('LN###'),
             'publication_date' => $this->faker->date(),
-            'acquisition_date' => $this->faker->date()
+            'acquisition_date' => $this->faker->date(),
+            'isbn' => $this->faker->unique()->isbn13,
+            'publication_year' => $this->faker->year
         ];
     }
 

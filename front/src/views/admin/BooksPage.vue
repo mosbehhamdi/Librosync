@@ -48,14 +48,6 @@
         </ion-card-content>
       </ion-card>
 
-      <!-- Show error message -->
-      <ion-toast
-        :is-open="!!adminStore.error"
-        :message="adminStore.error"
-        :duration="3000"
-        color="danger"
-      ></ion-toast>
-
       <!-- Books List -->
       <ion-list v-if="adminStore.books.length">
         <ion-item v-for="book in adminStore.books" :key="book.id" class="mb-2">
@@ -101,12 +93,12 @@
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
       </ion-infinite-scroll>
 
-      <!-- Book Form Modal -->
       <book-form-modal
         v-model:is-open="showFormModal"
         :book="selectedBook"
-        @saved="handleBookSaved"
-      />
+        @saved="handleBookSaved"/>
+    
+ 
     </ion-content>
   </admin-layout>
 </template>
@@ -121,8 +113,7 @@ import { deweyCategories } from '@/constants/dewey';
 import { 
   IonContent, IonButton, IonIcon, IonList, IonItem, IonLabel,
   IonCard, IonCardContent, IonGrid, IonRow, IonCol,
-  IonInput, IonSelect, IonSelectOption, alertController,
-  IonSpinner, IonToast, IonLoading, IonText, IonInfiniteScroll, IonInfiniteScrollContent
+  IonInput, IonSelect, IonSelectOption, alertController, IonText, IonInfiniteScroll, IonInfiniteScrollContent
 } from '@ionic/vue';
 import { 
   addOutline, createOutline, trashOutline, 

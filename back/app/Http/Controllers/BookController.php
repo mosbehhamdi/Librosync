@@ -87,10 +87,25 @@ return response()->json([
 }
 }
 
-public function store(BookRequest $request): JsonResponse
+public function store(BookRequest $request)
 {
-$book = Book::create($request->validated());
-return response()->json($book, 201);
+    try {
+        $book = Book::create($request->validated());
+        return response()->json($book, 201);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+public function update(BookRequest $request, $id)
+{
+    $book = Book::findOrFail($id);
+    try {
+        $book->update($request->validated());
+        return response()->json($book);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
 }
 
 public function show(Book $book): JsonResponse
@@ -99,11 +114,6 @@ $book->load(['reservations.user']);
 return response()->json($book);
 }
 
-public function update(BookRequest $request, Book $book): JsonResponse
-{
-$book->update($request->validated());
-return response()->json($book);
-}
 
 public function destroy(Book $book): JsonResponse
 {
@@ -152,4 +162,4 @@ return response()->json([
 ], 500);
 }
 }
-} 
+}

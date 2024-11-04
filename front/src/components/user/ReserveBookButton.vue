@@ -8,7 +8,7 @@
       <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
       <template v-else>
         <ion-icon :icon="reservationButton.icon" slot="start"></ion-icon>
-        {{ reservationButton.text }}
+        {{ reservationButton.text }} -- {{ existingReservation?.status }}
       </template>
     </ion-button>
     <div v-if="queuePosition !== null">
@@ -138,7 +138,6 @@ const handleCancelReservation = async () => {
       await bookStore.fetchBooks();
     }
   } catch (error: any) {
-    console.error('Error cancelling reservation:', error);
     await showToast(error.response?.data?.message || 'Failed to cancel reservation', 'danger');
   } finally {
     isLoading.value = false;

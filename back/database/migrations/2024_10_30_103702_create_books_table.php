@@ -25,8 +25,10 @@ return new class extends Migration
             $table->string('local_number')->nullable();
             $table->date('publication_date')->nullable();
             $table->date('acquisition_date')->nullable();
+            $table->string('isbn')->unique(); // Add ISBN field
+            $table->integer('publication_year'); // Add publication year field
             $table->timestamps();
-            $table->softDeletes(); // Add this line for soft deletes
+            $table->softDeletes();
         });
     }
 

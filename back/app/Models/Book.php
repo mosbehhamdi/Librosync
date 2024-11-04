@@ -26,6 +26,8 @@ class Book extends Model
         'local_number',
         'publication_date',
         'acquisition_date',
+        'isbn',
+        'publication_year',
     ];
 
     protected $casts = [
@@ -37,6 +39,7 @@ class Book extends Model
         'available_copies' => 'integer',
         'parts_count' => 'integer',
         'edition_number' => 'integer',
+        'publication_year' => 'integer',
     ];
 
     protected $appends = ['waiting_time'];
