@@ -20,7 +20,9 @@ $query->search($search);
 ->paginate($request->per_page ?? 10);
 
 $books->getCollection()->transform(function ($book) {
-$book->user_reservation = $book->reservations->first();
+$book->user_reservation = $book->reservations
+    ->where('user_id', auth()->id())
+    ->first();
 $book->waiting_time = $book->getWaitingTimeAttribute();
 unset($book->reservations);
 return $book;
@@ -140,7 +142,9 @@ $books = Book::where('dewey_category', $category)
 ->paginate(10);
 
 $books->getCollection()->transform(function ($book) {
-$book->user_reservation = $book->reservations->first();
+$book->user_reservation = $book->reservations
+    ->where('user_id', auth()->id())
+    ->first();
 $book->waiting_time = $book->getWaitingTimeAttribute();
 unset($book->reservations);
 return $book;

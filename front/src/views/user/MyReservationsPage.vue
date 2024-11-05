@@ -156,7 +156,7 @@ const cancelReservation = async (id: number) => {
   }
 };
 
-onMounted(() => {
-  reservationStore.fetchUserReservations();
+onMounted(async () => {
+  await reservationStore.fetchUserReservations();
 });
 </script> 

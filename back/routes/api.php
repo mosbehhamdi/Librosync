@@ -32,7 +32,6 @@ Route::middleware('auth:api')->group(function () {
 
     // Books
     Route::get('/books', [BookController::class, 'index']);
-    Route::get('/books/search', [BookController::class, 'search']);
     Route::get('/books/category/{category}', [BookController::class, 'getByCategory']);
     Route::post('/books/{book}/reserve', [ReservationController::class, 'store']);
 
@@ -40,7 +39,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::get('/reservations/expired', [ReservationController::class, 'handleExpiredReservations']);
     Route::get('/reservations/history', [ReservationController::class, 'history']);
-    Route::get('/reservations/statistics', [ReservationController::class, 'statistics']);
     Route::get('/books/{book}/queue-position', [ReservationController::class, 'getQueuePosition']);
 
     Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
@@ -79,9 +77,6 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::post('/admin/reservations/{reservation}/cancel', [AdminReservationController::class, 'cancel']);
     Route::get('/admin/reservations/statistics', [AdminReservationController::class, 'reservationStatistics']);
     // Statistics
-    Route::get('/admin/statistics/books', [AdminController::class, 'bookStatistics']);
-    Route::get('/admin/statistics/users', [AdminController::class, 'userStatistics']);
-    Route::get('/admin/books/search', [BookController::class, 'adminSearch']);
     Route::get('/admin/reservations/history', [AdminReservationController::class, 'history']);
     Route::post('/admin/reservations/{reservation}/accept', [AdminReservationController::class, 'accept']);
     Route::post('/admin/reservations/{reservation}/deliver', [AdminReservationController::class, 'deliver']);

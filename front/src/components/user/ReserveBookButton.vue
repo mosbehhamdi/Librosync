@@ -8,7 +8,7 @@
       <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
       <template v-else>
         <ion-icon :icon="reservationButton.icon" slot="start"></ion-icon>
-        {{ reservationButton.text }} -- {{ existingReservation?.status }}
+        {{ reservationButton.text }} 
       </template>
     </ion-button>
     <div v-if="queuePosition !== null">
@@ -43,21 +43,23 @@ watch(() => props.existingReservation, (newReservation) => {
   reservation.value = newReservation;
 });
 
-const isUserReservation = computed(() => {
-  return (
-    reservation.value &&
-    reservation.value.user_id === authStore.user?.id 
+const hasActiveReservation = computed(() => {
+  return reservationStore.reservations.some(res => 
+    res.book_id === props.bookId &&
+    ['pending', 'ready'].includes(res.status) &&
+    res.user_id === authStore.user?.id
   );
 });
 
 onMounted(async () => {
+  await reservationStore.fetchUserReservations();
   if (reservation.value?.status === 'pending') {
     queuePosition.value = await reservationStore.getQueuePosition(props.bookId);
   }
 });
 
 const reservationButton = computed(() => {
-  if (isUserReservation.value && !['cancelled', 'delivered'].includes(reservation.value.status)) {
+  if (hasActiveReservation.value) {
     return {
       color: 'medium',
       icon: checkmarkCircleOutline,
@@ -88,7 +90,7 @@ const showToast = async (message: string, color: string) => {
 };
 
 const handleReserveClick = () => {
-  if (isUserReservation.value) {
+  if (hasActiveReservation.value) {
     handleCancelReservation();
   } else if (props.availableCopies > 0) {
     handleReserve();

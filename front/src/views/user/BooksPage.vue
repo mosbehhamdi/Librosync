@@ -114,12 +114,11 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, watch } from 'vue';
+  import { ref } from 'vue';
   import { useBookStore } from '@/stores/book';
   import { deweyCategories } from '@/constants/dewey';
   import ReserveBookButton from '@/components/user/ReserveBookButton.vue';
   import { searchOutline } from 'ionicons/icons';
-  import { useDebounceFn } from '@vueuse/core';
   
   const bookStore = useBookStore();
   const books = ref([]);

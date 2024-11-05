@@ -69,7 +69,9 @@ class Book extends Model
     // Add a scope for searching
     public function scopeSearch($query, $search)
     {
-        return $query->where(function ($q) use ($search) {
+        return $query->where('title', 'like', "%{$search}%");
+        /*
+         return $query->where(function ($q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
               ->orWhereJsonContains('authors', $search)
               ->orWhere('dewey_category', $search)
@@ -78,5 +80,6 @@ class Book extends Model
               ->orWhere('central_number', 'like', "%{$search}%")
               ->orWhere('local_number', 'like', "%{$search}%");
         });
+        */
     }
-} 
+}
