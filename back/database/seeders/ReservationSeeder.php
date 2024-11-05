@@ -17,10 +17,10 @@ class ReservationSeeder extends Seeder
         // Create some random reservations
         foreach ($users as $user) {
             $randomBooks = $books->random(rand(0, 3));
-            
+
             foreach ($randomBooks as $book) {
                 $status = $this->getRandomStatus();
-                
+
                 Reservation::create([
                     'user_id' => $user->id,
                     'book_id' => $book->id,
@@ -34,7 +34,7 @@ class ReservationSeeder extends Seeder
 
     private function getRandomStatus(): string
     {
-        return collect(['pending', 'ready', 'completed', 'cancelled'])
+        return collect(['pending', 'ready', 'delivered', 'cancelled'])
             ->random();
     }
-} 
+}

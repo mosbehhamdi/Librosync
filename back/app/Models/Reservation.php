@@ -13,7 +13,7 @@ class Reservation extends Model
     protected $fillable = [
         'user_id',
         'book_id',
-        'status', // 'pending', 'ready', 'completed', 'cancelled'
+        'status', // 'pending', 'ready', 'delivered', 'cancelled'
         'queue_position',
         'notification_sent',
         'expires_at'
@@ -33,4 +33,4 @@ class Reservation extends Model
     {
         return $this->belongsTo(Book::class);
     }
-} 
+}

@@ -54,6 +54,15 @@
             >
               Accept
             </ion-button>
+            <ion-button 
+              v-if="reservation.status === 'ready'"
+              slot="end" 
+              fill="clear" 
+              color="success"
+              @click="confirmDeliver(reservation)"
+            >
+              Deliver
+            </ion-button>
           </ion-item>
         </ion-item-group>
 
@@ -97,7 +106,7 @@ const getStatusColor = (status: string) => {
   const colors = {
     pending: 'warning',
     ready: 'success',
-    completed: 'primary',
+    delivered: 'primary',
     cancelled: 'medium',
     accepted: 'tertiary'
   };
@@ -108,7 +117,7 @@ const getStatusText = (status: string) => {
   const texts = {
     pending: 'Waiting',
     ready: 'Ready for Pickup',
-    completed: 'Completed',
+    delivered: 'Delivered',
     cancelled: 'Cancelled',
     accepted: 'Accepted'
   };
@@ -176,6 +185,34 @@ const acceptReservation = async (id: number) => {
     await adminStore.fetchAllReservations();
   } catch (error) {
     console.error('Error accepting reservation:', error);
+  }
+};
+
+const confirmDeliver = async (reservation) => {
+  const alert = await alertController.create({
+    header: 'Deliver Reservation',
+    message: 'Are you sure you want to mark this reservation as delivered?',
+    buttons: [
+      {
+        text: 'No',
+        role: 'cancel'
+      },
+      {
+        text: 'Yes',
+        role: 'confirm',
+        handler: () => deliverReservation(reservation.id)
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const deliverReservation = async (id: number) => {
+  try {
+    await adminStore.deliverReservation(id);
+    await adminStore.fetchAllReservations();
+  } catch (error) {
+    console.error('Error delivering reservation:', error);
   }
 };
 

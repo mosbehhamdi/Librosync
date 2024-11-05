@@ -13,8 +13,8 @@ class ReservationFactory extends Factory
 
     public function definition()
     {
-        $status = $this->faker->randomElement(['pending', 'ready', 'completed', 'cancelled']);
-        
+        $status = $this->faker->randomElement(['pending', 'ready', 'delivered', 'cancelled']);
+
         return [
             'user_id' => User::factory(),
             'book_id' => Book::factory(),
@@ -47,4 +47,4 @@ class ReservationFactory extends Factory
             ];
         });
     }
-} 
+}

@@ -15,7 +15,7 @@ class ReservationController extends Controller
             ->with(['book', 'user'])
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         return response()->json($reservations);
     }
 
@@ -27,7 +27,7 @@ class ReservationController extends Controller
 
         $reservation->status = 'cancelled';
         $reservation->save();
-        
+
         return response()->json(['message' => 'Reservation cancelled successfully']);
     }
 
@@ -55,13 +55,8 @@ class ReservationController extends Controller
                 'queue_position' => $book->activeReservations()->count() + 1
             ]);
 
-            // Update available copies if immediate reservation
-            if ($book->available_copies > 0) {
-                $book->decrement('available_copies');
-            }
-
             return response()->json([
-                'message' => $book->available_copies > 0 
+                'message' => $book->available_copies > 0
                     ? 'Book reserved successfully! Please pick it up within 48 hours.'
                     : 'Added to waitlist. We\'ll notify you when the book is available.',
                 'reservation' => $reservation
@@ -72,7 +67,7 @@ class ReservationController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'message' => 'Failed to create reservation',
                 'error' => $e->getMessage()
@@ -112,30 +107,24 @@ class ReservationController extends Controller
             $nextInQueue->status = 'ready';
             $nextInQueue->expires_at = now()->addHours(48);
             $nextInQueue->save();
-            
+
             // Send notification to user
-            // TODO: Implement notification system
+            $this->sendNotification($nextInQueue->user, 'Your reservation is ready for pickup.');
         }
+    }
+
+    private function sendNotification($user, $message)
+    {
+        // Implement notification logic here
     }
 
     public function joinWaitlist(Book $book): JsonResponse
     {
         try {
-            // Check if the user already has a pending or ready reservation
-            $existingReservation = $book->reservations()
-                ->where('user_id', auth()->id())
-                ->whereIn('status', ['pending', 'ready'])
-                ->first();
-
-         /*   if ($existingReservation) {
-                return response()->json([
-                    'message' => 'You already have an active reservation for this book'
-                ], 422);
-            }
- */
             // Add user to the waitlist
             $reservation = $book->reservations()->create([
                 'user_id' => auth()->id(),
+                'book_id' => $book->id,
                 'status' => 'pending',
                 'queue_position' => $book->activeReservations()->count() + 1
             ]);
@@ -198,4 +187,4 @@ class ReservationController extends Controller
 
         return response()->json($reservations);
     }
-} 
+}

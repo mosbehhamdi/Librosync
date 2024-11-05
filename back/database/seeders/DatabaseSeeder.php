@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
 
     private function getRandomStatus(): string
     {
-        return collect(['pending', 'ready', 'completed', 'cancelled'])
+        return collect(['pending', 'ready', 'delivered', 'cancelled'])
             ->random();
     }
 }

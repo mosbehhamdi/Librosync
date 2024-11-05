@@ -39,10 +39,17 @@ Route::middleware('auth:api')->group(function () {
     // User reservations
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::get('/reservations/expired', [ReservationController::class, 'handleExpiredReservations']);
-    Route::get('/reservations/{reservation}/queue-position', [ReservationController::class, 'getQueuePosition']);
-    Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
     Route::get('/reservations/history', [ReservationController::class, 'history']);
     Route::get('/reservations/statistics', [ReservationController::class, 'statistics']);
+    Route::get('/books/{book}/queue-position', [ReservationController::class, 'getQueuePosition']);
+
+    Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
+    // Waitlist routes
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/books/{book}/waitlist', [ReservationController::class, 'joinWaitlist']);
+    });
+
+
 
     // Profile
     Route::get('/profile', [UserController::class, 'show']);
@@ -70,7 +77,6 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     // Reservations management
     Route::get('/admin/reservations', [AdminReservationController::class, 'index']);
     Route::post('/admin/reservations/{reservation}/cancel', [AdminReservationController::class, 'cancel']);
-    Route::post('/admin/reservations/{reservation}/ready', [AdminReservationController::class, 'markAsReady']);
     Route::get('/admin/reservations/statistics', [AdminReservationController::class, 'reservationStatistics']);
     // Statistics
     Route::get('/admin/statistics/books', [AdminController::class, 'bookStatistics']);
@@ -78,11 +84,5 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::get('/admin/books/search', [BookController::class, 'adminSearch']);
     Route::get('/admin/reservations/history', [AdminReservationController::class, 'history']);
     Route::post('/admin/reservations/{reservation}/accept', [AdminReservationController::class, 'accept']);
+    Route::post('/admin/reservations/{reservation}/deliver', [AdminReservationController::class, 'deliver']);
 });
-
-// Waitlist routes
-Route::middleware('auth:api')->group(function () {
-    Route::post('/books/{book}/waitlist', [ReservationController::class, 'joinWaitlist']);
-});
-
-Route::get('/books/{book}/queue-position', [ReservationController::class, 'getQueuePosition']);

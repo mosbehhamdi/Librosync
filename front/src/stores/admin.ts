@@ -27,7 +27,7 @@ export const useAdminStore = defineStore('admin', {
       state.reservations.filter(r => ['pending', 'ready'].includes(r.status)),
     
     pastReservations: (state) => 
-      state.reservations.filter(r => ['completed', 'cancelled'].includes(r.status))
+      state.reservations.filter(r => ['delivered', 'cancelled'].includes(r.status))
   },
 
   actions: {
@@ -231,6 +231,23 @@ export const useAdminStore = defineStore('admin', {
         this.statistics = response.data;
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to fetch reservation statistics';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async deliverReservation(id: number) {
+      this.isLoading = true;
+      try {
+        const response = await api.post(`/admin/reservations/${id}/deliver`);
+        const reservation = this.reservations.find(r => r.id === id);
+        if (reservation) {
+          reservation.status = 'delivered';
+        }
+        return response.data;
+      } catch (error) {
+        this.error = error;
         throw error;
       } finally {
         this.isLoading = false;

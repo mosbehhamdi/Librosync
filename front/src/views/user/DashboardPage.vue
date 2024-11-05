@@ -31,7 +31,7 @@
             <p class="text-3xl font-bold text-indigo-600">0</p>
           </div>
           <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">Books Completed</h3>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Books Delivered</h3>
             <p class="text-3xl font-bold text-green-600">0</p>
           </div>
           <div class="bg-white p-6 rounded-lg shadow-md">

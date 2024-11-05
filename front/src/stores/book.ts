@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
 import { api } from '@/api';
 
 interface Book {
@@ -16,11 +15,6 @@ interface Book {
     status: string;
     queue_position: number;
   };
-}
-
-interface BookFilters {
-  search?: string;
-  category?: string;
 }
 
 export const useBookStore = defineStore('book', {

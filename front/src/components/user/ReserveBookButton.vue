@@ -46,8 +46,7 @@ watch(() => props.existingReservation, (newReservation) => {
 const isUserReservation = computed(() => {
   return (
     reservation.value &&
-    reservation.value.user_id === authStore.user?.id &&
-    !['cancelled', 'completed'].includes(reservation.value.status)
+    reservation.value.user_id === authStore.user?.id 
   );
 });
 
@@ -58,7 +57,7 @@ onMounted(async () => {
 });
 
 const reservationButton = computed(() => {
-  if (isUserReservation.value) {
+  if (isUserReservation.value && !['cancelled', 'delivered'].includes(reservation.value.status)) {
     return {
       color: 'medium',
       icon: checkmarkCircleOutline,

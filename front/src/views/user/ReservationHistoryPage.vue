@@ -42,7 +42,7 @@ const getStatusColor = (status: string) => {
   const colors = {
     pending: 'warning',
     ready: 'success',
-    completed: 'primary',
+    delivered: 'primary',
     cancelled: 'medium'
   };
   return colors[status] || 'medium';
@@ -52,7 +52,7 @@ const getStatusText = (status: string) => {
   const texts = {
     pending: 'Waiting',
     ready: 'Ready for Pickup',
-    completed: 'Completed',
+    delivered: 'Delivered',
     cancelled: 'Cancelled'
   };
   return texts[status] || status;

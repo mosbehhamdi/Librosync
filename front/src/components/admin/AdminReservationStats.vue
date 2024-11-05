@@ -14,8 +14,8 @@
           <ion-note slot="end">{{ statistics.active }}</ion-note>
         </ion-item>
         <ion-item>
-          <ion-label>Completed Reservations</ion-label>
-          <ion-note slot="end">{{ statistics.completed }}</ion-note>
+          <ion-label>Delivered Reservations</ion-label>
+          <ion-note slot="end">{{ statistics.delivered }}</ion-note>
         </ion-item>
         <ion-item>
           <ion-label>Cancelled Reservations</ion-label>

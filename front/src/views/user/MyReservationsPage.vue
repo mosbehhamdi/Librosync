@@ -101,7 +101,7 @@ const activeReservations = computed(() =>
 
 const pastReservations = computed(() => 
   reservationStore.reservations.filter(r => 
-    ['completed', 'cancelled'].includes(r.status)
+    ['delivered', 'cancelled'].includes(r.status)
   )
 );
 
@@ -109,7 +109,7 @@ const getStatusColor = (status: string) => {
   const colors = {
     pending: 'warning',
     ready: 'success',
-    completed: 'primary',
+    delivered: 'primary',
     cancelled: 'medium'
   };
   return colors[status] || 'medium';
@@ -119,7 +119,7 @@ const getStatusText = (status: string) => {
   const texts = {
     pending: 'Waiting',
     ready: 'Ready for Pickup',
-    completed: 'Completed',
+    delivered: 'delivered',
     cancelled: 'Cancelled'
   };
   return texts[status] || status;
