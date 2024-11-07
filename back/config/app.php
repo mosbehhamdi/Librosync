@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost:8000'),
+    'url' => env('APP_URL', 'https://librosync.tn'),
 
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:8100'),
 
