@@ -97,6 +97,7 @@
   :book-id="book.id"
   :available-copies="book.available_copies"
   :existing-reservation="book.user_reservation"
+  @reservationUpdated="refreshBooksList"
   />
   </ion-item>
   </ion-list>
@@ -114,12 +115,14 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { useBookStore } from '@/stores/book';
   import { deweyCategories } from '@/constants/dewey';
   import ReserveBookButton from '@/components/user/ReserveBookButton.vue';
   import { searchOutline } from 'ionicons/icons';
-  
+ // import { useReservationStore } from '@/stores/reservation';
+
+  //const reservationStore = useReservationStore();
   const bookStore = useBookStore();
   const books = ref([]);
   const searchQuery = ref('');
@@ -138,6 +141,7 @@
   error.value = null;
   
   try {
+ // await reservationStore.fetchUserReservations();
   const response = await bookStore.searchBooks({
   query: searchQuery.value,
   category: filters.value.category,
@@ -180,6 +184,18 @@
   }
   } finally {
   event.target.complete();
+  }
+  };
+  
+  const refreshBooksList = async (bookId: number) => {
+  try {
+  const updatedBook = await bookStore.getBook(bookId);
+  const bookIndex = books.value.findIndex(book => book.id === bookId);
+  if (bookIndex !== -1) {
+  books.value[bookIndex] = updatedBook;
+  }
+  } catch (err) {
+  console.error('Error refreshing book:', err);
   }
   };
   

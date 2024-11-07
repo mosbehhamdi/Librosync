@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Reservation;
 use App\Models\Book;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class ReservationController extends Controller
@@ -187,4 +186,25 @@ class ReservationController extends Controller
 
         return response()->json($reservations);
     }
+
+  /*  public function getReservationByBookId(Book $book): JsonResponse
+    {
+        try {
+            $reservation = $book->reservations()
+                ->where('user_id', auth()->id())
+                ->first();
+
+            if (!$reservation) {
+                return response()->json(['message' => 'No reservation found for this book'], 404);
+            }
+
+            return response()->json($reservation);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching reservation by book ID:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['message' => 'Error fetching reservation'], 500);
+        }
+    } */
 }

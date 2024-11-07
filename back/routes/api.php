@@ -33,7 +33,9 @@ Route::middleware('auth:api')->group(function () {
     // Books
     Route::get('/books', [BookController::class, 'index']);
     Route::get('/books/category/{category}', [BookController::class, 'getByCategory']);
+    Route::get('/books/{book}', [BookController::class, 'refreshBook']);
     Route::post('/books/{book}/reserve', [ReservationController::class, 'store']);
+   // Route::get('/reservations/book/{book}', [ReservationController::class, 'getReservationByBookId']);
 
     // User reservations
     Route::get('/reservations', [ReservationController::class, 'index']);

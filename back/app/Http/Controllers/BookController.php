@@ -22,6 +22,7 @@ $query->search($search);
 $books->getCollection()->transform(function ($book) {
 $book->user_reservation = $book->reservations
     ->where('user_id', auth()->id())
+    ->whereIn('status', ['pending', 'ready'])
     ->first();
 $book->waiting_time = $book->getWaitingTimeAttribute();
 unset($book->reservations);
@@ -165,5 +166,29 @@ return response()->json([
 'error' => $e->getMessage()
 ], 500);
 }
+}
+
+public function refreshBook(Book $book): JsonResponse
+{
+    try {
+        $book->load('reservations');
+        $book->user_reservation = $book->reservations
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['pending', 'ready'])
+            ->first();
+        $book->waiting_time = $book->getWaitingTimeAttribute();
+        unset($book->reservations);
+
+        return response()->json($book);
+    } catch (\Exception $e) {
+        \Log::error('Error refreshing book:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'message' => 'Error fetching book',
+            'error' => $e->getMessage()
+        ], 500);
+    }
 }
 }
