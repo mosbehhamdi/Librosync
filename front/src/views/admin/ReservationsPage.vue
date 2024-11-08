@@ -1,106 +1,132 @@
 <template>
   <admin-layout>
     <ion-content class="ion-padding">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Reservations Management</h1>
-        <ion-button router-link="/admin/reservations/history">
-          View Reservation History
-        </ion-button>
+      <!-- Header with Title -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-center">Reservations Management</h1>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="adminStore.isLoading" class="flex justify-center p-4">
-        <ion-spinner></ion-spinner>
-      </div>
-
-      <!-- Reservations List -->
-      <ion-list v-else>
-        <ion-item-group>
-          <ion-item-divider>
+      <!-- Tabs for Active, Past, and History Reservations -->
+      <ion-tabs>
+        <ion-tab-bar slot="top">
+          <ion-tab-button tab="active">
             <ion-label>Active Reservations</ion-label>
-          </ion-item-divider>
-
-          <ion-item v-for="reservation in adminStore.activeReservations" :key="reservation.id">
-            <ion-label>
-              <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
-              <p>Reserved by: {{ reservation.user.name }}</p>
-              <p>
-                <ion-badge :color="getStatusColor(reservation.status)">
-                  {{ getStatusText(reservation.status) }}
-                </ion-badge>
-                <span v-if="reservation.status === 'ready'" class="ml-2">
-                  Expires: {{ formatExpiry(reservation.expires_at) }}
-                </span>
-                <span v-if="reservation.status === 'pending'" class="ml-2">
-                  Queue Position: {{ reservation.queue_position }}
-                </span>
-              </p>
-            </ion-label>
-
-            <ion-button 
-              slot="end" 
-              fill="clear" 
-              color="danger"
-              @click="confirmCancel(reservation)"
-            >
-              Cancel
-            </ion-button>
-            <ion-button 
-              v-if="reservation.status === 'ready'"
-              slot="end" 
-              fill="clear" 
-              color="success"
-              @click="confirmAccept(reservation)"
-            >
-              Accept
-            </ion-button>
-            <ion-button 
-              v-if="reservation.status === 'ready'"
-              slot="end" 
-              fill="clear" 
-              color="success"
-              @click="confirmDeliver(reservation)"
-            >
-              Deliver
-            </ion-button>
-          </ion-item>
-        </ion-item-group>
-
-        <ion-item-group>
-          <ion-item-divider>
+          </ion-tab-button>
+          <ion-tab-button tab="past">
             <ion-label>Past Reservations</ion-label>
-          </ion-item-divider>
+          </ion-tab-button>
+          <ion-tab-button tab="history">
+            <ion-label>Reservation History</ion-label>
+          </ion-tab-button>
+        </ion-tab-bar>
 
-          <ion-item v-for="reservation in adminStore.pastReservations" :key="reservation.id">
-            <ion-label>
-              <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
-              <p>Reserved by: {{ reservation.user.name }}</p>
-              <p>
-                <ion-badge :color="getStatusColor(reservation.status)">
-                  {{ getStatusText(reservation.status) }}
-                </ion-badge>
-              </p>
-            </ion-label>
-          </ion-item>
-        </ion-item-group>
-      </ion-list>
+        <!-- Active Reservations Tab -->
+        <ion-tab tab="active">
+          <!-- Loading State -->
+          <div v-if="adminStore.isLoading" class="flex justify-center items-center h-full">
+            <ion-spinner></ion-spinner>
+          </div>
+
+          <!-- Active Reservations List -->
+          <ion-list v-else>
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label>Active Reservations</ion-label>
+              </ion-item-divider>
+              <ion-item v-for="reservation in adminStore.activeReservations" :key="reservation.id">
+                <ion-label>
+                  <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
+                  <p>Reserved by: {{ reservation.user.name }}</p>
+                  <p>
+                    <ion-badge :color="getStatusColor(reservation.status)">
+                      {{ getStatusText(reservation.status) }}
+                    </ion-badge>
+                    <span v-if="reservation.status === 'ready'" class="ml-2">
+                      Expires: {{ formatExpiry(reservation.expires_at) }}
+                    </span>
+                    <span v-if="reservation.status === 'pending'" class="ml-2">
+                      Queue Position: {{ reservation.queue_position }}
+                    </span>
+                  </p>
+                </ion-label>
+
+                <ion-button 
+                  slot="end" 
+                  fill="clear" 
+                  color="danger"
+                  @click="confirmCancel(reservation)"
+                >
+                  Cancel
+                </ion-button>
+                <ion-button 
+                  v-if="reservation.status === 'ready'"
+                  slot="end" 
+                  fill="clear" 
+                  color="success"
+                  @click="confirmAccept(reservation)"
+                >
+                  Accept
+                </ion-button>
+                <ion-button 
+                  v-if="reservation.status === 'ready'"
+                  slot="end" 
+                  fill="clear" 
+                  color="success"
+                  @click="confirmDeliver(reservation)"
+                >
+                  Deliver
+                </ion-button>
+              </ion-item>
+            </ion-item-group>
+          </ion-list>
+        </ion-tab>
+
+        <!-- Past Reservations Tab -->
+        <ion-tab tab="past">
+          <ion-list v-if="!adminStore.isLoading">
+            <ion-item-group>
+              <ion-item-divider>
+                <ion-label>Past Reservations</ion-label>
+              </ion-item-divider>
+              <ion-item v-for="reservation in adminStore.pastReservations" :key="reservation.id">
+                <ion-label>
+                  <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
+                  <p>Reserved by: {{ reservation.user.name }}</p>
+                  <p>
+                    <ion-badge :color="getStatusColor(reservation.status)">
+                      {{ getStatusText(reservation.status) }}
+                    </ion-badge>
+                  </p>
+                </ion-label>
+              </ion-item>
+            </ion-item-group>
+          </ion-list>
+        </ion-tab>
+
+        <!-- Reservation History Tab -->
+        <ion-tab tab="history">
+          <ReservationHistoryPage />
+        </ion-tab>
+      </ion-tabs>
     </ion-content>
   </admin-layout>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import AdminLayout from '@/components/admin/AdminLayout.vue';
 import { useAdminStore } from '@/stores/admin';
 import { alertController } from '@ionic/vue';
 import {
   IonContent, IonList, IonItem, IonLabel, IonBadge,
-  IonSpinner, IonButton, IonItemGroup, IonItemDivider
+  IonSpinner, IonButton, IonItemGroup, IonItemDivider,
+  IonTabs, IonTabBar, IonTabButton, IonTab
 } from '@ionic/vue';
 import { format } from 'date-fns';
-
+import ReservationHistoryPage from './ReservationHistoryPage.vue';
 
 const adminStore = useAdminStore();
+const socket = ref<WebSocket | null>(null);
 
 const getStatusColor = (status: string) => {
   const colors = {
@@ -220,4 +246,7 @@ const deliverReservation = async (id: number) => {
 onMounted(() => {
   adminStore.fetchAllReservations();
 });
+
+
+
 </script> 

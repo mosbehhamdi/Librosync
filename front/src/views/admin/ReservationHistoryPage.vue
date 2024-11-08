@@ -1,7 +1,5 @@
 <template>
-  <admin-layout>
     <ion-content class="ion-padding">
-      <h1 class="text-2xl font-bold mb-4">Reservation History</h1>
       <ion-list>
         <ion-item v-for="reservation in adminStore.reservationHistory" :key="reservation.id">
           <ion-label>
@@ -19,14 +17,12 @@
         </ion-item>
       </ion-list>
     </ion-content>
-  </admin-layout>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useAdminStore } from '@/stores/admin';
 import { format } from 'date-fns';
-import AdminLayout from '@/components/admin/AdminLayout.vue';
 
 const adminStore = useAdminStore();
 
