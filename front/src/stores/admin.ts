@@ -5,7 +5,6 @@ export const useAdminStore = defineStore('admin', {
   state: () => ({
     users: [],
     books: [] as any[],
-    reservations: [] as any[],
     pagination: {
       currentPage: 1,
       lastPage: 1,
@@ -22,13 +21,6 @@ export const useAdminStore = defineStore('admin', {
     error: null as string | null
   }),
 
-  getters: {
-    activeReservations: (state) => 
-      state.reservations.filter(r => ['pending', 'ready'].includes(r.status)),
-    
-    pastReservations: (state) => 
-      state.reservations.filter(r => ['delivered', 'cancelled'].includes(r.status))
-  },
 
   actions: {
     async fetchDashboardStats() {
@@ -59,19 +51,7 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    async fetchAllReservations() {
-      this.isLoading = true;
-      try {
-        const response = await api.get('/admin/reservations');
-        this.reservations = response.data;
-        return response.data;
-      } catch (error) {
-        this.error = error;
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
+ 
 
     async fetchBooks(params = {}) {
       this.isLoading = true;
@@ -153,23 +133,6 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    async updateReservationStatus(id: number, status: string) {
-      this.isLoading = true;
-      try {
-        const response = await api.put(`/admin/reservations/${id}/status`, { status });
-        const reservation = this.reservations.find(r => r.id === id);
-        if (reservation) {
-          reservation.status = status;
-        }
-        return response.data;
-      } catch (error) {
-        this.error = error;
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
     async deleteUser(id: number) {
       this.isLoading = true;
       try {
@@ -183,87 +146,6 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    async fetchReservationHistory() {
-      this.isLoading = true;
-      try {
-        const response = await api.get('/admin/reservations/history');
-        this.reservationHistory = response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch reservation history';
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
 
-    async cancelReservation(reservationId: number) {
-      this.isLoading = true;
-      try {
-        const response = await api.post(`/admin/reservations/${reservationId}/cancel`);
-        const updatedReservation = response.data;
-        const reservationIndex = this.reservations.findIndex(r => r.id === reservationId);
-        if (reservationIndex !== -1) {
-          this.reservations[reservationIndex] = updatedReservation;
-        }
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to cancel reservation';
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    async acceptReservation(reservationId: number) {
-      this.isLoading = true;
-      try {
-        const response = await api.post(`/admin/reservations/${reservationId}/accept`);
-        const updatedReservation = response.data;
-
-        // Find the reservation and update its status
-        const reservationIndex = this.reservations.findIndex(r => r.id === reservationId);
-        if (reservationIndex !== -1) {
-          this.reservations[reservationIndex].status = updatedReservation.status; // Update status
-          this.reservations[reservationIndex].expires_at = updatedReservation.expires_at; // Update expiry if needed
-        }
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to accept reservation';
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    async fetchReservationStatistics() {
-      this.isLoading = true;
-      try {
-        const response = await api.get('/admin/reservations/statistics');
-        this.statistics = response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch reservation statistics';
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    async deliverReservation(id: number) {
-      this.isLoading = true;
-      try {
-        const response = await api.post(`/admin/reservations/${id}/deliver`);
-        const updatedReservation = response.data;
-        const reservationIndex = this.reservations.findIndex(r => r.id === id);
-        if (reservationIndex !== -1) {
-          this.reservations[reservationIndex] = updatedReservation;
-        }
-        return response.data;
-      } catch (error) {
-        this.error = error;
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    }
   }
 }); 

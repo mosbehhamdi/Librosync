@@ -3,13 +3,21 @@ import { api } from '@/api';
 
 export const useReservationStore = defineStore('reservation', {
   state: () => ({
-    reservations: [],
     history: [],
     statistics: null,
     isLoading: false,
     error: null,
-    expiredReservations: []
+    expiredReservations: [],
+    reservations: [] as any[],
+
   }),
+  getters: {
+    activeReservations: (state) => 
+      state.reservations.filter(r => ['pending', 'ready'].includes(r.status)),
+    
+    pastReservations: (state) => 
+      state.reservations.filter(r => ['delivered', 'cancelled'].includes(r.status))
+  },
 
   actions: {
     async fetchUserReservations() {
@@ -20,6 +28,85 @@ export const useReservationStore = defineStore('reservation', {
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to fetch reservations';
         console.error('Error fetching user reservations:', this.error);
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async fetchAllReservations() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/admin/reservations');
+        this.reservations = response.data;
+        return response.data;
+      } catch (error) {
+        this.error = error;
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async updateReservationStatus(id: number, status: string) {
+      this.isLoading = true;
+      try {
+        const response = await api.put(`/admin/reservations/${id}/status`, { status });
+        const reservation = this.reservations.find(r => r.id === id);
+        if (reservation) {
+          reservation.status = status;
+        }
+        return response.data;
+      } catch (error) {
+        this.error = error;
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async fetchReservationHistory() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/admin/reservations/history');
+        this.reservationHistory = response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to fetch reservation history';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async fetchReservationStatistics() {
+      this.isLoading = true;
+      try {
+        const response = await api.get('/admin/reservations/statistics');
+        this.statistics = response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || 'Failed to fetch reservation statistics';
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async adminReservationAction(action: 'cancel' | 'accept' | 'deliver', reservationId: number) {
+      this.isLoading = true;
+      try {
+        let response;
+        if (action === 'cancel') {
+          response = await api.post(`/admin/reservations/${reservationId}/cancel`);
+        } else if (action === 'accept') {
+          response = await api.post(`/admin/reservations/${reservationId}/accept`);
+        } else if (action === 'deliver') {
+          response = await api.post(`/admin/reservations/${reservationId}/deliver`);
+        }
+        
+        const updatedReservation = response.data;
+        const reservationIndex = this.reservations.findIndex(r => r.id === reservationId);
+        if (reservationIndex !== -1) {
+          this.reservations[reservationIndex] = updatedReservation;
+        }
+        return response.data;
+      } catch (error: any) {
+        this.error = error.response?.data?.message || `Failed to ${action} reservation`;
         throw error;
       } finally {
         this.isLoading = false;

@@ -23,7 +23,7 @@
         <!-- Active Reservations Tab -->
         <ion-tab tab="active">
           <!-- Loading State -->
-          <div v-if="adminStore.isLoading" class="flex justify-center items-center h-full">
+          <div v-if="reservationStore.isLoading" class="flex justify-center items-center h-full">
             <ion-spinner></ion-spinner>
           </div>
 
@@ -33,7 +33,7 @@
               <ion-item-divider>
                 <ion-label>Active Reservations</ion-label>
               </ion-item-divider>
-              <ion-item v-for="reservation in adminStore.activeReservations" :key="reservation.id">
+              <ion-item v-for="reservation in reservationStore.activeReservations" :key="reservation.id">
                 <ion-label>
                   <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
                   <p>Reserved by: {{ reservation.user.name }}</p>
@@ -84,12 +84,12 @@
 
         <!-- Past Reservations Tab -->
         <ion-tab tab="past">
-          <ion-list v-if="!adminStore.isLoading">
+          <ion-list v-if="!reservationStore.isLoading">
             <ion-item-group>
               <ion-item-divider>
                 <ion-label>Past Reservations</ion-label>
               </ion-item-divider>
-              <ion-item v-for="reservation in adminStore.pastReservations" :key="reservation.id">
+              <ion-item v-for="reservation in reservationStore.pastReservations" :key="reservation.id">
                 <ion-label>
                   <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
                   <p>Reserved by: {{ reservation.user.name }}</p>
@@ -116,7 +116,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import AdminLayout from '@/components/admin/AdminLayout.vue';
-import { useAdminStore } from '@/stores/admin';
+import { useReservationStore } from '@/stores/reservation';
 import { alertController } from '@ionic/vue';
 import {
   IonContent, IonList, IonItem, IonLabel, IonBadge,
@@ -126,7 +126,7 @@ import {
 import { format } from 'date-fns';
 import ReservationHistoryPage from './ReservationHistoryPage.vue';
 
-const adminStore = useAdminStore();
+const reservationStore = useReservationStore();
 const socket = ref<WebSocket | null>(null);
 
 const getStatusColor = (status: string) => {
@@ -168,20 +168,21 @@ const confirmCancel = async (reservation) => {
       {
         text: 'Yes',
         role: 'confirm',
-        handler: () => cancelReservation(reservation.id)
+        handler: () => adminReservationAction('cancel', reservation.id)
       }
     ]
   });
   await alert.present();
 };
 
-const cancelReservation = async (id: number) => {
+const adminReservationAction = async (action: 'cancel' | 'accept' | 'deliver', reservationId: number) => {
   try {
-    await adminStore.cancelReservation(id);
+    await reservationStore.adminReservationAction(action, reservationId);
   } catch (error) {
-    console.error('Error cancelling reservation:', error);
+    console.error('Error performing reservation action:', error);
   }
 };
+
 const formatExpiry = (date: string) => {
   return format(new Date(date), 'MMM dd, yyyy');
 };
@@ -198,19 +199,11 @@ const confirmAccept = async (reservation) => {
       {
         text: 'Yes',
         role: 'confirm',
-        handler: () => acceptReservation(reservation.id)
+        handler: () => adminReservationAction('accept', reservation.id)
       }
     ]
   });
   await alert.present();
-};
-
-const acceptReservation = async (id: number) => {
-  try {
-    await adminStore.acceptReservation(id);
-  } catch (error) {
-    console.error('Error accepting reservation:', error);
-  }
 };
 
 const confirmDeliver = async (reservation) => {
@@ -225,24 +218,16 @@ const confirmDeliver = async (reservation) => {
       {
         text: 'Yes',
         role: 'confirm',
-        handler: () => deliverReservation(reservation.id)
+        handler: () => adminReservationAction('deliver', reservation.id)
       }
     ]
   });
   await alert.present();
 };
 
-const deliverReservation = async (id: number) => {
-  try {
-    await adminStore.deliverReservation(id);
-  } catch (error) {
-    console.error('Error delivering reservation:', error);
-  }
-};
-
 // Fetch reservations on mount
 onMounted(() => {
-  adminStore.fetchAllReservations();
+  reservationStore.fetchAllReservations();
 });
 
 

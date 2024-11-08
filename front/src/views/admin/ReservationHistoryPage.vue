@@ -1,7 +1,7 @@
 <template>
     <ion-content class="ion-padding">
       <ion-list>
-        <ion-item v-for="reservation in adminStore.reservationHistory" :key="reservation.id">
+        <ion-item v-for="reservation in reservationStore.reservationHistory" :key="reservation.id">
           <ion-label>
             <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
             <p>Reserved by: {{ reservation.user.name }}</p>
@@ -21,10 +21,10 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useAdminStore } from '@/stores/admin';
+import { useReservationStore } from '@/stores/reservation';
 import { format } from 'date-fns';
 
-const adminStore = useAdminStore();
+const reservationStore = useReservationStore();
 
 const getStatusColor = (status: string) => {
   const colors = {
@@ -51,6 +51,6 @@ const formatDate = (date: string) => {
 };
 
 onMounted(() => {
-  adminStore.fetchReservationHistory();
+  reservationStore.fetchReservationHistory();
 });
 </script> 
