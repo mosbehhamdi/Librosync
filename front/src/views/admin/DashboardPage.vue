@@ -38,13 +38,6 @@
             </ion-card>
           </ion-col>
         </ion-row>
-        <ion-row>
-          <ion-col size="12">
-            <ion-button expand="full" router-link="/admin/reservations/history">
-              View Reservation History
-            </ion-button>
-          </ion-col>
-        </ion-row>
       </ion-grid>
     </ion-content>
   </admin-layout>

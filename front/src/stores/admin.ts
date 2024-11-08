@@ -200,7 +200,11 @@ export const useAdminStore = defineStore('admin', {
       this.isLoading = true;
       try {
         const response = await api.post(`/admin/reservations/${reservationId}/cancel`);
-        this.updateReservationStatus(reservationId, 'cancelled');
+        const updatedReservation = response.data;
+        const reservationIndex = this.reservations.findIndex(r => r.id === reservationId);
+        if (reservationIndex !== -1) {
+          this.reservations[reservationIndex] = updatedReservation;
+        }
         return response.data;
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to cancel reservation';
@@ -214,7 +218,14 @@ export const useAdminStore = defineStore('admin', {
       this.isLoading = true;
       try {
         const response = await api.post(`/admin/reservations/${reservationId}/accept`);
-        this.updateReservationStatus(reservationId, 'accepted');
+        const updatedReservation = response.data;
+
+        // Find the reservation and update its status
+        const reservationIndex = this.reservations.findIndex(r => r.id === reservationId);
+        if (reservationIndex !== -1) {
+          this.reservations[reservationIndex].status = updatedReservation.status; // Update status
+          this.reservations[reservationIndex].expires_at = updatedReservation.expires_at; // Update expiry if needed
+        }
         return response.data;
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to accept reservation';
@@ -241,9 +252,10 @@ export const useAdminStore = defineStore('admin', {
       this.isLoading = true;
       try {
         const response = await api.post(`/admin/reservations/${id}/deliver`);
-        const reservation = this.reservations.find(r => r.id === id);
-        if (reservation) {
-          reservation.status = 'delivered';
+        const updatedReservation = response.data;
+        const reservationIndex = this.reservations.findIndex(r => r.id === id);
+        if (reservationIndex !== -1) {
+          this.reservations[reservationIndex] = updatedReservation;
         }
         return response.data;
       } catch (error) {

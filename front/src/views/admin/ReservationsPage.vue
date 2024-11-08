@@ -59,16 +59,7 @@
                   Cancel
                 </ion-button>
                 <ion-button 
-                  v-if="reservation.status === 'ready'"
-                  slot="end" 
-                  fill="clear" 
-                  color="success"
-                  @click="confirmAccept(reservation)"
-                >
-                  Accept
-                </ion-button>
-                <ion-button 
-                  v-if="reservation.status === 'ready'"
+                  v-if="reservation.status === 'accepted'"
                   slot="end" 
                   fill="clear" 
                   color="success"
@@ -76,6 +67,16 @@
                 >
                   Deliver
                 </ion-button>
+                <ion-button 
+                  v-else
+                  slot="end" 
+                  fill="clear" 
+                  color="success"
+                  @click="confirmAccept(reservation)"
+                >
+                  Accept
+                </ion-button>
+               
               </ion-item>
             </ion-item-group>
           </ion-list>
@@ -207,8 +208,6 @@ const confirmAccept = async (reservation) => {
 const acceptReservation = async (id: number) => {
   try {
     await adminStore.acceptReservation(id);
-    // Optionally, refresh the reservations list
-    await adminStore.fetchAllReservations();
   } catch (error) {
     console.error('Error accepting reservation:', error);
   }
@@ -236,7 +235,6 @@ const confirmDeliver = async (reservation) => {
 const deliverReservation = async (id: number) => {
   try {
     await adminStore.deliverReservation(id);
-    await adminStore.fetchAllReservations();
   } catch (error) {
     console.error('Error delivering reservation:', error);
   }

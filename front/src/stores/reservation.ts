@@ -105,11 +105,9 @@ export const useReservationStore = defineStore('reservation', {
 
     async fetchExpiredReservations() {
       this.isLoading = true;
-      console.log('Fetching expired reservations...');
       try {
         const response = await api.get('/reservations/expired');
         this.expiredReservations = response.data;
-        console.log('Expired reservations fetched successfully:', this.expiredReservations);
       } catch (error: any) {
         this.error = error.response?.data?.message || 'Failed to fetch expired reservations';
         console.error('Error fetching expired reservations:', this.error);
