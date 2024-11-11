@@ -27,8 +27,8 @@
   </ion-col>
   <ion-col size="12" size-md="6">
   <ion-select
-  v-model="filters.category"
   placeholder="Select category"
+  @ionChange="onCategoryChange"
   >
   <ion-select-option value="">All Categories</ion-select-option>
   <ion-select-option
@@ -64,8 +64,8 @@
   <ion-card-content class="ion-text-center">
   <ion-text color="medium">
   No books found for "{{ searchQuery }}"
-  <template v-if="filters.category">
-  in category {{ getDeweyCategory(filters.category) }}
+  <template v-if="selectedCategory">
+  in category {{ getDeweyCategory(selectedCategory) }}
   </template>
   </ion-text>
   </ion-card-content>
@@ -115,7 +115,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, watch } from 'vue';
   import { useBookStore } from '@/stores/book';
   import { deweyCategories } from '@/constants/dewey';
   import ReserveBookButton from '@/components/user/ReserveBookButton.vue';
@@ -131,11 +131,25 @@
   const error = ref(null);
   const showResults = ref(false);
   
-  const filters = ref({
-  category: ''
-  });
+  const selectedCategory = ref('');
   
+  // Watch for changes in selectedCategory
+  watch(selectedCategory, (newValue, oldValue) => {
+    console.log('Selected Category changed from', oldValue, 'to', newValue); // Log the change
+    if (newValue) {
+      performSearch(); // Perform search whenever the category changes
+    }
+  });
+
+  // Method to handle category change
+  const onCategoryChange = (event: any) => {
+    selectedCategory.value = event.detail.value; // Update selectedCategory manually
+    console.log('Category changed:', selectedCategory.value); // Log the current value
+    performSearch(); // Trigger search whenever the category changes
+  };
+
   const performSearch = async () => { 
+  console.log('Performing search with category:', selectedCategory.value); // Log the category being used
   showResults.value = true;
   currentPage.value = 1;
   error.value = null;
@@ -143,7 +157,7 @@
   try {
     const response = await bookStore.searchBooks({
       query: searchQuery.value,
-      category: filters.value.category,
+      category: selectedCategory.value,
       page: currentPage.value
     });
     if (response?.data) {
@@ -174,7 +188,7 @@
   currentPage.value++;
   const response = await bookStore.searchBooks({
   query: searchQuery.value,
-  category: filters.value.category,
+  category: selectedCategory.value,
   page: currentPage.value
   });
   if (response?.data) {
