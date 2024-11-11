@@ -88,9 +88,13 @@
       <!-- Pagination -->
       <ion-infinite-scroll
         v-if="bookStore.pagination.currentPage < bookStore.pagination.lastPage"
-        @ionInfinite="loadMore($event)"
+        @ionInfinite="loadMore"
+        threshold="100px"
       >
-        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+        <ion-infinite-scroll-content
+          loading-spinner="bubbles"
+          loading-text="Loading more books..."
+        ></ion-infinite-scroll-content>
       </ion-infinite-scroll>
 
       <book-form-modal
@@ -129,7 +133,6 @@ const filters = ref({
   category: ''
 });
 
-
 const handleSearch = async () => {
   try {
     bookStore.pagination.currentPage = 1; // Reset to first page for new searches
@@ -145,18 +148,26 @@ const handleSearch = async () => {
 
 // Load more books
 const loadMore = async (event: any) => {
-  try {
-    if (bookStore.pagination.currentPage >= bookStore.pagination.lastPage) {
-      event.target.complete();
-      return;
-    }
+  console.log('Load more triggered'); // Debugging statement
+  console.log(`Current Page: ${bookStore.pagination.currentPage}, Last Page: ${bookStore.pagination.lastPage}`); // Debugging statement
 
-    const nextPage = bookStore.pagination.currentPage + 1;
+  if (bookStore.pagination.currentPage >= bookStore.pagination.lastPage) {
+    console.log('No more pages to load'); // Debugging statement
+    event.target.complete();
+    return;
+  }
+
+  const nextPage = bookStore.pagination.currentPage + 1;
+  console.log(`Loading page: ${nextPage}`); // Debugging statement
+  try {
     await bookStore.fetchAdminBooks({
       page: nextPage,
       search: filters.value.search,
       category: filters.value.category
     });
+    console.log('Books loaded successfully'); // Debugging statement
+  } catch (error) {
+    console.error('Error loading more books:', error);
   } finally {
     event.target.complete();
   }

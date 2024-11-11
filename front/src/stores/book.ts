@@ -132,6 +132,8 @@ export const useBookStore = defineStore('book', {
         });
         
         this.adminBooks = response.data.data;
+        this.pagination.currentPage = response.data.current_page; // Update current page
+        this.pagination.lastPage = response.data.last_page; // Update last page
         return response.data;
       } catch (error) {
         this.error = error;

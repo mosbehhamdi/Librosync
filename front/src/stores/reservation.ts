@@ -1,6 +1,25 @@
 import { defineStore } from 'pinia';
 import { api } from '@/api';
 
+// Define the Reservation interface
+interface Reservation {
+  id: number; // Unique identifier for the reservation
+  user_id: number; // ID of the user who made the reservation
+  book_id: number; // ID of the book being reserved
+  status: string; // Status of the reservation (e.g., pending, accepted, delivered, cancelled)
+  queue_position?: number; // Optional position in the queue
+  expires_at?: string; // Optional expiration date for the reservation
+  book?: {
+    id: number; // ID of the book
+    title: string; // Title of the book
+    available_copies: number; // Number of available copies
+  };
+  user?: {
+    id: number; // ID of the user
+    name: string; // Name of the user
+  };
+}
+
 export const useReservationStore = defineStore('reservation', {
   state: () => ({
     history: [],
@@ -9,7 +28,7 @@ export const useReservationStore = defineStore('reservation', {
     error: null,
     expiredReservations: [],
     reservations: [] as any[],
-    adminRreservations: [],
+    adminRreservations: [] as Reservation[], // Use the Reservation interface
     pagination: {
       currentPage: 1,
       lastPage: 1,
@@ -18,7 +37,7 @@ export const useReservationStore = defineStore('reservation', {
   }),
   getters: {
     activeReservations: (state) => 
-      state.adminRreservations.filter(r => ['pending', 'ready','accepted'].includes(r.status)),
+      state.adminRreservations.filter(r => ['pending', 'ready', 'accepted'].includes(r.status)),
     
     pastReservations: (state) => 
       state.adminRreservations.filter(r => ['delivered', 'cancelled'].includes(r.status))
@@ -37,11 +56,10 @@ export const useReservationStore = defineStore('reservation', {
         const response = await api.get('/reservations', {
           params: { 
             page: this.pagination.currentPage,
-            per_page: 100
+            per_page: 15
           }
         });
         this.adminRreservations = response.data.data;
-        console.log('Fetched Reservations:', this.adminRreservations);
         this.pagination.total = response.data.total;
         this.pagination.lastPage = response.data.last_page;
       } catch (error) {

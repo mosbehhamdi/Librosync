@@ -1,6 +1,6 @@
 <template>
   <admin-layout>
-    <ion-content class="ion-padding">
+    <ion-content class="ion-padding overflow-y-auto">
       <!-- Header with Title -->
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-center">Reservations Management</h1>
@@ -23,7 +23,8 @@
         <!-- Active Reservations Tab -->
         <ion-tab tab="active">
           <!-- Loading State -->
-          <div v-if="reservationStore.isLoading" class="flex justify-center items-center h-full">
+          <div v-if="reservationStore.isLoading && activeReservations.length === 0"
+            class="flex justify-center items-center h-full">
             <ion-spinner></ion-spinner>
           </div>
 
@@ -71,8 +72,7 @@
           <!-- Infinite Scroll for Active Reservations -->
           <ion-infinite-scroll
             v-if="!reservationStore.isLoading && reservationStore.pagination.currentPage < reservationStore.pagination.lastPage"
-            @ionInfinite="loadMoreReservations"
-          >
+            @ionInfinite="loadMoreReservations">
             <ion-infinite-scroll-content></ion-infinite-scroll-content>
           </ion-infinite-scroll>
         </ion-tab>
@@ -97,6 +97,13 @@
               </ion-item>
             </ion-item-group>
           </ion-list>
+
+          <!-- Infinite Scroll for Past Reservations -->
+          <ion-infinite-scroll
+            v-if="!reservationStore.isLoading && reservationStore.pagination.currentPage < reservationStore.pagination.lastPage"
+            @ionInfinite="loadMorePastReservations">
+            <ion-infinite-scroll-content></ion-infinite-scroll-content>
+          </ion-infinite-scroll>
         </ion-tab>
 
         <!-- Reservation History Tab -->
@@ -109,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, computed, ref } from 'vue';
+import { onMounted, computed } from 'vue';
 import AdminLayout from '@/components/admin/AdminLayout.vue';
 import { useReservationStore } from '@/stores/reservation';
 import { alertController } from '@ionic/vue';
@@ -120,7 +127,9 @@ import {
 } from '@ionic/vue';
 import { format } from 'date-fns';
 import ReservationHistoryPage from './ReservationHistoryPage.vue';
-
+import {
+  IonInfiniteScroll, IonInfiniteScrollContent
+} from '@ionic/vue';
 const reservationStore = useReservationStore();
 
 const getStatusColor = (status: string) => {
@@ -194,18 +203,31 @@ const activeReservations = computed(() => {
   }));
 });
 
-
-
 const loadMoreReservations = async (event: any) => {
   if (reservationStore.pagination.currentPage >= reservationStore.pagination.lastPage) {
     event.target.complete(); // Complete the event if on the last page
-    return; 
+    return;
   }
 
   try {
     await reservationStore.fetchMoreReservations(); // Fetch more reservations
   } catch (error) {
     console.error('Error loading more reservations:', error);
+  } finally {
+    event.target.complete(); // Complete the infinite scroll event
+  }
+};
+
+const loadMorePastReservations = async (event: any) => {
+  if (reservationStore.pagination.currentPage >= reservationStore.pagination.lastPage) {
+    event.target.complete(); // Complete the event if on the last page
+    return;
+  }
+
+  try {
+    await reservationStore.fetchMorePastReservations(); // Fetch more past reservations
+  } catch (error) {
+    console.error('Error loading more past reservations:', error);
   } finally {
     event.target.complete(); // Complete the infinite scroll event
   }
