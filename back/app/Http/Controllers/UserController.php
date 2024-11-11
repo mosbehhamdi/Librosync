@@ -19,7 +19,7 @@ class UserController extends Controller
             $user = auth()->user();
             $user->load(['reservations' => function ($query) {
                 $query->with('book')
-                    ->whereIn('status', ['pending', 'ready'])
+                    ->whereIn('status', ['pending', 'ready','accepted'])
                     ->orderBy('created_at', 'desc');
             }]);
 
@@ -125,4 +125,4 @@ class UserController extends Controller
             ], 500);
         }
     }
-} 
+}

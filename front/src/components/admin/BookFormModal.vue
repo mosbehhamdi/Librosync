@@ -237,7 +237,7 @@ import {
 } from '@ionic/vue';
 import { addOutline, removeCircleOutline } from 'ionicons/icons';
 import { deweyCategories } from '@/constants/dewey';
-import { useAdminStore } from '@/stores/admin';
+import { useBookStore } from '@/stores/book';
 import { ref, watch } from 'vue';
 
 const props = defineProps({
@@ -272,7 +272,7 @@ const formData = ref({
 
 const errors = ref({});
 
-const adminStore = useAdminStore();
+const bookStore = useBookStore();
 
 const presentToast = async (message, color = 'primary') => {
   const toast = await toastController.create({
@@ -289,9 +289,9 @@ const handleSubmit = async () => {
   errors.value = {}; // Reset errors
   try {
     if (props.book) {
-      await adminStore.updateBook(props.book.id, formData.value);
+      await bookStore.adminBookAction('update', formData.value, props.book.id);
     } else {
-      await adminStore.createBook(formData.value);
+      await bookStore.adminBookAction('create', formData.value);
     }
     emit('saved', formData.value);
     closeModal();

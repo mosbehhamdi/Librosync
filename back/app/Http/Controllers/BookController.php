@@ -9,86 +9,56 @@ use Illuminate\Http\JsonResponse;
 
 class BookController extends Controller
 {
-public function index(Request $request): JsonResponse
-{
-try {
-$books = Book::with('reservations')
-->when($request->search, function($query, $search) {
-$query->search($search);
-})
-->orderBy('title')
-->paginate($request->per_page ?? 10);
+    public function index(Request $request): JsonResponse
+    {
+        $query = Book::with('reservations');
 
-$books->getCollection()->transform(function ($book) {
-$book->user_reservation = $book->reservations
-    ->where('user_id', auth()->id())
-    ->whereIn('status', ['pending', 'ready'])
-    ->first();
-$book->waiting_time = $book->getWaitingTimeAttribute();
-unset($book->reservations);
-return $book;
-});
+        try {
+            // Apply search filter
+            if ($search = $request->input('search')) {
+                $query->where('title', 'like', "%{$search}%")
+                      ->orWhereJsonContains('authors', $search)
+                      ->orWhere('publisher', 'like', "%{$search}%");
+            }
 
-// Debug log
-\Log::info('Query results:', [
-'count' => $books->count(),
-'total' => $books->total()
-]);
+            // Apply category filter
+            if ($category = $request->input('category')) {
+                $query->where('dewey_category', substr($category, 0, 3));
+            }
+            // Determine sorting based on user role
+            $orderBy = auth()->user()->isAdmin() ? 'created_at' : 'title';
+            $books = $query->orderBy($orderBy, 'desc')
+                           ->paginate($request->input('per_page', 10));
 
-return response()->json($books);
-} catch (\Exception $e) {
-\Log::error('Book search error:', [
-'message' => $e->getMessage(),
-'trace' => $e->getTraceAsString()
-]);
-return response()->json([
-'message' => 'Error fetching books',
-'error' => $e->getMessage()
-], 500);
-}
-}
+            // Additional transformation for non-admin users
+            if (!auth()->user()->isAdmin()) {
+                $books->getCollection()->transform(function ($book) {
+                    $book->user_reservation = $book->reservations
+                        ->where('user_id', auth()->id())
+                        ->whereIn('status', ['pending', 'ready','accepted'])
+                        ->first();
+                    $book->waiting_time = $book->getWaitingTimeAttribute();
+                    unset($book->reservations);
+                    return $book;
+                });
+            }
 
-public function adminIndex(Request $request): JsonResponse
-{
-try {
-$query = Book::with(['reservations']);
-// Handle search
-if ($request->has('search') && !empty($request->search)) {
-$searchTerm = $request->search;
-$query->where(function($q) use ($searchTerm) {
-$q->where('title', 'like', "%{$searchTerm}%")
-->orWhereJsonContains('authors', $searchTerm)
-->orWhere('publisher', 'like', "%{$searchTerm}%");
-});
-}
-// Handle category filter - exact match for dewey_category
-if ($request->has('category') && !empty($request->category)) {
-$query->where('dewey_category', substr($request->category, 0, 3));
-}
-\Log::info('Query debug:', [
-'SQL' => $query->toSql(),
-'Bindings' => $query->getBindings(),
-'Category' => $request->category
-]);
-$books = $query->orderBy('created_at', 'desc')
-->paginate($request->per_page ?? 10);
-return response()->json([
-'data' => $books->items(),
-'current_page' => $books->currentPage(),
-'last_page' => $books->lastPage(),
-'total' => $books->total()
-]);
-} catch (\Exception $e) {
-\Log::error('Error in adminIndex:', [
-'message' => $e->getMessage(),
-'trace' => $e->getTraceAsString()
-]);
-return response()->json([
-'message' => 'Error fetching books',
-'error' => $e->getMessage()
-], 500);
-}
-}
+            return response()->json([
+                'data' => $books->items(),
+                'current_page' => $books->currentPage(),
+                'last_page' => $books->lastPage(),
+                'total' => $books->total()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching books',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 
 public function store(BookRequest $request)
 {
@@ -174,7 +144,7 @@ public function refreshBook(Book $book): JsonResponse
         $book->load('reservations');
         $book->user_reservation = $book->reservations
             ->where('user_id', auth()->id())
-            ->whereIn('status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready','accepted'])
             ->first();
         $book->waiting_time = $book->getWaitingTimeAttribute();
         unset($book->reservations);

@@ -34,7 +34,7 @@ class ReservationSeeder extends Seeder
 
     private function getRandomStatus(): string
     {
-        return collect(['pending', 'ready', 'delivered', 'cancelled'])
+        return collect(['pending', 'ready','accepted', 'delivered', 'cancelled'])
             ->random();
     }
 }

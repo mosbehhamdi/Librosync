@@ -141,23 +141,22 @@
   error.value = null;
   
   try {
- // await reservationStore.fetchUserReservations();
-  const response = await bookStore.searchBooks({
-  query: searchQuery.value,
-  category: filters.value.category,
-  page: currentPage.value
-  });
-  if (response?.data) {
-  books.value = response.data;
-  hasMorePages.value = response.current_page < response.last_page;
-  } else {
-  books.value = [];
-  hasMorePages.value = false;
-  }
+    const response = await bookStore.searchBooks({
+      query: searchQuery.value,
+      category: filters.value.category,
+      page: currentPage.value
+    });
+    if (response?.data) {
+      books.value = response.data;
+      hasMorePages.value = response.current_page < response.last_page;
+    } else {
+      books.value = [];
+      hasMorePages.value = false;
+    }
   } catch (err) {
-  console.error('Search error:', err);
-  error.value = 'Error searching books. Please try again.';
-  books.value = [];
+    console.error('Search error:', err);
+    error.value = 'Error searching books. Please try again.';
+    books.value = [];
   }
   };
   
@@ -170,7 +169,7 @@
   event.target.complete();
   return;
   }
-  
+
   try {
   currentPage.value++;
   const response = await bookStore.searchBooks({

@@ -49,8 +49,8 @@
       </ion-card>
 
       <!-- Books List -->
-      <ion-list v-if="adminStore.books.length">
-        <ion-item v-for="book in adminStore.books" :key="book.id" class="mb-2">
+      <ion-list v-if="bookStore.adminBooks.length">
+        <ion-item v-for="book in bookStore.adminBooks" :key="book.id" class="mb-2">
           <ion-label>
             <h2 class="text-lg font-semibold">{{ book.title }}</h2>
             <p class="text-sm text-gray-600">
@@ -81,13 +81,13 @@
       </ion-list>
 
       <!-- Empty state -->
-      <ion-text v-else-if="!adminStore.isLoading" color="medium" class="text-center p-4">
-        <p>{{ adminStore.error || 'No books found' }}</p>
+      <ion-text v-else-if="!bookStore.isLoading" color="medium" class="text-center p-4">
+        <p>{{ bookStore.error || 'No books found' }}</p>
       </ion-text>
 
       <!-- Pagination -->
       <ion-infinite-scroll
-        v-if="adminStore.pagination.currentPage < adminStore.pagination.lastPage"
+        v-if="bookStore.pagination.currentPage < bookStore.pagination.lastPage"
         @ionInfinite="loadMore($event)"
       >
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
@@ -108,7 +108,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import AdminLayout from '@/components/admin/AdminLayout.vue';
 import BookFormModal from '@/components/admin/BookFormModal.vue';
-import { useAdminStore } from '@/stores/admin';
+import { useBookStore } from '@/stores/book';
 import { deweyCategories } from '@/constants/dewey';
 import { 
   IonContent, IonButton, IonIcon, IonList, IonItem, IonLabel,
@@ -120,7 +120,7 @@ import {
   libraryOutline 
 } from 'ionicons/icons';
 
-const adminStore = useAdminStore();
+const bookStore = useBookStore();
 const showFormModal = ref(false);
 const selectedBook = ref(null);
 
@@ -129,13 +129,11 @@ const filters = ref({
   category: ''
 });
 
-const debug = ref(null);
 
-// Define handleSearch before using it in debouncedSearch
 const handleSearch = async () => {
   try {
-    adminStore.pagination.currentPage = 1; // Reset to first page for new searches
-    await adminStore.fetchBooks({
+    bookStore.pagination.currentPage = 1; // Reset to first page for new searches
+    await bookStore.fetchAdminBooks({
       search: filters.value.search,
       category: filters.value.category,
       page: 1
@@ -148,13 +146,13 @@ const handleSearch = async () => {
 // Load more books
 const loadMore = async (event: any) => {
   try {
-    if (adminStore.pagination.currentPage >= adminStore.pagination.lastPage) {
+    if (bookStore.pagination.currentPage >= bookStore.pagination.lastPage) {
       event.target.complete();
       return;
     }
 
-    const nextPage = adminStore.pagination.currentPage + 1;
-    await adminStore.fetchBooks({
+    const nextPage = bookStore.pagination.currentPage + 1;
+    await bookStore.fetchAdminBooks({
       page: nextPage,
       search: filters.value.search,
       category: filters.value.category
@@ -166,7 +164,7 @@ const loadMore = async (event: any) => {
 
 // Initialize
 onMounted(async () => {
-  await adminStore.fetchBooks();
+  await bookStore.fetchAdminBooks();
 });
 
 const debouncedSearch = useDebounceFn(handleSearch, 300);
@@ -204,9 +202,9 @@ const openEditModal = (book) => {
 const handleBookSaved = async (bookData) => {
   try {
     if (selectedBook.value) {
-      await adminStore.updateBook(selectedBook.value.id, bookData);
+      await bookStore.adminBookAction('update', bookData, selectedBook.value.id);
     } else {
-      await adminStore.createBook(bookData);
+      await bookStore.adminBookAction('create', bookData);
     }
     showFormModal.value = false;
   } catch (error) {
@@ -235,7 +233,7 @@ const confirmDelete = async (book) => {
 
 const deleteBook = async (id: number) => {
   try {
-    await adminStore.deleteBook(id);
+    await bookStore.adminBookAction('delete', undefined, id);
   } catch (error) {
     console.error('Error deleting book:', error);
   }

@@ -9,78 +9,44 @@ export const useReservationStore = defineStore('reservation', {
     error: null,
     expiredReservations: [],
     reservations: [] as any[],
-
+    adminRreservations: [],
+    pagination: {
+      currentPage: 1,
+      lastPage: 1,
+      total: 0
+    },
   }),
   getters: {
     activeReservations: (state) => 
-      state.reservations.filter(r => ['pending', 'ready'].includes(r.status)),
+      state.adminRreservations.filter(r => ['pending', 'ready','accepted'].includes(r.status)),
     
     pastReservations: (state) => 
-      state.reservations.filter(r => ['delivered', 'cancelled'].includes(r.status))
+      state.adminRreservations.filter(r => ['delivered', 'cancelled'].includes(r.status))
   },
 
   actions: {
     async fetchUserReservations() {
-      this.isLoading = true;
-      try {
+      return this.handleApiCall(async () => {
         const response = await api.get('/reservations');
         this.reservations = response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch reservations';
-        console.error('Error fetching user reservations:', this.error);
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
+      });
     },
-    async fetchAllReservations() {
+    async fetchAdminReservations() {
       this.isLoading = true;
       try {
-        const response = await api.get('/admin/reservations');
-        this.reservations = response.data;
-        return response.data;
+        const response = await api.get('/reservations', {
+          params: { 
+            page: this.pagination.currentPage,
+            per_page: 100
+          }
+        });
+        this.adminRreservations = response.data.data;
+        console.log('Fetched Reservations:', this.adminRreservations);
+        this.pagination.total = response.data.total;
+        this.pagination.lastPage = response.data.last_page;
       } catch (error) {
         this.error = error;
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    async updateReservationStatus(id: number, status: string) {
-      this.isLoading = true;
-      try {
-        const response = await api.put(`/admin/reservations/${id}/status`, { status });
-        const reservation = this.reservations.find(r => r.id === id);
-        if (reservation) {
-          reservation.status = status;
-        }
-        return response.data;
-      } catch (error) {
-        this.error = error;
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    async fetchReservationHistory() {
-      this.isLoading = true;
-      try {
-        const response = await api.get('/admin/reservations/history');
-        this.reservationHistory = response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch reservation history';
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    async fetchReservationStatistics() {
-      this.isLoading = true;
-      try {
-        const response = await api.get('/admin/reservations/statistics');
-        this.statistics = response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch reservation statistics';
+        console.error('Error fetching reservations:', error);
         throw error;
       } finally {
         this.isLoading = false;
@@ -88,8 +54,7 @@ export const useReservationStore = defineStore('reservation', {
     },
 
     async adminReservationAction(action: 'cancel' | 'accept' | 'deliver', reservationId: number) {
-      this.isLoading = true;
-      try {
+      return this.handleApiCall(async () => {
         let response;
         if (action === 'cancel') {
           response = await api.post(`/admin/reservations/${reservationId}/cancel`);
@@ -100,134 +65,91 @@ export const useReservationStore = defineStore('reservation', {
         }
         
         const updatedReservation = response.data;
-        const reservationIndex = this.reservations.findIndex(r => r.id === reservationId);
+        const reservationIndex = this.adminRreservations.findIndex(r => r.id === reservationId);
         if (reservationIndex !== -1) {
-          this.reservations[reservationIndex] = updatedReservation;
+          this.adminRreservations[reservationIndex] = updatedReservation;
         }
         return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || `Failed to ${action} reservation`;
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
+      });
     },
 
-    async reserveBook(bookId: number) {
-      this.isLoading = true;
-      console.log(`Reserving book with ID: ${bookId}...`);
-      try {
-        const response = await api.post(`/books/${bookId}/reserve`);
-        console.log('Book reserved successfully:', response.data);
+    async userReservationAction(action: 'cancel' | 'reserve' | 'joinWaitlist', reservationId?: number, bookId?: number) {
+      return this.handleApiCall(async () => {
+        let response;
+        if (action === 'cancel' && reservationId) {
+          response = await api.post(`/reservations/${reservationId}/cancel`);
+        } else if (action === 'reserve' && bookId) {
+          response = await api.post(`/books/${bookId}/reserve`);
+        } else if (action === 'joinWaitlist' && bookId) {
+          response = await api.post(`/books/${bookId}/waitlist`);
+        }
         return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to reserve book';
-        console.error('Error reserving book:', this.error);
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
+      });
     },
 
-    async cancelReservation(reservationId: number) {
-      console.log(`Cancelling reservation with ID: ${reservationId}...`);
-      try {
-        const response = await api.post(`/reservations/${reservationId}/cancel`);
-        console.log('Reservation cancelled successfully:', response.data);
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to cancel reservation';
-        console.error('Error cancelling reservation:', this.error);
-        throw error;
-      }
-    },
-
-    async joinWaitlist(bookId: number) {
-      this.isLoading = true;
-      console.log(`Joining waitlist for book with ID: ${bookId}...`);
-      try {
-        const response = await api.post(`/books/${bookId}/waitlist`);
-        console.log('Joined waitlist successfully:', response.data);
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to join waitlist';
-        console.error('Error joining waitlist:', this.error);
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    async getReservationHistory() {
-      this.isLoading = true;
-      console.log('Fetching reservation history...');
-      try {
+    async fetchReservationHistory() {
+      return this.handleApiCall(async () => {
         const response = await api.get('/reservations/history');
         this.history = response.data;
-        console.log('Reservation history fetched successfully:', this.history);
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch history';
-        console.error('Error fetching reservation history:', this.error);
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
+      });
     },
 
-    async getReservationStatistics() {
-      console.log('Fetching reservation statistics...');
-      try {
-        const response = await api.get('/reservations/statistics');
+    async fetchReservationStatistics() {
+      return this.handleApiCall(async () => {
+        const response = await api.get('/admin/reservations/statistics');
         this.statistics = response.data;
-        console.log('Reservation statistics fetched successfully:', this.statistics);
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch statistics';
-        console.error('Error fetching reservation statistics:', this.error);
-        throw error;
-      }
+      });
     },
-
 
     async fetchExpiredReservations() {
-      this.isLoading = true;
-      try {
+      return this.handleApiCall(async () => {
         const response = await api.get('/reservations/expired');
         this.expiredReservations = response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch expired reservations';
-        console.error('Error fetching expired reservations:', this.error);
-        throw error;
-      } finally {
-        this.isLoading = false;
-      }
+      });
     },
 
     async getQueuePosition(bookId: number) {
-      console.log(`Getting queue position for book with ID: ${bookId}...`);
-      try {
+      return this.handleApiCall(async () => {
         const response = await api.get(`/books/${bookId}/queue-position`);
-        console.log('Queue position retrieved successfully:', response.data.queue_position);
         return response.data.queue_position;
+      });
+    },
+
+    async handleApiCall(apiCall: () => Promise<any>) {
+      this.isLoading = true;
+      this.error = null; // Reset error before the call
+      try {
+        return await apiCall();
       } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to get queue position';
-        console.error('Error getting queue position:', this.error);
+        this.error = error.response?.data?.message || 'An error occurred';
+        console.error(this.error);
         throw error;
+      } finally {
+        this.isLoading = false;
       }
     },
 
-   /* async fetchUserReservationByBookId(bookId: number) {
-      console.log(`Fetching reservation for book with ID: ${bookId}...`);
+    async fetchMoreReservations() {
+      if (this.pagination.currentPage >= this.pagination.lastPage) return; // Prevent loading if on the last page
+
+      this.isLoading = true;
       try {
-        const response = await api.get(`/reservations/book/${bookId}`);
-        console.log('Reservation fetched successfully:', response.data);
-        return response.data;
-      } catch (error: any) {
-        this.error = error.response?.data?.message || 'Failed to fetch reservation';
-        console.error('Error fetching reservation:', this.error);
+        this.pagination.currentPage++; // Increment the current page
+        const response = await api.get('/reservations', {
+          params: { 
+            page: this.pagination.currentPage,
+            per_page: 15 // Ensure this matches the API's expected per_page
+          }
+        });
+        this.adminRreservations.push(...response.data.data); // Append new reservations
+        this.pagination.total = response.data.total; // Update total count
+        this.pagination.lastPage = response.data.last_page; // Update last page number
+      } catch (error) {
+        this.error = error;
         throw error;
+      } finally {
+        this.isLoading = false;
       }
-    } */
+    },
   }
-}); 
+});

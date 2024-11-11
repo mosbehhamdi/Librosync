@@ -1,9 +1,9 @@
 <template>
     <ion-content class="ion-padding">
       <ion-list>
-        <ion-item v-for="reservation in reservationStore.reservationHistory" :key="reservation.id">
+        <ion-item v-for="reservation in reservationStore.history" :key="reservation.id">
           <ion-label>
-            <h2 class="text-lg font-semibold">{{ reservation.book.title }}</h2>
+            <h2 class="text-lg font-semibold">{{ reservation.book?.title }}</h2>
             <p>Reserved by: {{ reservation.user.name }}</p>
             <p>
               <ion-badge :color="getStatusColor(reservation.status)">

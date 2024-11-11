@@ -13,7 +13,7 @@ class Reservation extends Model
     protected $fillable = [
         'user_id',
         'book_id',
-        'status', // 'pending', 'ready', 'delivered', 'cancelled'
+        'status', // 'pending', 'ready','accepted', 'delivered', 'cancelled'
         'queue_position',
         'notification_sent',
         'expires_at'

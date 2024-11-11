@@ -35,7 +35,7 @@ import { format } from 'date-fns';
 const reservationStore = useReservationStore();
 
 onMounted(() => {
-  reservationStore.getReservationHistory();
+  reservationStore.fetchReservationHistory();
 });
 
 const getStatusColor = (status: string) => {

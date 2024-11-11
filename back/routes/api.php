@@ -1,60 +1,37 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Auth\PasswordResetController;
-use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\Admin\AdminReservationController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/forgot-password', [PasswordResetController::class, 'forgotPassword']);
-Route::post('/auth/verify-reset-code', [PasswordResetController::class, 'verifyCode']);
-Route::post('/auth/reset-password', [PasswordResetController::class, 'reset']);
 
-// Email verification routes
+require 'auth.php';
+
+
 Route::middleware('auth:api')->group(function () {
-    Route::post('/email/verify', [VerificationController::class, 'verify']);
-    Route::post('/email/resend', [VerificationController::class, 'resend']);
-});
-
-// User routes (authenticated)
-Route::middleware('auth:api')->group(function () {
-    // Auth
-    Route::get('/auth/user', [AuthController::class, 'user']);
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-
     // Books
     Route::get('/books', [BookController::class, 'index']);
+
     Route::get('/books/category/{category}', [BookController::class, 'getByCategory']);
     Route::get('/books/{book}', [BookController::class, 'refreshBook']);
     Route::post('/books/{book}/reserve', [ReservationController::class, 'store']);
-   // Route::get('/reservations/book/{book}', [ReservationController::class, 'getReservationByBookId']);
 
     // User reservations
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::get('/reservations/expired', [ReservationController::class, 'handleExpiredReservations']);
     Route::get('/reservations/history', [ReservationController::class, 'history']);
     Route::get('/books/{book}/queue-position', [ReservationController::class, 'getQueuePosition']);
-
     Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
-    // Waitlist routes
+
+    //admin reservations
+    Route::post('/admin/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
+    Route::get('/admin/reservations/statistics', [ReservationController::class, 'reservationStatistics']);
+    Route::post('/admin/reservations/{reservation}/accept', [ReservationController::class, 'accept']);
+    Route::post('/admin/reservations/{reservation}/deliver', [ReservationController::class, 'deliver']);
     Route::middleware('auth:api')->group(function () {
         Route::post('/books/{book}/waitlist', [ReservationController::class, 'joinWaitlist']);
     });
-
-
-
-    // Profile
-    Route::get('/profile', [UserController::class, 'show']);
-    Route::put('/profile', [UserController::class, 'update']);
-    Route::put('/profile/password', [UserController::class, 'updatePassword']);
 });
 
 // Admin routes
@@ -67,19 +44,11 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser']);
 
     // Books management
-    Route::get('/admin/books', [BookController::class, 'adminIndex']);
     Route::post('/admin/books', [BookController::class, 'store']);
     Route::get('/admin/books/{book}', [BookController::class, 'show']);
     Route::put('/admin/books/{book}', [BookController::class, 'update']);
     Route::delete('/admin/books/{book}', [BookController::class, 'destroy']);
     Route::put('/admin/books/{book}/copies', [BookController::class, 'updateCopies']);
 
-    // Reservations management
-    Route::get('/admin/reservations', [AdminReservationController::class, 'index']);
-    Route::post('/admin/reservations/{reservation}/cancel', [AdminReservationController::class, 'cancel']);
-    Route::get('/admin/reservations/statistics', [AdminReservationController::class, 'reservationStatistics']);
-    // Statistics
-    Route::get('/admin/reservations/history', [AdminReservationController::class, 'history']);
-    Route::post('/admin/reservations/{reservation}/accept', [AdminReservationController::class, 'accept']);
-    Route::post('/admin/reservations/{reservation}/deliver', [AdminReservationController::class, 'deliver']);
+
 });

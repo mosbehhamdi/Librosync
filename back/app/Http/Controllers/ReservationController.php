@@ -5,36 +5,73 @@ namespace App\Http\Controllers;
 use App\Models\Reservation;
 use App\Models\Book;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class ReservationController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $reservations = auth()->user()->reservations()
-            ->with(['book', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = auth()->user()->isAdmin()
+            ? Reservation::query()->with(['user', 'book'])
+            : auth()->user()->reservations()->with(['book', 'user']);
 
-        return response()->json($reservations);
+        $reservations = $query
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'data' => $reservations->items(),
+            'current_page' => $reservations->currentPage(),
+            'last_page' => $reservations->lastPage(),
+            'total' => $reservations->total()
+        ]);
     }
 
     public function cancel(Reservation $reservation): JsonResponse
     {
-        if ($reservation->user_id !== auth()->id()) {
+        // If the user is an admin, skip the user_id check
+        if (!auth()->user()->isAdmin() && $reservation->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $reservation->status = 'cancelled';
         $reservation->save();
 
+        if (auth()->user()->isAdmin()) {
+            // Increment available copies
+            $reservation->book->increment('available_copies');
+
+            // Update queue positions
+            $this->updateQueuePositions($reservation->book_id);
+            return response()->json(['message' => 'Reservation cancelled successfully', 'reservation' => $reservation]);
+        }
+
         return response()->json(['message' => 'Reservation cancelled successfully']);
     }
+
+
+
+
+    private function updateQueuePositions($bookId)
+    {
+        $reservations = Reservation::where('book_id', $bookId)
+            ->where('status', 'pending')
+            ->orderBy('queue_position')
+            ->get();
+        foreach ($reservations as $index => $reservation) {
+            $reservation->queue_position = $index + 1;
+            $reservation->save();
+        }
+    }
+
 
     private function hasActiveReservation(Book $book): bool
     {
         return $book->reservations()
             ->where('user_id', auth()->id())
-            ->whereIn('status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready','accepted'])
             ->exists();
     }
 
@@ -60,7 +97,6 @@ class ReservationController extends Controller
                     : 'Added to waitlist. We\'ll notify you when the book is available.',
                 'reservation' => $reservation
             ], 201);
-
         } catch (\Exception $e) {
             \Log::error('Reservation creation failed:', [
                 'error' => $e->getMessage(),
@@ -132,7 +168,6 @@ class ReservationController extends Controller
                 'message' => 'Added to waitlist. We\'ll notify you when the book is available.',
                 'reservation' => $reservation
             ], 201);
-
         } catch (\Exception $e) {
             \Log::error('Failed to join waitlist:', [
                 'error' => $e->getMessage(),
@@ -179,32 +214,82 @@ class ReservationController extends Controller
 
     public function history(): JsonResponse
     {
-        $reservations = auth()->user()->reservations()
-            ->with(['book'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
+        if (auth()->user()->isAdmin()) {
+            $reservations = Reservation::with(['user', 'book'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $reservations = auth()->user()->reservations()
+                ->with(['book'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
         return response()->json($reservations);
     }
 
-  /*  public function getReservationByBookId(Book $book): JsonResponse
+    public function reservationStatistics(): JsonResponse
     {
-        try {
-            $reservation = $book->reservations()
-                ->where('user_id', auth()->id())
-                ->first();
+        $totalReservations = Reservation::count();
+        $activeReservations = Reservation::where('status', 'active')->count();
+        $deliveredReservations = Reservation::where('status', 'delivered')->count();
+        $cancelledReservations = Reservation::where('status', 'cancelled')->count();
 
-            if (!$reservation) {
-                return response()->json(['message' => 'No reservation found for this book'], 404);
+        $statistics = [
+            'total' => $totalReservations,
+            'active' => $activeReservations,
+            'delivered' => $deliveredReservations,
+            'cancelled' => $cancelledReservations,
+        ];
+
+        return response()->json($statistics);
+    }
+
+    public function accept(Reservation $reservation): JsonResponse
+    {
+        // Ensure the user is an admin
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Use a transaction to ensure atomicity
+        $updatedReservation = DB::transaction(function () use ($reservation) {
+            // Update available copies if immediate reservation
+            if ($reservation->book->available_copies > 0) {
+                $reservation->book->decrement('available_copies');
             }
 
-            return response()->json($reservation);
-        } catch (\Exception $e) {
-            \Log::error('Error fetching reservation by book ID:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['message' => 'Error fetching reservation'], 500);
+            // Update the reservation status to 'accepted'
+            $reservation->status = 'accepted';
+            $reservation->save();
+
+            // Check for the next pending reservation
+            $nextReservation = $reservation->book->reservations()
+                ->where('status', 'pending')
+                ->orderBy('queue_position')
+                ->first();
+
+            if ($nextReservation) {
+                $nextReservation->status = 'ready';
+                $nextReservation->save();
+            }
+
+            return $reservation; // Return the updated reservation
+        });
+
+        return response()->json(['message' => 'Reservation accepted successfully', 'reservation' => $updatedReservation]);
+    }
+
+    public function deliver(Reservation $reservation): JsonResponse
+    {
+        // Ensure the user is an admin
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
-    } */
+
+        // Update the reservation status to 'delivered'
+        $reservation->status = 'delivered';
+        $reservation->save();
+
+        return response()->json(['message' => 'Reservation marked as delivered successfully', 'reservation' => $reservation]);
+    }
 }

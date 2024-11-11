@@ -52,7 +52,7 @@ class Book extends Model
     public function activeReservations()
     {
         return $this->reservations()
-            ->whereIn('status', ['pending', 'ready'])
+            ->whereIn('status', ['pending', 'ready','accepted'])
             ->orderBy('queue_position');
     }
 

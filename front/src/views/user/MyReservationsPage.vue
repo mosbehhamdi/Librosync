@@ -82,13 +82,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useReservationStore } from '@/stores/reservation';
-import { 
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonList, IonItem, IonLabel, IonButton, IonBadge,
-  IonItemGroup, IonItemDivider, alertController 
-} from '@ionic/vue';
+import { alertController } from '@ionic/vue';
 import { format } from 'date-fns';
 
 const reservationStore = useReservationStore();
@@ -119,7 +115,7 @@ const getStatusText = (status: string) => {
   const texts = {
     pending: 'Waiting',
     ready: 'Ready for Pickup',
-    delivered: 'delivered',
+    delivered: 'Delivered',
     cancelled: 'Cancelled'
   };
   return texts[status] || status;
@@ -150,7 +146,7 @@ const confirmCancel = async (reservation) => {
 
 const cancelReservation = async (id: number) => {
   try {
-    await reservationStore.cancelReservation(id);
+    await reservationStore.userReservationAction('cancel', id);
   } catch (error) {
     console.error('Error cancelling reservation:', error);
   }

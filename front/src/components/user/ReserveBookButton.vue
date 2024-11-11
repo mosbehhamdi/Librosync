@@ -3,7 +3,7 @@
     <ion-button
       :disabled="isLoading"
       :color="reservationButton.color"
-      @click="reservationButton.clickEvent"
+      @click="handleReservationAction(reservationButton.action)"
     >
       <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
       <template v-else>
@@ -24,11 +24,10 @@ import { useBookStore } from '@/stores/book';
 import { toastController } from '@ionic/vue';
 import { bookmarkOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
-const props = defineProps<{
+const { bookId, availableCopies, existingReservation } = defineProps<{
   bookId: number;
   availableCopies: number;
   existingReservation?: any;
-  waitingTime?: number;
 }>();
 
 // Define emits
@@ -37,42 +36,40 @@ const emit = defineEmits(['reservationUpdated']);
 const reservationStore = useReservationStore();
 const bookStore = useBookStore();
 const isLoading = ref(false);
-const reservation = ref(props.existingReservation);
+const reservation = ref(existingReservation);
 const queuePosition = ref<number | null>(null);
 
-watch(() => props.existingReservation, (newReservation) => {
+watch(() => existingReservation, (newReservation) => {
   reservation.value = newReservation;
 });
 
 onMounted(async () => {
   if (reservation.value?.status === 'pending') {
-    queuePosition.value = await reservationStore.getQueuePosition(props.bookId);
+    queuePosition.value = await reservationStore.getQueuePosition(bookId);
   }
 });
 
 const reservationButton = computed(() => {
+  const buttonConfig = {
+    color: 'warning',
+    icon: timeOutline,
+    text: 'Join Waitlist',
+    action: 'joinWaitlist'
+  };
+
   if (reservation.value) {
-    return {
-      color: 'medium',
-      icon: checkmarkCircleOutline,
-      text: 'Cancel Reservation',
-      clickEvent: handleCancelReservation
-    };
-  } else if (props.availableCopies > 0) {
-    return {
-      color: 'primary',
-      icon: bookmarkOutline,
-      text: 'Reserve Now',
-      clickEvent: handleReserve
-    };
-  } else {
-    return {
-      color: 'warning',
-      icon: timeOutline,
-      text: 'Join Waitlist',
-      clickEvent: handleJoinWaitlist
-    };
+    buttonConfig.color = 'medium';
+    buttonConfig.icon = checkmarkCircleOutline;
+    buttonConfig.text = 'Cancel Reservation';
+    buttonConfig.action = 'cancel';
+  } else if (availableCopies > 0) {
+    buttonConfig.color = 'primary';
+    buttonConfig.icon = bookmarkOutline;
+    buttonConfig.text = 'Reserve Now';
+    buttonConfig.action = 'reserve';
   }
+
+  return buttonConfig;
 });
 
 const showToast = async (message: string, color: string) => {
@@ -85,49 +82,40 @@ const showToast = async (message: string, color: string) => {
 };
 
 const updateReservation = async () => {
- // reservation.value = await reservationStore.fetchUserReservationByBookId(props.bookId);
-  emit('reservationUpdated', props.bookId);
+  emit('reservationUpdated', bookId);
 };
 
-const handleAction = async (action: () => Promise<any>, successMessage: string) => {
+const handleReservationAction = async (actionType: string) => {
   isLoading.value = true;
   try {
-    const response = await action();
+    let response;
+    const successMessage = actionType === 'cancel' 
+      ? 'Reservation cancelled' 
+      : 'Reservation sent';
+
+    if (actionType === 'cancel') {
+      response = await reservationStore.userReservationAction(actionType, reservation.value.id);
+      if (response?.message === 'Reservation cancelled successfully') {
+        reservation.value = null;
+        await bookStore.fetchBooks();
+      }
+    } else {
+      response = await reservationStore.userReservationAction(actionType, undefined, bookId);
+    }
+
     if (response?.reservation) {
       reservation.value = response.reservation;
     }
+    
     await showToast(successMessage, 'success');
     await updateReservation();
   } catch (error: any) {
     console.error(error);
+    await showToast('An error occurred. Please try again.', 'danger'); // Added error feedback
   } finally {
     isLoading.value = false;
   }
 };
-
-const handleReserve = () => handleAction(
-  () => reservationStore.reserveBook(props.bookId),
-  props.availableCopies > 0 
-    ? 'Book reserved successfully! Please pick it up within 48 hours.'
-    : 'Added to waitlist. We\'ll notify you when the book is available.'
-);
-
-const handleJoinWaitlist = () => handleAction(
-  () => reservationStore.joinWaitlist(props.bookId),
-  'Added to waitlist. We\'ll notify you when the book is available.'
-);
-
-const handleCancelReservation = () => handleAction(
-  async () => {
-    const response = await reservationStore.cancelReservation(reservation.value.id);
-    if (response?.message === 'Reservation cancelled successfully') {
-      reservation.value = null;
-      await bookStore.fetchBooks();
-    }
-    return response;
-  },
-  'Reservation cancelled successfully'
-);
 
 // Optional: Debugging watch to log reservation changes
 watch(reservation, () => {
