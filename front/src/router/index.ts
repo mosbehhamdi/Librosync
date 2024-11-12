@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import ExpiredReservationsPage from '@/views/user/ExpiredReservationsPage.vue';
-import AdminReservationHistoryPage from '@/views/admin/ReservationHistoryPage.vue';
 import UserReservationHistoryPage from '@/views/user/ReservationHistoryPage.vue';
 import MyReservationsPage from '@/views/user/MyReservationsPage.vue';
 import AdminReservationsPage from '@/views/admin/ReservationsPage.vue';
@@ -107,12 +106,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/admin/reservations',
     name: 'admin-reservations',
     component: AdminReservationsPage,
-    meta: { requiresAuth: true, requiresAdmin: true }
-  },
-  {
-    path: '/admin/reservations/history',
-    name: 'admin-reservation-history',
-    component: AdminReservationHistoryPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 

@@ -6,131 +6,146 @@
         <h1 class="text-2xl font-bold text-center">Reservations Management</h1>
       </div>
 
-      <!-- Tabs for Active, Past, and History Reservations -->
-      <ion-tabs>
-        <ion-tab-bar slot="top">
-          <ion-tab-button tab="active">
-            <ion-label>Active Reservations</ion-label>
-          </ion-tab-button>
-          <ion-tab-button tab="past">
-            <ion-label>Past Reservations</ion-label>
-          </ion-tab-button>
-          <ion-tab-button tab="history">
-            <ion-label>Reservation History</ion-label>
-          </ion-tab-button>
-        </ion-tab-bar>
+      <!-- Horizontal Menu for Reservation Types -->
+      <ion-segment v-model="selectedSegment" @ionChange="handleSegmentChange">
+        <ion-segment-button value="active">Active Reservations</ion-segment-button>
+        <ion-segment-button value="past">Past Reservations</ion-segment-button>
+        <ion-segment-button value="history">Reservation History</ion-segment-button>
+      </ion-segment>
 
-        <!-- Active Reservations Tab -->
-        <ion-tab tab="active">
-          <!-- Loading State -->
-          <div v-if="reservationStore.isLoading && activeReservations.length === 0"
-            class="flex justify-center items-center h-full">
-            <ion-spinner></ion-spinner>
-          </div>
+      <!-- Search Bar and Filters -->
+      <search-filter :initialSearch="filters.search" label="Search reservations..."
+        @search="handleSearch" />
+      <!-- 
+    filter by status  
+    -->
+      <!-- Conditional Rendering Based on Selected Segment -->
+      <div v-if="selectedSegment === 'active'">
+        <ion-select v-model="selectedStatus" placeholder="Filter by Status" @ionChange="handleStatusChange">
+          <ion-select-option value="pending">Pending</ion-select-option>
+          <ion-select-option value="ready">Ready for Pickup</ion-select-option>
+          <ion-select-option value="accepted">Accepted</ion-select-option>
+        </ion-select>
+        <ion-list>
+          <ion-item-group>
+            <ion-item-divider>
+              <ion-label>Active Reservations</ion-label>
+            </ion-item-divider>
+            <ion-item v-for="reservation in activeReservations" :key="reservation.id">
+              <ion-label>
+                <h2 class="text-lg font-semibold">{{ reservation.book?.title }}</h2>
+                <p>Reserved by: {{ reservation.user ? reservation.user.name : 'Unknown User' }}</p>
+                <p>
+                  <ion-badge :color="getStatusColor(reservation.status)">
+                    {{ getStatusText(reservation.status) }}
+                  </ion-badge>
+                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at)
+                    }}</span>
+                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position
+                    }}</span>
+                </p>
+              </ion-label>
+              <ion-button slot="end" fill="clear" color="danger"
+                @click="showConfirmation('cancel', reservation)">Cancel</ion-button>
+              <ion-button v-if="reservation.status === 'accepted'" slot="end" fill="clear" color="success"
+                @click="showConfirmation('deliver', reservation)">Deliver</ion-button>
+              <ion-button v-else-if="reservation.status === 'ready'" slot="end" fill="clear" color="success"
+                @click="showConfirmation('accept', reservation)">Accept</ion-button>
+            </ion-item>
+          </ion-item-group>
+        </ion-list>
+      </div>
 
-          <!-- Active Reservations List -->
-          <ion-list v-else>
-            <ion-item-group>
-              <ion-item-divider>
-                <ion-label>Active Reservations</ion-label>
-              </ion-item-divider>
-              <ion-item v-for="reservation in activeReservations" :key="reservation.id">
-                <ion-label>
-                  <h2 class="text-lg font-semibold">{{ reservation.book?.title }}</h2>
-                  <p>Reserved by: {{ reservation.user.name }}</p>
-                  <p>
-                    <ion-badge :color="reservation.statusColor">
-                      {{ reservation.statusText }}
-                    </ion-badge>
-                    <span v-if="reservation.expiry" class="ml-2">
-                      Expires: {{ reservation.expiry }}
-                    </span>
-                    <span v-if="reservation.queuePosition" class="ml-2">
-                      Queue Position: {{ reservation.queuePosition }}
-                    </span>
-                  </p>
-                </ion-label>
+      <div v-else-if="selectedSegment === 'past'">
+        <ion-select v-model="selectedStatus" placeholder="Filter by Status" @ionChange="handleStatusChange">
+          <ion-select-option value="delivered">Delivered</ion-select-option>
+          <ion-select-option value="cancelled">Cancelled</ion-select-option>
+        </ion-select>
+        <ion-list>
+          <ion-item-group>
+            <ion-item-divider>
+              <ion-label>Past Reservations</ion-label>
+            </ion-item-divider>
+            <ion-item v-for="reservation in pastReservations" :key="reservation.id">
+              <ion-label>
+                <h2 class="text-lg font-semibold">{{ reservation.book?.title }}</h2>
+                <p>Reserved by: {{ reservation.user ? reservation.user.name : 'Unknown User' }}</p>
+                <p>
+                  <ion-badge :color="getStatusColor(reservation.status)">
+                    {{ getStatusText(reservation.status) }}
+                  </ion-badge>
+                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at)
+                    }}</span>
+                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position
+                    }}</span>
+                </p>
+              </ion-label>
+            </ion-item>
+          </ion-item-group>
+        </ion-list>
+      </div>
 
-                <!-- Cancel Button Always Visible -->
-                <ion-button slot="end" fill="clear" color="danger" @click="showConfirmation('cancel', reservation)">
-                  Cancel
-                </ion-button>
+      <div v-else-if="selectedSegment === 'history'">
+        <ion-list>
+          <ion-item-group>
+            <ion-item-divider>
+              <ion-label>Reservation History</ion-label>
+            </ion-item-divider>
+            <ion-item v-for="reservation in reservationStore.history" :key="reservation.id">
+              <ion-label>
+                <h2 class="text-lg font-semibold">{{ reservation.book?.title }}</h2>
+                <p>Reserved by: {{ reservation.user.name }}</p>
+                <p>
+                  <ion-badge :color="getStatusColor(reservation.status)">
+                    {{ getStatusText(reservation.status) }}
+                  </ion-badge>
+                  <span class="ml-2">Reserved on: {{ formatDate(reservation.created_at) }}</span>
+                </p>
+              </ion-label>
+            </ion-item>
+          </ion-item-group>
+        </ion-list>
+      </div>
 
-                <!-- Action Button (Deliver or Accept) -->
-                <ion-button v-if="reservation.status === 'accepted'" slot="end" fill="clear" color="success"
-                  @click="showConfirmation('deliver', reservation)">
-                  Deliver
-                </ion-button>
-                <ion-button v-else-if="reservation.status === 'ready'" slot="end" fill="clear" color="success"
-                  @click="showConfirmation('accept', reservation)">
-                  Accept
-                </ion-button>
-              </ion-item>
-            </ion-item-group>
-          </ion-list>
+      <!-- Infinite Scroll for Reservations -->
+      <ion-infinite-scroll
+        v-if="!reservationStore.isLoading && reservationStore.pagination.currentPage < reservationStore.pagination.lastPage && (selectedSegment === 'active' || selectedSegment === 'past')"
+        @ionInfinite="loadMoreReservations">
+        <ion-infinite-scroll-content loading-spinner="bubbles"
+          loading-text="Loading more reservations..."></ion-infinite-scroll-content>
+      </ion-infinite-scroll>
 
-          <!-- Infinite Scroll for Active Reservations -->
-          <ion-infinite-scroll
-            v-if="!reservationStore.isLoading && reservationStore.pagination.currentPage < reservationStore.pagination.lastPage"
-            @ionInfinite="loadMoreReservations">
-            <ion-infinite-scroll-content></ion-infinite-scroll-content>
-          </ion-infinite-scroll>
-        </ion-tab>
-
-        <!-- Past Reservations Tab -->
-        <ion-tab tab="past">
-          <ion-list v-if="!reservationStore.isLoading">
-            <ion-item-group>
-              <ion-item-divider>
-                <ion-label>Past Reservations</ion-label>
-              </ion-item-divider>
-              <ion-item v-for="reservation in reservationStore.pastReservations" :key="reservation.id">
-                <ion-label>
-                  <h2 class="text-lg font-semibold">{{ reservation.book?.title }}</h2>
-                  <p>Reserved by: {{ reservation.user.name }}</p>
-                  <p>
-                    <ion-badge :color="getStatusColor(reservation.status)">
-                      {{ getStatusText(reservation.status) }}
-                    </ion-badge>
-                  </p>
-                </ion-label>
-              </ion-item>
-            </ion-item-group>
-          </ion-list>
-
-          <!-- Infinite Scroll for Past Reservations -->
-          <ion-infinite-scroll
-            v-if="!reservationStore.isLoading && reservationStore.pagination.currentPage < reservationStore.pagination.lastPage"
-            @ionInfinite="loadMorePastReservations">
-            <ion-infinite-scroll-content></ion-infinite-scroll-content>
-          </ion-infinite-scroll>
-        </ion-tab>
-
-        <!-- Reservation History Tab -->
-        <ion-tab tab="history">
-          <ReservationHistoryPage />
-        </ion-tab>
-      </ion-tabs>
+  
     </ion-content>
   </admin-layout>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import AdminLayout from '@/components/admin/AdminLayout.vue';
 import { useReservationStore } from '@/stores/reservation';
+import { useBookStore } from '@/stores/book';
+import { useAdminStore } from '@/stores/admin';
 import { alertController } from '@ionic/vue';
-import {
-  IonContent, IonList, IonItem, IonLabel, IonBadge,
-  IonSpinner, IonButton, IonItemGroup, IonItemDivider,
-  IonTabs, IonTabBar, IonTabButton, IonTab
-} from '@ionic/vue';
 import { format } from 'date-fns';
-import ReservationHistoryPage from './ReservationHistoryPage.vue';
-import {
-  IonInfiniteScroll, IonInfiniteScrollContent
-} from '@ionic/vue';
+import SearchFilter from '@/components/admin/SearchFilter.vue'; // Adjust the path as necessary
+
 const reservationStore = useReservationStore();
+const bookStore = useBookStore();
+const adminStore = useAdminStore();
+
+const filters = ref({
+  search: '',
+  book: null,
+  user: null
+});
+
+const selectedSegment = ref('active'); // Default to active reservations
+
+const handleSegmentChange = (event: any) => {
+  selectedSegment.value = event.detail.value;
+};
+
 
 const getStatusColor = (status: string) => {
   const colors = {
@@ -154,11 +169,55 @@ const getStatusText = (status: string) => {
   return texts[status] || status;
 };
 
-const formatExpiry = (date: string) => {
-  return format(new Date(date), 'MMM dd, yyyy');
+const formatExpiry = (date: string) => new Date(date).toLocaleDateString();
+const formatDate = (date: string) => format(new Date(date), 'MMM dd, yyyy');
+
+// Handle search input with debouncing
+const handleSearch = async (filterData) => {
+  if (!filterData) {
+    console.error('filterData is undefined');
+    return; // Early return if filterData is undefined
+  }
+
+  filters.value.search = filterData.search || ''; // Default to empty string if undefined
+  filters.value.book = filterData.book || null; // Default to null if undefined
+  filters.value.user = filterData.user || null; // Default to null if undefined
+
+
+  reservationStore.pagination.currentPage = 1; // Reset to first page for new searches
+  await reservationStore.fetchAdminReservations({
+    page: 1,
+    search: filters.value.search,
+    book_id: filters.value.book,
+    user_id: filters.value.user
+  });
+
 };
 
-// Reusable function to show confirmation alerts
+
+const loadMoreReservations = async (event: any) => {
+
+  if (reservationStore.pagination.currentPage >= reservationStore.pagination.lastPage) {
+    event.target.complete();
+    return;
+  }
+
+  try {
+    reservationStore.pagination.currentPage++;
+    await reservationStore.fetchAdminReservations({
+      page: reservationStore.pagination.currentPage,
+      search: filters.value.search,
+      book_id: filters.value.book,
+      user_id: filters.value.user
+    });
+  } catch (error) {
+    console.error('Error loading more reservations:', error);
+  } finally {
+    event.target.complete();
+  }
+};
+
+// Define the showConfirmation method
 const showConfirmation = async (action: 'cancel' | 'accept' | 'deliver', reservation) => {
   const actionText = action.charAt(0).toUpperCase() + action.slice(1);
   const alert = await alertController.create({
@@ -172,17 +231,19 @@ const showConfirmation = async (action: 'cancel' | 'accept' | 'deliver', reserva
       {
         text: 'Yes',
         role: 'confirm',
-        handler: () => adminReservationAction(action, reservation)
+        handler: () => {
+          adminReservationAction(action, reservation);
+        }
       }
     ]
   });
   await alert.present();
 };
 
+// Define the adminReservationAction method
 const adminReservationAction = (action: 'cancel' | 'accept' | 'deliver', reservation) => {
   reservationStore.adminReservationAction(action, reservation.id)
     .then(resp => {
-      // Update the local reservation state with the updated reservation data
       const index = reservationStore.adminRreservations.findIndex(r => r.id === reservation.id);
       if (index !== -1) {
         reservationStore.adminRreservations[index] = resp.reservation;
@@ -193,49 +254,43 @@ const adminReservationAction = (action: 'cancel' | 'accept' | 'deliver', reserva
     });
 };
 
+
+//filters
+const selectedStatus = ref(''); // Default to show all statuses
+
+const handleStatusChange = () => {
+  // Trigger search with the selected status
+  handleSearch();
+};
+
+// Update the computed properties to filter by status
 const activeReservations = computed(() => {
-  return reservationStore.activeReservations.map(reservation => ({
-    ...reservation,
-    statusColor: getStatusColor(reservation.status),
-    statusText: getStatusText(reservation.status),
-    expiry: reservation.status === 'ready' ? formatExpiry(reservation.expires_at) : null,
-    queuePosition: reservation.status === 'pending' ? reservation.queue_position : null,
-  }));
+  return reservationStore.activeReservations.filter(reservation => 
+    !selectedStatus.value || reservation.status === selectedStatus.value
+  );
 });
 
-const loadMoreReservations = async (event: any) => {
-  if (reservationStore.pagination.currentPage >= reservationStore.pagination.lastPage) {
-    event.target.complete(); // Complete the event if on the last page
-    return;
-  }
+const pastReservations = computed(() => {
+  return reservationStore.pastReservations.filter(reservation => 
+    !selectedStatus.value || reservation.status === selectedStatus.value
+  );
+});
 
-  try {
-    await reservationStore.fetchMoreReservations(); // Fetch more reservations
-  } catch (error) {
-    console.error('Error loading more reservations:', error);
-  } finally {
-    event.target.complete(); // Complete the infinite scroll event
-  }
-};
 
-const loadMorePastReservations = async (event: any) => {
-  if (reservationStore.pagination.currentPage >= reservationStore.pagination.lastPage) {
-    event.target.complete(); // Complete the event if on the last page
-    return;
-  }
 
-  try {
-    await reservationStore.fetchMorePastReservations(); // Fetch more past reservations
-  } catch (error) {
-    console.error('Error loading more past reservations:', error);
-  } finally {
-    event.target.complete(); // Complete the infinite scroll event
-  }
-};
 
 // Fetch reservations on mount
 onMounted(() => {
-  reservationStore.fetchAdminReservations();
+  reservationStore.fetchAdminReservations({ page: 1 });
+  bookStore.fetchAdminBooks();
+  adminStore.fetchUsers();
+  reservationStore.fetchReservationHistory(); // Fetch reservation history on mount
 });
-
 </script>
+
+<style scoped>
+.ion-content {
+  overflow-y: auto;
+  /* Ensure vertical scrolling is enabled */
+}
+</style>

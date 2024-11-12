@@ -10,43 +10,28 @@
       </div>
 
       <!-- Search and Filter -->
-      <ion-card class="mb-4">
-        <ion-card-content>
-          <ion-grid>
-            <ion-row>
-              <ion-col size="12" size-md="4">
-                <ion-item>
-                  <ion-input
-                    v-model="filters.search"
-                    label="Search books..."
-                    label-placement="floating"
-                    @ionInput="debouncedSearch"
-                  ></ion-input>
-                </ion-item>
-              </ion-col>
-              <ion-col size="12" size-md="4">
-                <ion-item>
-                  <ion-select
-                    v-model="filters.category"
-                    label="Dewey Category"
-                    label-placement="floating"
-                    @ionChange="handleSearch"
-                  >
+      <ion-grid>
+        <ion-row>
+          <ion-col> <search-filter :initialSearch="filters.search" :initialCategory="filters.category"
+              label="Search books..." @search="handleSearch" />
+          </ion-col>
+          <ion-col size="12" size-md="4">
+            <ion-card class="mb-4">
+              <ion-card-content>
+              <ion-item>
+                  <ion-select v-model="filters.category" label="Dewey Category" label-placement="floating"
+                    @ionChange="handleFilter">
                     <ion-select-option value="">All Categories</ion-select-option>
-                    <ion-select-option 
-                      v-for="cat in deweyCategories" 
-                      :key="cat.code" 
-                      :value="cat.code"
-                    >
+                    <ion-select-option v-for="cat in deweyCategories" :key="cat.code" :value="cat.code">
                       {{ cat.code }} - {{ cat.name }}
                     </ion-select-option>
                   </ion-select>
                 </ion-item>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-card-content>
-      </ion-card>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
 
       <!-- Books List -->
       <ion-list v-if="bookStore.adminBooks.length">
@@ -68,7 +53,7 @@
               </span>
             </div>
           </ion-label>
-          
+
           <div slot="end" class="flex gap-2">
             <ion-button fill="clear" @click="openEditModal(book)">
               <ion-icon :icon="createOutline" slot="icon-only"></ion-icon>
@@ -86,23 +71,14 @@
       </ion-text>
 
       <!-- Pagination -->
-      <ion-infinite-scroll
-        v-if="bookStore.pagination.currentPage < bookStore.pagination.lastPage"
-        @ionInfinite="loadMore"
-        threshold="100px"
-      >
-        <ion-infinite-scroll-content
-          loading-spinner="bubbles"
-          loading-text="Loading more books..."
-        ></ion-infinite-scroll-content>
+      <ion-infinite-scroll v-if="bookStore.pagination.currentPage < bookStore.pagination.lastPage"
+        @ionInfinite="loadMore" threshold="100px">
+        <ion-infinite-scroll-content loading-spinner="bubbles"
+          loading-text="Loading more books..."></ion-infinite-scroll-content>
       </ion-infinite-scroll>
 
-      <book-form-modal
-        v-model:is-open="showFormModal"
-        :book="selectedBook"
-        @saved="handleBookSaved"/>
-    
- 
+      <book-form-modal v-model:is-open="showFormModal" :book="selectedBook" @saved="handleBookSaved" />
+
     </ion-content>
   </admin-layout>
 </template>
@@ -112,16 +88,16 @@ import { ref, onMounted, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import AdminLayout from '@/components/admin/AdminLayout.vue';
 import BookFormModal from '@/components/admin/BookFormModal.vue';
+import SearchFilter from '@/components/admin/SearchFilter.vue'; // Import the new component
 import { useBookStore } from '@/stores/book';
 import { deweyCategories } from '@/constants/dewey';
-import { 
-  IonContent, IonButton, IonIcon, IonList, IonItem, IonLabel,
-  IonCard, IonCardContent, IonGrid, IonRow, IonCol,
-  IonInput, IonSelect, IonSelectOption, alertController, IonText, IonInfiniteScroll, IonInfiniteScrollContent
+import {
+  IonContent, IonButton, IonIcon, IonList, IonItem, IonLabel, alertController, IonText, IonInfiniteScroll, IonInfiniteScrollContent
+  , IonSelect, IonSelectOption, IonGrid, IonRow, IonCol
 } from '@ionic/vue';
-import { 
-  addOutline, createOutline, trashOutline, 
-  libraryOutline 
+import {
+  addOutline, createOutline, trashOutline,
+  libraryOutline
 } from 'ionicons/icons';
 
 const bookStore = useBookStore();
@@ -133,7 +109,30 @@ const filters = ref({
   category: ''
 });
 
-const handleSearch = async () => {
+const handleFilter = async () => {
+  try {
+    bookStore.pagination.currentPage = 1; // Reset to first page for new searches
+    await bookStore.fetchAdminBooks({
+      search: filters.value.search,
+      category: filters.value.category,
+      page: 1
+    });
+  } catch (error) {
+    console.error('Error searching books:', error);
+  }
+};
+
+
+// Handle search and reset pagination
+const handleSearch = async (filterData) => {
+  if (!filterData) {
+    //console.error('filterData is undefined');
+    return; // Early return if filterData is undefined
+  }
+
+  filters.value.search = filterData.search || ''; // Default to empty string if undefined
+  filters.value.category = filterData.category || ''; // Default to empty string if undefined
+
   try {
     bookStore.pagination.currentPage = 1; // Reset to first page for new searches
     await bookStore.fetchAdminBooks({
@@ -149,7 +148,6 @@ const handleSearch = async () => {
 // Load more books
 const loadMore = async (event: any) => {
   console.log('Load more triggered'); // Debugging statement
-  console.log(`Current Page: ${bookStore.pagination.currentPage}, Last Page: ${bookStore.pagination.lastPage}`); // Debugging statement
 
   if (bookStore.pagination.currentPage >= bookStore.pagination.lastPage) {
     console.log('No more pages to load'); // Debugging statement
@@ -160,12 +158,12 @@ const loadMore = async (event: any) => {
   const nextPage = bookStore.pagination.currentPage + 1;
   console.log(`Loading page: ${nextPage}`); // Debugging statement
   try {
-    await bookStore.fetchAdminBooks({
+    const response = await bookStore.fetchAdminBooks({
       page: nextPage,
       search: filters.value.search,
       category: filters.value.category
     });
-    console.log('Books loaded successfully'); // Debugging statement
+    console.log('Books loaded successfully', response); // Debugging statement
   } catch (error) {
     console.error('Error loading more books:', error);
   } finally {
@@ -175,7 +173,11 @@ const loadMore = async (event: any) => {
 
 // Initialize
 onMounted(async () => {
-  await bookStore.fetchAdminBooks();
+  await bookStore.fetchAdminBooks({
+    page: 1,
+    search: filters.value.search,
+    category: filters.value.category
+  });
 });
 
 const debouncedSearch = useDebounceFn(handleSearch, 300);
@@ -249,4 +251,4 @@ const deleteBook = async (id: number) => {
     console.error('Error deleting book:', error);
   }
 };
-</script> 
+</script>

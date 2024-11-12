@@ -130,10 +130,15 @@ export const useBookStore = defineStore('book', {
             per_page: 10
           }
         });
-        
-        this.adminBooks = response.data.data;
-        this.pagination.currentPage = response.data.current_page; // Update current page
-        this.pagination.lastPage = response.data.last_page; // Update last page
+
+        if (params.page === 1) {
+          this.adminBooks = response.data.data;
+        } else {
+          this.adminBooks.push(...response.data.data);
+        }
+
+        this.pagination.currentPage = response.data.current_page;
+        this.pagination.lastPage = response.data.last_page;
         return response.data;
       } catch (error) {
         this.error = error;

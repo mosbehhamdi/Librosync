@@ -50,22 +50,27 @@ export const useReservationStore = defineStore('reservation', {
         this.reservations = response.data;
       });
     },
-    async fetchAdminReservations() {
+    async fetchAdminReservations({ page, search, book_id, user_id }) {
       this.isLoading = true;
       try {
         const response = await api.get('/reservations', {
-          params: { 
-            page: this.pagination.currentPage,
-            per_page: 15
+          params: {
+            page,
+            search,
+            book_id,
+            user_id
           }
         });
-        this.adminRreservations = response.data.data;
-        this.pagination.total = response.data.total;
-        this.pagination.lastPage = response.data.last_page;
+        console.log('API Response:', response.data); // Log the API response
+        if (page === 1) {
+          this.adminRreservations = response.data.data; // Reset for the first page
+        } else {
+          this.adminRreservations.push(...response.data.data); // Append for subsequent pages
+        }
+        this.pagination.currentPage = page; // Update the current page
+        this.pagination.lastPage = response.data.last_page; // Update the last page
       } catch (error) {
-        this.error = error;
         console.error('Error fetching reservations:', error);
-        throw error;
       } finally {
         this.isLoading = false;
       }
@@ -160,6 +165,29 @@ export const useReservationStore = defineStore('reservation', {
           }
         });
         this.adminRreservations.push(...response.data.data); // Append new reservations
+        this.pagination.total = response.data.total; // Update total count
+        this.pagination.lastPage = response.data.last_page; // Update last page number
+      } catch (error) {
+        this.error = error;
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async fetchMorePastReservations() {
+      if (this.pagination.currentPage >= this.pagination.lastPage) return; // Prevent loading if on the last page
+
+      this.isLoading = true;
+      try {
+        this.pagination.currentPage++; // Increment the current page
+        const response = await api.get('/reservations/past', {
+          params: { 
+            page: this.pagination.currentPage,
+            per_page: 15 // Ensure this matches the API's expected per_page
+          }
+        });
+        this.adminRreservations.push(...response.data.data); // Append new past reservations
         this.pagination.total = response.data.total; // Update total count
         this.pagination.lastPage = response.data.last_page; // Update last page number
       } catch (error) {

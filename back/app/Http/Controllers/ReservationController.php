@@ -17,16 +17,44 @@ class ReservationController extends Controller
             ? Reservation::query()->with(['user', 'book'])
             : auth()->user()->reservations()->with(['book', 'user']);
 
-        $reservations = $query
-            ->orderBy('created_at', 'desc')
-            ->paginate($request->input('per_page', 15));
+        try {
+            // Apply search filter
+            if ($search = $request->input('search')) {
+                $query->whereHas('book', function($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhereJsonContains('authors', $search)
+                      ->orWhere('publisher', 'like', "%{$search}%");
+                });
+            }
 
-        return response()->json([
-            'data' => $reservations->items(),
-            'current_page' => $reservations->currentPage(),
-            'last_page' => $reservations->lastPage(),
-            'total' => $reservations->total()
-        ]);
+            // Apply book filter
+            if ($bookId = $request->input('book_id')) {
+                $query->where('book_id', $bookId);
+            }
+
+            // Apply user filter
+            if ($userId = $request->input('user_id')) {
+                $query->where('user_id', $userId);
+            }
+
+            // Determine sorting based on user role
+            $orderBy = auth()->user()->isAdmin() ? 'created_at' : 'user_id';
+            $reservations = $query->orderBy($orderBy, 'desc')
+                ->paginate($request->input('per_page', 15));
+
+            return response()->json([
+                'data' => $reservations->items(),
+                'current_page' => $reservations->currentPage(),
+                'last_page' => $reservations->lastPage(),
+                'total' => $reservations->total(),
+                'per_page' => $reservations->perPage(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching reservations',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function cancel(Reservation $reservation): JsonResponse
