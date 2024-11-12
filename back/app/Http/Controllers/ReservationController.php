@@ -43,10 +43,9 @@ class ReservationController extends Controller
                 $query->where('status', $status);
             }
 
-            // Determine sorting based on user role
-            $orderBy = auth()->user()->isAdmin() ? 'created_at' : 'user_id';
-            $reservations = $query->orderBy($orderBy, 'desc')
-                ->paginate($request->input('per_page', 15));
+            $reservations = $query->orderByRaw("COALESCE(updated_at, created_at) ASC")
+            ->paginate($request->input('per_page', 15));
+
 
             // Return paginated data as JSON
             return response()->json([

@@ -1,11 +1,6 @@
 <template>
   <admin-layout>
     <ion-content class="ion-padding overflow-y-auto">
-      <!-- Header with Title -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-center">Reservations Management</h1>
-      </div>
-
       <!-- Horizontal Menu for Reservation Types -->
       <ion-segment v-model="selectedSegment" @ionChange="handleSegmentChange">
         <ion-segment-button value="active">Active Reservations</ion-segment-button>
@@ -16,6 +11,7 @@
       <!-- Search Bar and Filters -->
       <search-filter :initialSearch="filters.search" label="Search reservations..."
         @search="handleSearch" />
+
       <!-- 
     filter by status  
     -->

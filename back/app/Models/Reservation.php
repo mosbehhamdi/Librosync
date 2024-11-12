@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Reservation extends Model
 {
     use HasFactory;
-
+    public $timestamps = true;
     protected $fillable = [
         'user_id',
         'book_id',
