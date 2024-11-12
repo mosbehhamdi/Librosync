@@ -87,15 +87,20 @@ export const useReservationStore = defineStore('reservation', {
         } else if (action === 'deliver') {
           response = await api.post(`/admin/reservations/${reservationId}/deliver`);
         }
-        
+    
         const updatedReservation = response.data;
         const reservationIndex = this.adminRreservations.findIndex(r => r.id === reservationId);
         if (reservationIndex !== -1) {
-          this.adminRreservations[reservationIndex] = updatedReservation;
+          // Remove the old reservation from the list and add the updated one at the top
+          this.adminRreservations.splice(reservationIndex, 1);
         }
+        // Add the updated reservation at the top of the list
+        this.adminRreservations.unshift(updatedReservation);
+        
         return response.data;
       });
-    },
+    }
+    ,
 
     async userReservationAction(action: 'cancel' | 'reserve' | 'joinWaitlist', reservationId?: number, bookId?: number) {
       return this.handleApiCall(async () => {

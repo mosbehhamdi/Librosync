@@ -9,19 +9,38 @@
       </ion-segment>
 
       <!-- Search Bar and Filters -->
-      <search-filter :initialSearch="filters.search" label="Search reservations..."
-        @search="handleSearch" />
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <search-filter :initialSearch="filters.search" label="Search reservations..." @search="handleSearch" />
+          </ion-col>
 
-      <!-- 
-    filter by status  
-    -->
+          <ion-card class="mb-5" v-if="['active','past'].includes(selectedSegment)">
+            <ion-card-content>
+              <ion-item>
+                <ion-col size="6" size-md="4" v-if="selectedSegment === 'active'">
+                  <ion-select v-model="selectedStatus" placeholder="Filter by Status" @ionChange="handleStatusChange">
+                    <ion-select-option value="pending">Pending</ion-select-option>
+                    <ion-select-option value="ready">Ready</ion-select-option>
+                    <ion-select-option value="accepted">Accepted</ion-select-option>
+                  </ion-select>
+                </ion-col>
+                <ion-col size="6" v-else-if="selectedSegment === 'past'">
+                  <ion-select v-model="selectedStatus" placeholder="Filter by Status" @ionChange="handleStatusChange">
+                    <ion-select-option value="delivered">Delivered</ion-select-option>
+                    <ion-select-option value="cancelled">Cancelled</ion-select-option>
+                  </ion-select>
+                </ion-col>
+              </ion-item>
+
+            </ion-card-content>
+          </ion-card>
+        </ion-row>
+      </ion-grid>
+
       <!-- Conditional Rendering Based on Selected Segment -->
       <div v-if="selectedSegment === 'active'">
-        <ion-select v-model="selectedStatus" placeholder="Filter by Status" @ionChange="handleStatusChange">
-          <ion-select-option value="pending">Pending</ion-select-option>
-          <ion-select-option value="ready">Ready for Pickup</ion-select-option>
-          <ion-select-option value="accepted">Accepted</ion-select-option>
-        </ion-select>
+
         <ion-list>
           <ion-item-group>
             <ion-item-divider>
@@ -35,8 +54,10 @@
                   <ion-badge :color="getStatusColor(reservation.status)">
                     {{ getStatusText(reservation.status) }}
                   </ion-badge>
-                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at) }}</span>
-                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position }}</span>
+                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at)
+                    }}</span>
+                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position
+                    }}</span>
                 </p>
               </ion-label>
               <ion-button slot="end" fill="clear" color="danger"
@@ -51,10 +72,6 @@
       </div>
 
       <div v-else-if="selectedSegment === 'past'">
-        <ion-select v-model="selectedStatus" placeholder="Filter by Status" @ionChange="handleStatusChange">
-          <ion-select-option value="delivered">Delivered</ion-select-option>
-          <ion-select-option value="cancelled">Cancelled</ion-select-option>
-        </ion-select>
         <ion-list>
           <ion-item-group>
             <ion-item-divider>
@@ -68,8 +85,10 @@
                   <ion-badge :color="getStatusColor(reservation.status)">
                     {{ getStatusText(reservation.status) }}
                   </ion-badge>
-                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at) }}</span>
-                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position }}</span>
+                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at)
+                    }}</span>
+                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position
+                    }}</span>
                 </p>
               </ion-label>
             </ion-item>
@@ -169,7 +188,6 @@ const getStatusText = (status: string) => {
 const formatExpiry = (date: string) => new Date(date).toLocaleDateString();
 const formatDate = (date: string) => format(new Date(date), 'MMM dd, yyyy');
 
-// Handle search input with debouncing
 const handleSearch = async (filterData) => {
   if (!filterData) {
     console.error('filterData is undefined');
@@ -179,7 +197,7 @@ const handleSearch = async (filterData) => {
   filters.value.book = filterData.book || null;
   filters.value.user = filterData.user || null;
   filters.value.status = filterData.status || '';
-  console.log('selected status : ' ,filters.value.status);
+  console.log('selected status : ', filters.value.status);
   reservationStore.pagination.currentPage = 1;
   await reservationStore.fetchAdminReservations({
     page: 1,
@@ -212,7 +230,6 @@ const loadMoreReservations = async (event: any) => {
   }
 };
 
-// Define the showConfirmation method
 const showConfirmation = async (action: 'cancel' | 'accept' | 'deliver', reservation) => {
   const actionText = action.charAt(0).toUpperCase() + action.slice(1);
   const alert = await alertController.create({
@@ -235,7 +252,6 @@ const showConfirmation = async (action: 'cancel' | 'accept' | 'deliver', reserva
   await alert.present();
 };
 
-// Define the adminReservationAction method
 const adminReservationAction = (action: 'cancel' | 'accept' | 'deliver', reservation) => {
   reservationStore.adminReservationAction(action, reservation.id)
     .then(resp => {
@@ -252,13 +268,13 @@ const adminReservationAction = (action: 'cancel' | 'accept' | 'deliver', reserva
 
 // Update the computed properties to filter by status
 const activeReservations = computed(() => {
-  return reservationStore.activeReservations.filter(reservation => 
+  return reservationStore.activeReservations.filter(reservation =>
     !selectedStatus.value || reservation.status === selectedStatus.value
   );
 });
 
 const pastReservations = computed(() => {
-  return reservationStore.pastReservations.filter(reservation => 
+  return reservationStore.pastReservations.filter(reservation =>
     !selectedStatus.value || reservation.status === selectedStatus.value
   );
 });

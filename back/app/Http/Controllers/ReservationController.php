@@ -43,7 +43,7 @@ class ReservationController extends Controller
                 $query->where('status', $status);
             }
 
-            $reservations = $query->orderByRaw("COALESCE(updated_at, created_at) ASC")
+            $reservations = $query->orderByRaw("COALESCE(updated_at, created_at) DESC")
             ->paginate($request->input('per_page', 15));
 
 
