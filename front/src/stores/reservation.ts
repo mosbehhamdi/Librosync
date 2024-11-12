@@ -50,7 +50,7 @@ export const useReservationStore = defineStore('reservation', {
         this.reservations = response.data;
       });
     },
-    async fetchAdminReservations({ page, search, book_id, user_id }) {
+    async fetchAdminReservations({ page, search, book_id, user_id,status }) {
       this.isLoading = true;
       try {
         const response = await api.get('/reservations', {
@@ -58,7 +58,8 @@ export const useReservationStore = defineStore('reservation', {
             page,
             search,
             book_id,
-            user_id
+            user_id,
+            status
           }
         });
         console.log('API Response:', response.data); // Log the API response

@@ -39,10 +39,8 @@
                   <ion-badge :color="getStatusColor(reservation.status)">
                     {{ getStatusText(reservation.status) }}
                   </ion-badge>
-                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at)
-                    }}</span>
-                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position
-                    }}</span>
+                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at) }}</span>
+                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position }}</span>
                 </p>
               </ion-label>
               <ion-button slot="end" fill="clear" color="danger"
@@ -74,10 +72,8 @@
                   <ion-badge :color="getStatusColor(reservation.status)">
                     {{ getStatusText(reservation.status) }}
                   </ion-badge>
-                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at)
-                    }}</span>
-                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position
-                    }}</span>
+                  <span v-if="reservation.expiry" class="ml-2">Expires: {{ formatExpiry(reservation.expires_at) }}</span>
+                  <span v-if="reservation.queue_position" class="ml-2">Queue Position: {{ reservation.queue_position }}</span>
                 </p>
               </ion-label>
             </ion-item>
@@ -115,7 +111,7 @@
           loading-text="Loading more reservations..."></ion-infinite-scroll-content>
       </ion-infinite-scroll>
 
-  
+
     </ion-content>
   </admin-layout>
 </template>
@@ -141,11 +137,16 @@ const filters = ref({
 });
 
 const selectedSegment = ref('active'); // Default to active reservations
+const selectedStatus = ref(''); // Default to show all statuses
 
 const handleSegmentChange = (event: any) => {
   selectedSegment.value = event.detail.value;
 };
 
+const handleStatusChange = () => {
+  const searchData = { status: selectedStatus.value };
+  handleSearch(searchData);
+};
 
 const getStatusColor = (status: string) => {
   const colors = {
@@ -176,27 +177,24 @@ const formatDate = (date: string) => format(new Date(date), 'MMM dd, yyyy');
 const handleSearch = async (filterData) => {
   if (!filterData) {
     console.error('filterData is undefined');
-    return; // Early return if filterData is undefined
+    return;
   }
-
-  filters.value.search = filterData.search || ''; // Default to empty string if undefined
-  filters.value.book = filterData.book || null; // Default to null if undefined
-  filters.value.user = filterData.user || null; // Default to null if undefined
-
-
-  reservationStore.pagination.currentPage = 1; // Reset to first page for new searches
+  filters.value.search = filterData.search || '';
+  filters.value.book = filterData.book || null;
+  filters.value.user = filterData.user || null;
+  filters.value.status = filterData.status || '';
+  console.log('selected status : ' ,filters.value.status);
+  reservationStore.pagination.currentPage = 1;
   await reservationStore.fetchAdminReservations({
     page: 1,
     search: filters.value.search,
     book_id: filters.value.book,
-    user_id: filters.value.user
+    user_id: filters.value.user,
+    status: filters.value.status
   });
-
 };
 
-
 const loadMoreReservations = async (event: any) => {
-
   if (reservationStore.pagination.currentPage >= reservationStore.pagination.lastPage) {
     event.target.complete();
     return;
@@ -208,7 +206,8 @@ const loadMoreReservations = async (event: any) => {
       page: reservationStore.pagination.currentPage,
       search: filters.value.search,
       book_id: filters.value.book,
-      user_id: filters.value.user
+      user_id: filters.value.user,
+      status: filters.value.status
     });
   } catch (error) {
     console.error('Error loading more reservations:', error);
@@ -255,14 +254,6 @@ const adminReservationAction = (action: 'cancel' | 'accept' | 'deliver', reserva
 };
 
 
-//filters
-const selectedStatus = ref(''); // Default to show all statuses
-
-const handleStatusChange = () => {
-  // Trigger search with the selected status
-  handleSearch();
-};
-
 // Update the computed properties to filter by status
 const activeReservations = computed(() => {
   return reservationStore.activeReservations.filter(reservation => 
@@ -287,10 +278,3 @@ onMounted(() => {
   reservationStore.fetchReservationHistory(); // Fetch reservation history on mount
 });
 </script>
-
-<style scoped>
-.ion-content {
-  overflow-y: auto;
-  /* Ensure vertical scrolling is enabled */
-}
-</style>

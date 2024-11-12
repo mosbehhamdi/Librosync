@@ -13,6 +13,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        // Determine if the user is an admin and set up the initial query accordingly
         $query = auth()->user()->isAdmin()
             ? Reservation::query()->with(['user', 'book'])
             : auth()->user()->reservations()->with(['book', 'user']);
@@ -37,11 +38,17 @@ class ReservationController extends Controller
                 $query->where('user_id', $userId);
             }
 
+            // Apply status filter
+            if ($status = $request->input('status')) {
+                $query->where('status', $status);
+            }
+
             // Determine sorting based on user role
             $orderBy = auth()->user()->isAdmin() ? 'created_at' : 'user_id';
             $reservations = $query->orderBy($orderBy, 'desc')
                 ->paginate($request->input('per_page', 15));
 
+            // Return paginated data as JSON
             return response()->json([
                 'data' => $reservations->items(),
                 'current_page' => $reservations->currentPage(),
