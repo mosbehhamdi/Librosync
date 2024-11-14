@@ -76,7 +76,15 @@ const showToast = async (message: string, color: string) => {
   const toast = await toastController.create({
     message,
     duration: 3000,
-    color
+    color,
+    position: 'top',
+    cssClass: 'custom-toast',
+    buttons: [
+      {
+        text: 'Close',
+        role: 'cancel'
+      }
+    ]
   });
   await toast.present();
 };
@@ -88,33 +96,43 @@ const updateReservation = async () => {
 const handleReservationAction = async (actionType: string) => {
   isLoading.value = true;
   try {
-    let response;
-    const successMessage = actionType === 'cancel' 
-      ? 'Reservation cancelled' 
-      : 'Reservation sent';
+    const response = await reservationStore.userReservationAction(
+      actionType, 
+      actionType === 'cancel' ? reservation.value?.id : undefined,
+      actionType !== 'cancel' ? bookId : undefined
+    );
 
-    if (actionType === 'cancel') {
-      response = await reservationStore.userReservationAction(actionType, reservation.value.id);
-      if (response?.message === 'Reservation cancelled successfully') {
-        reservation.value = null;
-        await bookStore.fetchBooks();
-      }
-    } else {
-      response = await reservationStore.userReservationAction(actionType, undefined, bookId);
+    if (response) {
+      reservation.value = actionType === 'cancel' ? null : response.reservation;
+      await showToast(
+        actionType === 'cancel' ? 'Reservation cancelled successfully' : 'Reservation sent successfully',
+        'success'
+      );
+      await updateReservation();
     }
-
-    if (response?.reservation) {
-      reservation.value = response.reservation;
-    }
-    
-    await showToast(successMessage, 'success');
-    await updateReservation();
   } catch (error: any) {
-    console.error(error);
-    await showToast('An error occurred. Please try again.', 'danger'); // Added error feedback
+    await handleReservationError(error);
   } finally {
     isLoading.value = false;
   }
+};
+
+const handleReservationError = async (error: any) => {
+  let errorMessage = 'Failed to process reservation';
+  let color = 'danger';
+
+  // Handle specific error messages from the backend
+  if (error.response?.data?.message) {
+    errorMessage = error.response.data.message;
+    
+    // Use warning color for limit-related messages
+    if (errorMessage.includes('Maximum number of') || 
+        errorMessage.includes('overdue books')) {
+      color = 'warning';
+    }
+  }
+
+  await showToast(errorMessage, color);
 };
 
 // Optional: Debugging watch to log reservation changes

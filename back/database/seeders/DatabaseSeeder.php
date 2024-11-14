@@ -21,29 +21,66 @@ class DatabaseSeeder extends Seeder
         // Create regular users
         $users = User::factory(50)->create();
 
-        // Create books with diverse categories
+        // Create books
         $books = Book::factory(100)->create();
 
-        // Create reservations with realistic patterns
         foreach ($users as $user) {
-            $randomBooks = $books->random(rand(1, 5));
+            // Create active reservations (pending, ready, accepted, delivered)
+            $activeBooks = $books->random(rand(2, 4));
+            foreach ($activeBooks as $book) {
+                $status = collect([
+                    Reservation::STATUS_PENDING,
+                    Reservation::STATUS_READY,
+                    Reservation::STATUS_ACCEPTED,
+                    Reservation::STATUS_DELIVERED
+                ])->random();
 
-            foreach ($randomBooks as $book) {
-                $status = $this->getRandomStatus();
-                Reservation::factory()->create([
-                    'user_id' => $user->id,
-                    'book_id' => $book->id,
-                    'status' => $status,
-                    'queue_position' => in_array($status, ['pending', 'ready']) ? rand(1, 5) : null,
-                    'expires_at' => $status === 'ready' ? now()->addDays(2) : null,
-                ]);
+                $reservation = new Reservation();
+                $reservation->user_id = $user->id;
+                $reservation->book_id = $book->id;
+                $reservation->status = $status;
+
+                // Set specific fields based on status
+                switch ($status) {
+                    case Reservation::STATUS_PENDING:
+                        $reservation->queue_position = rand(1, 5);
+                        break;
+                    case Reservation::STATUS_READY:
+                        $reservation->expires_at = now()->addDays(2);
+                        break;
+                    case Reservation::STATUS_DELIVERED:
+                        $delivered_at = now()->subDays(rand(1, 13));
+                        $reservation->delivered_at = $delivered_at;
+                        $reservation->due_date = $delivered_at->copy()->addDays(14);
+                        $book->decrement('available_copies');
+                        break;
+                }
+
+                $reservation->save();
+            }
+
+            // Create past reservations (delivered, cancelled)
+            $pastBooks = $books->diff($activeBooks)->random(rand(2, 4));
+            foreach ($pastBooks as $book) {
+                $status = collect([
+                    Reservation::STATUS_RETURNED,
+                    Reservation::STATUS_CANCELLED
+                ])->random();
+
+                $reservation = new Reservation();
+                $reservation->user_id = $user->id;
+                $reservation->book_id = $book->id;
+                $reservation->status = $status;
+
+                if ($status === Reservation::STATUS_RETURNED) {
+                    $delivered_at = now()->subDays(rand(15, 30));
+                    $reservation->delivered_at = $delivered_at;
+                    $reservation->due_date = $delivered_at->copy()->addDays(14);
+                }
+
+                $reservation->created_at = now()->subDays(rand(1, 30));
+                $reservation->save();
             }
         }
-    }
-
-    private function getRandomStatus(): string
-    {
-        return collect(['pending', 'ready','accepted', 'delivered', 'cancelled'])
-            ->random();
     }
 }

@@ -31,6 +31,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/admin/reservations/{reservation}/deliver', [ReservationController::class, 'deliver']);
     Route::middleware('auth:api')->group(function () {
         Route::post('/books/{book}/waitlist', [ReservationController::class, 'joinWaitlist']);
+        Route::get('/user/reservation-stats', [ReservationController::class, 'getUserReservationStats']);
     });
 });
 
@@ -50,5 +51,5 @@ Route::middleware(['auth:api', 'admin'])->group(function () {
     Route::delete('/admin/books/{book}', [BookController::class, 'destroy']);
     Route::put('/admin/books/{book}/copies', [BookController::class, 'updateCopies']);
 
-
+    Route::post('/admin/reservations/{reservation}/return', [ReservationController::class, 'returnBook']);
 });

@@ -97,7 +97,7 @@ export const useBookStore = defineStore('book', {
       try {
         let response;
         if (action === 'create' && bookData) {
-          response = await api.post('/books', bookData);
+          response = await api.post('admin/books', bookData);
         } else if (action === 'update' && id && bookData) {
           response = await api.put(`/admin/books/${id}`, bookData);
         } else if (action === 'delete' && id) {

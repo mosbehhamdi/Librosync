@@ -21,4 +21,8 @@ export default defineConfig({
     environment: 'jsdom'
   },
   base: './',
+  server: {
+    host: '0.0.0.0',  // Allows access from network devices
+    port: 5174        // Specify the port explicitly
+  }
 })

@@ -14,13 +14,24 @@ class ReservationSeeder extends Seeder
         $users = User::where('is_admin', false)->get();
         $books = Book::all();
 
-        // Create some random reservations
         foreach ($users as $user) {
-            $randomBooks = $books->random(rand(0, 3));
+            $deliveredBooks = $books->random(rand(1, 2));
+            foreach ($deliveredBooks as $book) {
+                $delivered_at = now()->subDays(rand(1, 13));
+                Reservation::create([
+                    'user_id' => $user->id,
+                    'book_id' => $book->id,
+                    'status' => 'delivered',
+                    'delivered_at' => $delivered_at,
+                    'due_date' => $delivered_at->copy()->addDays(14),
+                ]);
+                $book->decrement('available_copies');
+            }
 
-            foreach ($randomBooks as $book) {
+            // Create other random reservations
+            $otherBooks = $books->diff($deliveredBooks)->random(rand(0, 2));
+            foreach ($otherBooks as $book) {
                 $status = $this->getRandomStatus();
-
                 Reservation::create([
                     'user_id' => $user->id,
                     'book_id' => $book->id,
@@ -34,7 +45,13 @@ class ReservationSeeder extends Seeder
 
     private function getRandomStatus(): string
     {
-        return collect(['pending', 'ready','accepted', 'delivered', 'cancelled'])
-            ->random();
+        return collect([
+            Reservation::STATUS_PENDING,
+            Reservation::STATUS_READY,
+            Reservation::STATUS_ACCEPTED,
+            Reservation::STATUS_DELIVERED,
+            Reservation::STATUS_RETURNED,
+            Reservation::STATUS_CANCELLED
+        ])->random();
     }
 }

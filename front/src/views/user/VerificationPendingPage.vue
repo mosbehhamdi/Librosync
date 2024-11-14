@@ -1,10 +1,5 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Email Verification</ion-title>
-      </ion-toolbar>
-    </ion-header>
 
     <ion-content class="ion-padding">
       <div class="max-w-md mx-auto space-y-4">
@@ -17,7 +12,6 @@
 
           <form @submit.prevent="verifyCode" class="space-y-4">
             <ion-item>
-              <ion-label position="floating">Verification Code</ion-label>
               <ion-input
                 v-model="code"
                 type="text"

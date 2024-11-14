@@ -13,38 +13,35 @@ class ReservationFactory extends Factory
 
     public function definition()
     {
-        $status = $this->faker->randomElement(['pending', 'ready','accepted', 'delivered', 'cancelled']);
+        $status = $this->faker->randomElement(['pending', 'ready', 'accepted', 'delivered', 'cancelled']);
+        $delivered_at = null;
+        $due_date = null;
+        $expires_at = null;
+        $queue_position = null;
+
+        switch ($status) {
+            case 'pending':
+                $queue_position = $this->faker->numberBetween(1, 5);
+                break;
+            case 'ready':
+                $expires_at = now()->addDays(2);
+                break;
+            case 'delivered':
+                $delivered_at = now()->subDays($this->faker->numberBetween(15, 30));
+                $due_date = (clone $delivered_at)->addDays(14);
+                break;
+        }
 
         return [
             'user_id' => User::factory(),
             'book_id' => Book::factory(),
             'status' => $status,
-            'queue_position' => in_array($status, ['pending', 'ready']) ? $this->faker->numberBetween(1, 5) : null,
-            'expires_at' => $status === 'ready' ? now()->addDays(2) : null,
+            'queue_position' => $queue_position,
+            'expires_at' => $expires_at,
+            'delivered_at' => $delivered_at,
+            'due_date' => $due_date,
             'created_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
             'updated_at' => now()
         ];
-    }
-
-    public function pending()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'pending',
-                'queue_position' => $this->faker->numberBetween(1, 5),
-                'expires_at' => null
-            ];
-        });
-    }
-
-    public function ready()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => 'ready',
-                'queue_position' => 1,
-                'expires_at' => now()->addDays(2)
-            ];
-        });
     }
 }

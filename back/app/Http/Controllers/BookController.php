@@ -35,7 +35,7 @@ class BookController extends Controller
                 $books->getCollection()->transform(function ($book) {
                     $book->user_reservation = $book->reservations
                         ->where('user_id', auth()->id())
-                        ->whereIn('status', ['pending', 'ready','accepted'])
+                        ->whereIn('status', ['pending', 'ready', 'accepted', 'delivered'])
                         ->first();
                     $book->waiting_time = $book->getWaitingTimeAttribute();
                     unset($book->reservations);
