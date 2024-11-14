@@ -109,6 +109,14 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, requiresAdmin: true }
   },
 
+  // Settings route
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/components/common/SettingsPage.vue'),
+    meta: { requiresAuth: true }
+  },
+
   // Default route
   {
     path: '/:pathMatch(.*)*',

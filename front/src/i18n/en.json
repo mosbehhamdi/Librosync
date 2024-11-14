@@ -1,0 +1,300 @@
+{
+  "common": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "close": "Close",
+      "confirm": "Confirm",
+      "search": "Search",
+      "filter": "Filter",
+      "logout": "Logout",
+      "back": "Back"
+    },
+    "status": {
+      "success": "Success",
+      "error": "Error",
+      "loading": "Loading"
+    },
+    "messages": {
+      "updateSuccess": "Updated successfully",
+      "updateError": "Update failed",
+      "deleteSuccess": "Deleted successfully",
+      "deleteError": "Delete failed",
+      "saveSuccess": "Saved successfully",
+      "saveError": "Save failed",
+      "invalidInput": "Invalid input"
+    }
+  },
+  "menu": {
+    "title": "Menu",
+    "adminMenu": "Admin Menu",
+    "browseBooks": "Browse Books",
+    "myReservations": "My Reservations",
+    "myProfile": "My Profile",
+    "settings": "Settings",
+    "adminDashboard": "Admin Dashboard",
+    "bookManagement": "Book Management",
+    "reservationManagement": "Reservation Management",
+    "userManagement": "User Management",
+    "library": "Library"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create one now"
+    },
+    "register": {
+      "title": "Create an account",
+      "submit": "Sign up",
+      "login": "Already have an account? Sign in",
+      "success": "Registration successful!"
+    },
+    "logout": {
+      "title": "Confirm Logout",
+      "message": "Are you sure you want to logout?",
+      "success": "Logged out successfully"
+    },
+    "resetPassword": {
+      "title": "Reset Your Password",
+      "submit": "Reset Password",
+      "success": "Password reset successfully",
+      "error": "Failed to reset password",
+      "invalidToken": "Invalid reset token. Please try again."
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "description": "Enter your email address and we'll send you a code to reset your password.",
+      "sendCode": "Send Reset Code",
+      "resetPassword": "Reset Password",
+      "backToLogin": "Back to Login",
+      "checkEmail": "Please check your email for the reset code"
+    },
+    "fields": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "password": "Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "resetCode": "Reset Code",
+      "namePlaceholder": "Enter your full name",
+      "emailPlaceholder": "Enter your email address",
+      "passwordPlaceholder": "Enter your password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "resetCodePlaceholder": "Enter the code from your email"
+    },
+    "validation": {
+      "fillAllFields": "Please fill in all fields",
+      "checkFields": "Please check all fields",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "invalidEmail": "Please enter a valid email address"
+    }
+  },
+  "bookManagement": {
+    "title": "Books Management",
+    "addBook": "Add Book",
+    "editBook": "Edit Book",
+    "deleteBook": "Delete Book",
+    "fields": {
+      "title": "Title",
+      "authors": "Authors",
+      "copies": "Copies",
+      "available": "Available",
+      "category": "Category",
+      "isbn": "ISBN",
+      "publisher": "Publisher",
+      "waitingTime": "Estimated Wait Time",
+      "waitingDays": "{days} days"
+    },
+    "form": {
+      "copies": "Number of Copies",
+      "available": "Available Copies",
+      "parts": "Number of Parts",
+      "publisher": "Publisher",
+      "edition": "Edition Number",
+      "dewey": {
+        "category": "Dewey Category",
+        "subcategory": "Dewey Subcategory"
+      },
+      "price": "Price",
+      "comments": "Comments",
+      "numbers": {
+        "central": "Central Number",
+        "local": "Local Number"
+      },
+      "isbn": "ISBN",
+      "dates": {
+        "publication": "Publication Date",
+        "acquisition": "Acquisition Date"
+      }
+    }
+  },
+  "reservations": {
+    "status": {
+      "pending": "Waiting",
+      "ready": "Ready for Pickup",
+      "accepted": "Accepted",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "returned": "Returned"
+    },
+    "actions": {
+      "reserve": "Reserve",
+      "cancel": "Cancel Reservation",
+      "accept": "Accept",
+      "deliver": "Deliver",
+      "return": "Return",
+      "cancelHeader": "Cancel Reservation",
+      "cancelConfirm": "Are you sure you want to cancel this reservation?",
+      "acceptHeader": "Accept Reservation",
+      "acceptConfirm": "Are you sure you want to accept this reservation?",
+      "deliverHeader": "Deliver Book",
+      "deliverConfirm": "Are you sure you want to deliver this book?",
+      "returnHeader": "Return Book",
+      "returnConfirm": "Are you sure you want to return this book?"
+    },
+    "labels": {
+      "activeTitle": "Active Reservations",
+      "pastTitle": "Past Reservations",
+      "historyTitle": "Reservation History",
+      "queuePosition": "Queue Position",
+      "reservedOn": "Reserved on",
+      "expires": "Expires",
+      "due": "Due",
+      "reservedBy": "Reserved by",
+      "noActive": "No active reservations",
+      "noPast": "No past reservations"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard"
+    },
+    "books": {
+      "title": "Books Management"
+    },
+    "users": {
+      "title": "User Management"
+    },
+    "reservations": {
+      "title": "Reservations Management",
+      "filters": {
+        "filterByStatus": "Filter by Status",
+        "search": "Search",
+        "noResults": "No results found",
+        "searchReservations": "Search reservations..."
+      },
+      "confirmations": {
+        "cancelHeader": "Cancel Reservation",
+        "acceptHeader": "Accept Reservation",
+        "deliverHeader": "Deliver Book",
+        "returnHeader": "Return Book",
+        "cancel": "Are you sure you want to cancel this reservation?",
+        "accept": "Are you sure you want to accept this reservation?",
+        "deliver": "Are you sure you want to deliver this book?",
+        "return": "Are you sure you want to return this book?"
+      },
+      "success": {
+        "cancel": "Reservation cancelled successfully",
+        "accept": "Reservation accepted successfully",
+        "deliver": "Book delivered successfully",
+        "return": "Book returned successfully"
+      }
+    }
+  },
+  "user": {
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome back, {name}!",
+      "description": "This is your personal dashboard. Here you can manage your books and reading progress."
+    },
+    "profile": {
+      "stats": {
+        "activeReservations": "Active Reservations",
+        "totalReservations": "Total Reservations"
+      }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile Settings",
+      "role": "Account Type",
+      "adminRole": "Administrator",
+      "userRole": "User",
+      "edit": "Edit Profile"
+    },
+    "language": {
+      "title": "Language Settings",
+      "select": "Select Language"
+    }
+  },
+  "toast": {
+    "reservation": {
+      "cancelSuccess": "Reservation cancelled successfully",
+      "createSuccess": "Reservation created successfully",
+      "updateSuccess": "Reservation updated successfully",
+      "error": "Reservation action failed",
+      "generalError": "Failed to process reservation",
+      "limitExceeded": "Maximum number of reservations reached",
+      "overdueBooks": "You have overdue books"
+    },
+    "profile": {
+      "updateSuccess": "Profile updated successfully",
+      "updateError": "Failed to update profile"
+    },
+    "book": {
+      "createSuccess": "Book created successfully",
+      "updateSuccess": "Book updated successfully",
+      "deleteSuccess": "Book deleted successfully",
+      "error": "Book action failed"
+    },
+    "auth": {
+      "verificationSuccess": "Email verified successfully",
+      "verificationError": "Invalid or expired verification code",
+      "codeSent": "New verification code sent",
+      "sendError": "Failed to send verification code",
+      "codeVerified": "Code verified successfully",
+      "passwordMismatch": "Passwords do not match",
+      "generalError": "An error occurred",
+      "resetCodeSent": "Reset code sent to your email",
+      "resetCodeError": "Failed to send reset code",
+      "resetTokenInvalid": "Invalid reset token. Please try again.",
+      "resetSuccess": "Password reset successfully",
+      "resetError": "Failed to reset password"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "passwordPlaceholder": "Leave blank to keep current password"
+    },
+    "actions": {
+      "edit": "Edit Profile",
+      "save": "Save Changes",
+      "cancel": "Cancel"
+    },
+    "stats": {
+      "title": "My Statistics",
+      "activeReservations": "Active Reservations",
+      "totalBooks": "Total Books Reserved"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
+  }
+} 

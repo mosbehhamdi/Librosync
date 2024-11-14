@@ -1,5 +1,5 @@
 <template>
-  <div class="queue-position-wrapper" v-if="showPosition">
+  <div :class="['queue-position', rtlClass]" class="queue-position-wrapper" v-if="showPosition">
     <div class="queue-position">
       <ion-chip :color="positionColor" class="position-chip">
         <ion-icon :icon="timeOutline" v-if="isPending"></ion-icon>
@@ -21,6 +21,7 @@
 import { computed } from 'vue';
 import { IonChip, IonLabel, IonIcon, IonNote } from '@ionic/vue';
 import { timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { useRtl } from '@/composables/useRtl';
 
 interface Props {
   position: number | null;
@@ -57,6 +58,8 @@ const positionText = computed(() => {
   if (!isPending.value) return 'Ready for pickup';
   return `Queue Position: ${props.position}`;
 });
+
+const { rtlClass } = useRtl();
 </script>
 
 <style scoped>

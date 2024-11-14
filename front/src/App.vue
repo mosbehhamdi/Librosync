@@ -1,15 +1,10 @@
 <template>
-  <ion-app>
+  <ion-app :class="rtlClass" :style="rtlStyle">
     <template v-if="authStore.isAuthenticated">
-      <template v-if="authStore.user?.is_admin">
+      <main-layout v-if="!isGuestRoute">
         <router-view></router-view>
-      </template>
-      <template v-else>
-        <user-layout v-if="!isGuestRoute">
-          <router-view></router-view>
-        </user-layout>
-        <router-view v-else></router-view>
-      </template>
+      </main-layout>
+      <router-view v-else></router-view>
     </template>
     <router-view v-else></router-view>
   </ion-app>
@@ -18,12 +13,14 @@
 <script setup lang="ts">
 import { IonApp } from '@ionic/vue';
 import { useAuthStore } from '@/stores/auth';
-import UserLayout from '@/components/user/UserLayout.vue';
+import MainLayout from '@/components/common/MainLayout.vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useRtl } from '@/composables/useRtl';
 
 const authStore = useAuthStore();
 const route = useRoute();
+const { rtlClass, rtlStyle } = useRtl();
 
 const isGuestRoute = computed(() => {
   return route.meta.requiresGuest === true;

@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Expired Reservations</ion-title>
+        <ion-title>{{ t('reservations.labels.expiredTitle') }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -13,9 +13,9 @@
             <h2>{{ reservation.book.title }}</h2>
             <p>{{ reservation.book.authors.join(', ') }}</p>
             <p>
-              <ion-badge color="danger">Expired</ion-badge>
+              <ion-badge color="danger">{{ t('reservations.status.expired') }}</ion-badge>
               <span class="ml-2">
-                Expired on: {{ formatDate(reservation.expires_at) }}
+                {{ t('reservations.labels.expiredOn') }}: {{ formatDate(reservation.expires_at) }}
               </span>
             </p>
           </ion-label>
@@ -27,9 +27,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useReservationStore } from '@/stores/reservation';
 import { format } from 'date-fns';
 
+const { t } = useI18n();
 const reservationStore = useReservationStore();
 const expiredReservations = ref([]);
 

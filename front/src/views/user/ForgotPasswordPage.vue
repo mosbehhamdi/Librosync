@@ -1,93 +1,98 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Reset Password</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content class="ion-padding">
-      <div class="max-w-md mx-auto">
-        <div v-if="step === 1">
-          <h2 class="text-xl font-semibold mb-4">Forgot Password</h2>
-          <form @submit.prevent="sendResetCode">
-            <ion-item>
-              <ion-label position="floating">Email</ion-label>
-              <ion-input
+      <div class="min-h-screen flex items-center justify-center">
+        <div class="max-w-md w-full space-y-8 p-6 bg-white rounded-xl shadow-lg">
+          <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-900">{{ t('auth.forgotPassword.title') }}</h2>
+            <p class="mt-2 text-sm text-gray-600">
+              {{ t('auth.forgotPassword.description') }}
+            </p>
+          </div>
+
+          <!-- Email Form -->
+          <form v-if="!codeSent" @submit.prevent="handleSendCode" class="mt-8 space-y-6">
+            <div>
+              <label for="email" class="sr-only">{{ t('auth.fields.email') }}</label>
+              <input
+                id="email"
                 v-model="email"
                 type="email"
                 required
-              ></ion-input>
-            </ion-item>
-            
-            <ion-button
-              type="submit"
-              expand="block"
-              class="mt-4"
-              :disabled="isLoading"
-            >
-              <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
-              <span v-else>Send Reset Code</span>
-            </ion-button>
-          </form>
-        </div>
+                class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                :placeholder="t('auth.fields.emailPlaceholder')"
+              />
+            </div>
 
-        <div v-if="step === 2">
-          <h2 class="text-xl font-semibold mb-4">Enter Reset Code</h2>
-          <form @submit.prevent="verifyCode">
-            <ion-item>
-              <ion-label position="floating">Code</ion-label>
-              <ion-input
-                v-model="code"
-                type="text"
-                maxlength="6"
-                required
-              ></ion-input>
-            </ion-item>
-            
-            <ion-button
-              type="submit"
-              expand="block"
-              class="mt-4"
-              :disabled="isLoading"
-            >
-              <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
-              <span v-else>Verify Code</span>
-            </ion-button>
+            <div>
+              <button
+                type="submit"
+                :disabled="isLoading"
+                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
+                <span v-else>{{ t('auth.forgotPassword.sendCode') }}</span>
+              </button>
+            </div>
           </form>
-        </div>
 
-        <div v-if="step === 3">
-          <h2 class="text-xl font-semibold mb-4">Set New Password</h2>
-          <form @submit.prevent="resetPassword">
-            <ion-item>
-              <ion-label position="floating">New Password</ion-label>
-              <ion-input
-                v-model="password"
-                type="password"
-                required
-              ></ion-input>
-            </ion-item>
+          <!-- Reset Password Form -->
+          <form v-else @submit.prevent="handleResetPassword" class="mt-8 space-y-6">
+            <div class="rounded-md shadow-sm space-y-4">
+              <div>
+                <label for="code" class="sr-only">{{ t('auth.fields.resetCode') }}</label>
+                <input
+                  id="code"
+                  v-model="resetCode"
+                  type="text"
+                  required
+                  class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  :placeholder="t('auth.fields.resetCodePlaceholder')"
+                />
+              </div>
 
-            <ion-item>
-              <ion-label position="floating">Confirm Password</ion-label>
-              <ion-input
-                v-model="passwordConfirmation"
-                type="password"
-                required
-              ></ion-input>
-            </ion-item>
-            
-            <ion-button
-              type="submit"
-              expand="block"
-              class="mt-4"
-              :disabled="isLoading"
-            >
-              <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
-              <span v-else>Reset Password</span>
-            </ion-button>
+              <div>
+                <label for="new-password" class="sr-only">{{ t('auth.fields.newPassword') }}</label>
+                <input
+                  id="new-password"
+                  v-model="newPassword"
+                  type="password"
+                  required
+                  class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  :placeholder="t('auth.fields.newPasswordPlaceholder')"
+                />
+              </div>
+
+              <div>
+                <label for="confirm-password" class="sr-only">{{ t('auth.fields.confirmPassword') }}</label>
+                <input
+                  id="confirm-password"
+                  v-model="confirmPassword"
+                  type="password"
+                  required
+                  class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  :placeholder="t('auth.fields.confirmPasswordPlaceholder')"
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                :disabled="isLoading || !isValidReset"
+                class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
+                <span v-else>{{ t('auth.forgotPassword.resetPassword') }}</span>
+              </button>
+            </div>
           </form>
+
+          <div class="text-center">
+            <router-link to="/login" class="text-indigo-600 hover:text-indigo-500">
+              {{ t('auth.forgotPassword.backToLogin') }}
+            </router-link>
+          </div>
         </div>
       </div>
     </ion-content>
@@ -95,145 +100,80 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonButton,
-  IonSpinner,
-  toastController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonSpinner, toastController } from '@ionic/vue';
+import { useLanguage } from '@/composables/useLanguage';
 
+const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
+const { getStoredLanguage, setLanguage } = useLanguage();
 
-const step = ref(1);
-const isLoading = ref(false);
 const email = ref('');
-const code = ref('');
-const token = ref('');
-const password = ref('');
-const passwordConfirmation = ref('');
+const resetCode = ref('');
+const newPassword = ref('');
+const confirmPassword = ref('');
+const isLoading = ref(false);
+const codeSent = ref(false);
 
-const sendResetCode = async () => {
+const isValidReset = computed(() => {
+  return resetCode.value &&
+         newPassword.value.length >= 8 &&
+         newPassword.value === confirmPassword.value;
+});
+
+const presentToast = async (message: string, color: 'success' | 'danger' = 'danger') => {
+  const toast = await toastController.create({
+    message: t(message),
+    duration: 3000,
+    color
+  });
+  await toast.present();
+};
+
+const handleSendCode = async () => {
+  if (!email.value) return;
+
   isLoading.value = true;
   try {
-    await authStore.forgotPassword(email.value);
-    step.value = 2;
-    const toast = await toastController.create({
-      message: 'Reset code sent to your email',
-      duration: 2000,
-      color: 'success'
-    });
-    await toast.present();
+    await authStore.sendResetCode(email.value);
+    codeSent.value = true;
+    await presentToast('toast.auth.resetCodeSent', 'success');
   } catch (error) {
-    const toast = await toastController.create({
-      message: 'Failed to send reset code',
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
+    await presentToast('toast.auth.resetCodeError');
   } finally {
     isLoading.value = false;
   }
 };
 
-const verifyCode = async () => {
-  isLoading.value = true;
-  try {
-    const response = await authStore.verifyResetCode(email.value, code.value);
-    console.log('Verification response:', response);
-    
-    if (response.token) {
-      token.value = response.token;
-      step.value = 3;
-      const toast = await toastController.create({
-        message: 'Code verified successfully',
-        duration: 2000,
-        color: 'success'
-      });
-      await toast.present();
-    } else {
-      throw new Error('No token received');
-    }
-  } catch (error: any) {
-    console.error('Verification error:', error);
-    const message = error.response?.data?.message || 'Invalid or expired code';
-    const toast = await toastController.create({
-      message,
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const resetPassword = async () => {
-  if (password.value !== passwordConfirmation.value) {
-    const toast = await toastController.create({
-      message: 'Passwords do not match',
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
-    return;
-  }
-
-  if (!token.value) {
-    const toast = await toastController.create({
-      message: 'Invalid reset token. Please try again.',
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
+const handleResetPassword = async () => {
+  if (!isValidReset.value) {
+    await presentToast('toast.auth.invalidInput');
     return;
   }
 
   isLoading.value = true;
   try {
-    console.log('Resetting password with data:', {
-      email: email.value,
-      token: token.value,
-      password: password.value,
-      password_confirmation: passwordConfirmation.value
-    });
-
     await authStore.resetPassword({
       email: email.value,
-      token: token.value,
-      password: password.value,
-      password_confirmation: passwordConfirmation.value
+      code: resetCode.value,
+      password: newPassword.value,
+      password_confirmation: confirmPassword.value
     });
-    
-    const toast = await toastController.create({
-      message: 'Password reset successfully',
-      duration: 2000,
-      color: 'success'
-    });
-    await toast.present();
-    
+    await presentToast('toast.auth.resetSuccess', 'success');
     router.push('/login');
-  } catch (error: any) {
-    console.error('Reset password error:', error);
-    const message = error.response?.data?.message || 'Failed to reset password';
-    const toast = await toastController.create({
-      message,
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
+  } catch (error) {
+    await presentToast('toast.auth.resetError');
   } finally {
     isLoading.value = false;
   }
 };
+
+onMounted(() => {
+  const storedLang = getStoredLanguage();
+  setLanguage(storedLang);
+});
 </script>

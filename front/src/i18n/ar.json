@@ -1,0 +1,192 @@
+{
+    "common": {
+      "actions": {
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "close": "إغلاق",
+        "confirm": "تأكيد",
+        "search": "بحث",
+        "filter": "تصفية",
+        "logout": "تسجيل الخروج",
+        "back": "رجوع"
+      },
+      "status": {
+        "success": "نجاح",
+        "error": "خطأ",
+        "loading": "جاري التحميل"
+      }
+    },
+    "menu": {
+      "title": "القائمة",
+      "adminMenu": "قائمة المسؤول",
+      "browseBooks": "تصفح الكتب",
+      "myReservations": "حجوزاتي",
+      "myProfile": "ملفي الشخصي",
+      "settings": "الإعدادات",
+      "adminDashboard": "لوحة تحكم المسؤول",
+      "bookManagement": "إدارة الكتب",
+      "reservationManagement": "إدارة الحجوزات",
+      "userManagement": "إدارة المستخدمين",
+      "library": "المكتبة"
+    },
+    "books": {
+      "management": "إدارة الكتب",
+      "addBook": "إضافة كتاب",
+      "editBook": "تعديل الكتاب",
+      "deleteBook": "حذف الكتاب",
+      "fields": {
+        "title": "العنوان",
+        "authors": "المؤلفون",
+        "copies": "النسخ",
+        "available": "المتوفر",
+        "category": "التصنيف",
+        "isbn": "الرقم التسلسلي",
+        "publisher": "الناشر"
+      }
+    },
+    "reservations": {
+      "status": {
+        "pending": "قيد الانتظار",
+        "ready": "جاهز للاستلام",
+        "accepted": "مقبول",
+        "delivered": "تم التسليم",
+        "cancelled": "ملغى",
+        "returned": "تم الإرجاع"
+      },
+      "actions": {
+        "reserve": "حجز",
+        "cancel": "إلغاء الحجز",
+        "accept": "قبول",
+        "deliver": "تسليم",
+        "return": "إرجاع"
+      },
+      "noActive": "لا توجد حجوزات نشطة",
+      "noPast": "لا توجد حجوزات سابقة",
+      "expires": "تنتهي في",
+      "due": "مستحق",
+      "reservedBy": "محجوز من قبل",
+      "historyTitle": "سجل الحجوزات"
+    },
+    "auth": {
+      "login": {
+        "title": "تسجيل الدخول",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "submit": "دخول",
+        "register": "إنشاء حساب جديد"
+      },
+      "register": {
+        "title": "إنشاء حساب",
+        "name": "الاسم الكامل",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "submit": "تسجيل",
+        "login": "لديك حساب؟ سجل دخول"
+      }
+    },
+    "admin": {
+      "dashboard": "لوحة التحكم",
+      "books": "الكتب",
+      "reservations": {
+        "activeTitle": "الحجوزات النشطة",
+        "pastTitle": "الحجوزات السابقة",
+        "historyTitle": "سجل الحجوزات",
+        "queuePosition": "الموقع في قائمة الانتظار",
+        "reservedOn": "تم الحجز في"
+      },
+      "users": "المستخدمون",
+      "filters": {
+        "filterByStatus": "تصفية حسب الحالة",
+        "search": "بحث",
+        "noResults": "لم يتم العثور على نتائج",
+        "searchReservations": "البحث عن الحجوزات..."
+      },
+      "confirmations": {
+        "cancelHeader": "إلغاء الحجز",
+        "acceptHeader": "قبول الحجز",
+        "deliverHeader": "تسليم الكتاب",
+        "returnHeader": "إرجاع الكتاب",
+        "cancel": "هل أنت متأكد من إلغاء هذا الحجز؟",
+        "accept": "هل أنت متأكد من قبول هذا الحجز؟",
+        "deliver": "هل أنت متأكد من تسليم هذا الكتاب؟",
+        "return": "هل أنت متأكد من إرجاع هذا الكتاب؟"
+      },
+      "actions": {
+        "successMessages": {
+          "cancel": "تم إلغاء الحجز بنجاح",
+          "accept": "تم قبول الحجز بنجاح",
+          "deliver": "تم تسليم الكتاب بنجاح",
+          "return": "تم إرجاع الكتاب بنجاح"
+        }
+      }
+    },
+    "profile": {
+      "stats": {
+        "activeReservations": "الحجوزات النشطة",
+        "totalReservations": "إجمالي الحجوزات"
+      },
+      "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
+      "updateError": "فشل في تحديث الملف الشخصي"
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "profile": {
+        "title": "إعدادات الملف الشخصي",
+        "role": "نوع الحساب",
+        "adminRole": "مدير",
+        "userRole": "مستخدم",
+        "edit": "تعديل الملف الشخصي"
+      },
+      "language": {
+        "title": "إعدادات اللغة",
+        "select": "اختر اللغة"
+      }
+    },
+    "bookManagement": {
+      "title": "إدارة الكتب",
+      "addBook": "إضافة كتاب",
+      "editBook": "تعديل الكتاب",
+      "deleteBook": "حذف الكتاب",
+      "fields": {
+        "title": "العنوان",
+        "authors": "المؤلفون",
+        "copies": "النسخ",
+        "available": "المتوفر",
+        "category": "التصنيف",
+        "isbn": "الرقم التسلسلي",
+        "publisher": "الناشر"
+      }
+    },
+    "user": {
+      "dashboard": {
+        "title": "لوحة التحكم",
+        "welcome": "مرحباً بعودتك، {name}!",
+        "description": "هذه لوحة التحكم الشخصية الخاصة بك. هنا يمكنك إدارة تبك ومتابعة تقدم القراءة."
+      }
+    },
+    "toast": {
+      "auth": {
+        "resetCodeSent": "تم إرسال رمز إعادة التعيين إلى بريدك الإلكتروني",
+        "resetCodeError": "فشل في إرسال رمز إعادة التعيين",
+        "codeVerified": "تم التحقق من الرمز بنجاح",
+        "verificationError": "رمز التحقق غير صالح أو منتهي الصلاحية",
+        "passwordMismatch": "كلمات المرور غير متطابقة",
+        "resetTokenInvalid": "رمز إعادة التعيين غير صالح. يرجى المحاولة مرة أخرى.",
+        "resetSuccess": "تم إعادة تعيين كلمة المرور بنجاح",
+        "resetError": "فشل في إعادة تعيين كلمة المرور"
+      },
+      "reservation": {
+        "cancelSuccess": "تم إلغاء الحجز بنجاح",
+        "createSuccess": "تم إنشاء الحجز بنجاح",
+        "updateSuccess": "تم تحديث الحجز بنجاح",
+        "error": "فشل في إجراء الحجز",
+        "generalError": "فشل في معالجة الحجز",
+        "limitExceeded": "تم الوصول إلى الحد الأقصى للحجوزات",
+        "overdueBooks": "لديك كتب متأخرة"
+      }
+    }
+  }
+  

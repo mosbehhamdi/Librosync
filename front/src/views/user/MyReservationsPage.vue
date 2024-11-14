@@ -3,25 +3,25 @@
     <ion-content class="ion-padding">
       <!-- Horizontal Menu for Reservation Types -->
       <ion-segment v-model="selectedSegment" @ionChange="handleSegmentChange">
-        <ion-segment-button value="active">Active Reservations</ion-segment-button>
-        <ion-segment-button value="past">Past Reservations</ion-segment-button>
-        <ion-segment-button value="history">Reservation History</ion-segment-button>
+        <ion-segment-button value="active">{{ t('reservations.labels.activeTitle') }}</ion-segment-button>
+        <ion-segment-button value="past">{{ t('reservations.labels.pastTitle') }}</ion-segment-button>
+        <ion-segment-button value="history">{{ t('reservations.labels.historyTitle') }}</ion-segment-button>
       </ion-segment>
 
-      <!-- Status Filter for Active/Past Reservations -->
+      <!-- Status Filter -->
       <ion-card class="mb-4" v-if="['active', 'past'].includes(selectedSegment)">
         <ion-card-content>
           <ion-item>
-            <ion-select v-model="selectedStatus" placeholder="Filter by Status" @ionChange="handleStatusChange">
+            <ion-select v-model="selectedStatus" :placeholder="t('reservations.filters.statusPlaceholder')" @ionChange="handleStatusChange">
               <template v-if="selectedSegment === 'active'">
-                <ion-select-option value="pending">Waiting</ion-select-option>
-                <ion-select-option value="ready">Ready for Pickup</ion-select-option>
-                <ion-select-option value="accepted">Accepted</ion-select-option>
-                <ion-select-option value="delivered">Currently Delivered</ion-select-option>
+                <ion-select-option value="pending">{{ t('reservations.status.pending') }}</ion-select-option>
+                <ion-select-option value="ready">{{ t('reservations.status.ready') }}</ion-select-option>
+                <ion-select-option value="accepted">{{ t('reservations.status.accepted') }}</ion-select-option>
+                <ion-select-option value="delivered">{{ t('reservations.status.delivered') }}</ion-select-option>
               </template>
               <template v-else>
-                <ion-select-option value="delivered">Delivered</ion-select-option>
-                <ion-select-option value="cancelled">Cancelled</ion-select-option>
+                <ion-select-option value="delivered">{{ t('reservations.status.delivered') }}</ion-select-option>
+                <ion-select-option value="cancelled">{{ t('reservations.status.cancelled') }}</ion-select-option>
               </template>
             </ion-select>
           </ion-item>
@@ -37,7 +37,7 @@
               <p>{{ reservation.book?.authors.join(', ') }}</p>
               <div class="reservation-status">
                 <ion-badge :color="getStatusColor(reservation.status)">
-                  {{ getStatusText(reservation.status) }}
+                  {{ t(`reservations.status.${reservation.status}`) }}
                 </ion-badge>
                 <QueuePositionDisplay
                   :position="reservation.queue_position"
@@ -45,7 +45,7 @@
                   :estimatedWaitTime="reservation.book?.waiting_time"
                 />
                 <span v-if="reservation.expires_at" class="ml-2">
-                  Expires: {{ formatDate(reservation.expires_at) }}
+                  {{ t('reservations.labels.expiresOn') }}: {{ formatDate(reservation.expires_at) }}
                 </span>
               </div>
             </ion-label>
@@ -55,11 +55,11 @@
               color="danger"
               @click="confirmCancel(reservation)"
             >
-              Cancel
+              {{ t('common.actions.cancel') }}
             </ion-button>
           </ion-item>
           <ion-item v-if="filteredActiveReservations.length === 0">
-            <ion-label class="ion-text-center">No active reservations</ion-label>
+            <ion-label class="ion-text-center">{{ t('reservations.labels.noActive') }}</ion-label>
           </ion-item>
         </ion-list>
       </div>
@@ -73,33 +73,13 @@
               <p>{{ reservation.book?.authors.join(', ') }}</p>
               <p>
                 <ion-badge :color="getStatusColor(reservation.status)">
-                  {{ getStatusText(reservation.status) }}
+                  {{ t(`reservations.status.${reservation.status}`) }}
                 </ion-badge>
               </p>
             </ion-label>
           </ion-item>
           <ion-item v-if="filteredPastReservations.length === 0">
-            <ion-label class="ion-text-center">No past reservations</ion-label>
-          </ion-item>
-        </ion-list>
-      </div>
-
-      <!-- Reservation History -->
-      <div v-else-if="selectedSegment === 'history'">
-        <ion-list>
-          <ion-item v-for="reservation in reservationStore.history" :key="reservation.id">
-            <ion-label>
-              <h2 class="text-lg font-semibold">{{ reservation.book?.title }}</h2>
-              <p>{{ reservation.book?.authors.join(', ') }}</p>
-              <p>
-                <ion-badge :color="getStatusColor(reservation.status)">
-                  {{ getStatusText(reservation.status) }}
-                </ion-badge>
-                <span class="ml-2">
-                  Reserved on: {{ formatDate(reservation.created_at) }}
-                </span>
-              </p>
-            </ion-label>
+            <ion-label class="ion-text-center">{{ t('reservations.labels.noPast') }}</ion-label>
           </ion-item>
         </ion-list>
       </div>
@@ -113,10 +93,14 @@ import { useReservationStore } from '@/stores/reservation';
 import { alertController } from '@ionic/vue';
 import { format } from 'date-fns';
 import QueuePositionDisplay from '@/components/QueuePositionDisplay.vue';
+import { useToast } from '@/composables/useToast';
+import { useI18n } from 'vue-i18n';
 
 const reservationStore = useReservationStore();
 const selectedSegment = ref('active');
 const selectedStatus = ref('');
+const { showToast } = useToast();
+const { t } = useI18n();
 
 onMounted(async () => {
   await reservationStore.fetchUserReservations();
@@ -178,14 +162,7 @@ const getStatusColor = (status: string) => {
 };
 
 const getStatusText = (status: string) => {
-  const texts = {
-    pending: 'Waiting',
-    ready: 'Ready for Pickup',
-    accepted: 'Accepted',
-    delivered: 'Delivered',
-    cancelled: 'Cancelled'
-  };
-  return texts[status] || status;
+  return t(`reservations.status.${status}`);
 };
 
 const formatDate = (date: string) => {
@@ -194,16 +171,16 @@ const formatDate = (date: string) => {
 
 const confirmCancel = async (reservation) => {
   const alert = await alertController.create({
-    header: 'Cancel Reservation',
-    message: 'Are you sure you want to cancel this reservation?',
+    header: t('reservations.cancel.title'),
+    message: t('reservations.cancel.message'),
     buttons: [
       {
-        text: 'No',
+        text: t('common.actions.cancel'),
         role: 'cancel'
       },
       {
-        text: 'Yes',
-        role: 'confirm',
+        text: t('common.actions.confirm'),
+        role: 'destructive',
         handler: () => cancelReservation(reservation.id)
       }
     ]
@@ -213,12 +190,18 @@ const confirmCancel = async (reservation) => {
 
 const cancelReservation = async (id: number) => {
   try {
-    const response = await reservationStore.userReservationAction('cancel', id);
-    await reservationStore.fetchUserReservations(); // Refresh the list
-    await presentToast('Reservation cancelled successfully', 'success');
+    await reservationStore.userReservationAction('cancel', id);
+    await reservationStore.fetchUserReservations();
+    await showToast('toast.reservation.cancelSuccess', { 
+      color: 'success',
+      translate: true 
+    });
   } catch (error) {
     console.error('Error cancelling reservation:', error);
-    await presentToast('Failed to cancel reservation', 'danger');
+    await showToast('toast.reservation.error', { 
+      color: 'danger',
+      translate: true 
+    });
   }
 };
 </script> 

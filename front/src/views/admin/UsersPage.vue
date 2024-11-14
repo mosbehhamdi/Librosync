@@ -1,39 +1,36 @@
 <template>
-  <admin-layout>
-    <ion-content class="ion-padding">
-      <h1>User Management</h1>
-      
-      <!-- Search and Filter -->
-      <search-filter 
-        :initialSearch="filters.search" 
-        label="Search users..."
-        @search="handleSearch" 
-      />
+  <ion-content class="ion-padding">
+    <h1>User Management</h1>
+    
+    <!-- Search and Filter -->
+    <search-filter 
+      :initialSearch="filters.search" 
+      label="Search users..."
+      @search="handleSearch" 
+    />
 
-      <ion-list>
-        <ion-item v-for="user in filteredUsers" :key="user.id">
-          <ion-label>
-            <h2>{{ user.name }}</h2>
-            <p>{{ user.email }}</p>
-            <p>{{ user.email_verified_at ? 'Verified' : 'Not Verified' }}</p>
-          </ion-label>
-          
-          <ion-button 
-            slot="end" 
-            color="danger"
-            @click="confirmDelete(user)"
-          >
-            Delete
-          </ion-button>
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </admin-layout>
+    <ion-list>
+      <ion-item v-for="user in filteredUsers" :key="user.id">
+        <ion-label>
+          <h2>{{ user.name }}</h2>
+          <p>{{ user.email }}</p>
+          <p>{{ user.email_verified_at ? 'Verified' : 'Not Verified' }}</p>
+        </ion-label>
+        
+        <ion-button 
+          slot="end" 
+          color="danger"
+          @click="confirmDelete(user)"
+        >
+          Delete
+        </ion-button>
+      </ion-item>
+    </ion-list>
+  </ion-content>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import AdminLayout from '@/components/admin/AdminLayout.vue';
 import { useAdminStore } from '@/stores/admin';
 import { IonContent, IonList, IonItem, IonLabel, 
          IonButton, alertController } from '@ionic/vue';

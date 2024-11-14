@@ -3,13 +3,13 @@
     <div class="max-w-2xl mx-auto">
       <ion-card>
         <ion-card-header>
-          <ion-card-title>My Profile</ion-card-title>
+          <ion-card-title>{{ t('profile.title') }}</ion-card-title>
         </ion-card-header>
 
         <ion-card-content>
           <ion-list>
             <ion-item>
-              <ion-label position="stacked">Name</ion-label>
+              <ion-label position="stacked">{{ t('profile.fields.name') }}</ion-label>
               <ion-input
                 v-model="profileData.name"
                 :readonly="!isEditing"
@@ -18,7 +18,7 @@
             </ion-item>
 
             <ion-item>
-              <ion-label position="stacked">Email</ion-label>
+              <ion-label position="stacked">{{ t('profile.fields.email') }}</ion-label>
               <ion-input
                 v-model="profileData.email"
                 readonly
@@ -27,7 +27,7 @@
             </ion-item>
 
             <ion-item v-if="isEditing">
-              <ion-label position="stacked">Current Password</ion-label>
+              <ion-label position="stacked">{{ t('profile.fields.currentPassword') }}</ion-label>
               <ion-input
                 v-model="profileData.current_password"
                 type="password"
@@ -36,16 +36,16 @@
             </ion-item>
 
             <ion-item v-if="isEditing">
-              <ion-label position="stacked">New Password</ion-label>
+              <ion-label position="stacked">{{ t('profile.fields.newPassword') }}</ion-label>
               <ion-input
                 v-model="profileData.password"
                 type="password"
-                placeholder="Leave blank to keep current password"
+                :placeholder="t('profile.fields.passwordPlaceholder')"
               ></ion-input>
             </ion-item>
 
             <ion-item v-if="isEditing">
-              <ion-label position="stacked">Confirm New Password</ion-label>
+              <ion-label position="stacked">{{ t('profile.fields.confirmPassword') }}</ion-label>
               <ion-input
                 v-model="profileData.password_confirmation"
                 type="password"
@@ -59,7 +59,7 @@
               expand="block"
               @click="startEditing"
             >
-              Edit Profile
+              {{ t('profile.actions.edit') }}
             </ion-button>
 
             <ion-button
@@ -70,7 +70,7 @@
               :disabled="isSaving"
             >
               <ion-spinner v-if="isSaving" name="crescent"></ion-spinner>
-              <span v-else>Save Changes</span>
+              <span v-else>{{ t('profile.actions.save') }}</span>
             </ion-button>
 
             <ion-button
@@ -79,7 +79,7 @@
               fill="clear"
               @click="cancelEditing"
             >
-              Cancel
+              {{ t('profile.actions.cancel') }}
             </ion-button>
           </div>
         </ion-card-content>
@@ -88,20 +88,20 @@
       <!-- Statistics Card -->
       <ion-card class="mt-4">
         <ion-card-header>
-          <ion-card-title>My Statistics</ion-card-title>
+          <ion-card-title>{{ t('profile.stats.title') }}</ion-card-title>
         </ion-card-header>
 
         <ion-card-content>
           <ion-list>
             <ion-item>
               <ion-label>
-                <h2>Active Reservations</h2>
+                <h2>{{ t('profile.stats.activeReservations') }}</h2>
                 <p>{{ stats.activeReservations || 0 }}</p>
               </ion-label>
             </ion-item>
             <ion-item>
               <ion-label>
-                <h2>Total Books Reserved</h2>
+                <h2>{{ t('profile.stats.totalBooks') }}</h2>
                 <p>{{ stats.totalReservations || 0 }}</p>
               </ion-label>
             </ion-item>
@@ -114,8 +114,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
-import { toastController } from '@ionic/vue';
+import { useToast } from '@/composables/useToast';
 import {
   IonContent,
   IonCard,
@@ -130,7 +131,10 @@ import {
   IonSpinner
 } from '@ionic/vue';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
+const { showToast } = useToast();
+
 const isEditing = ref(false);
 const isSaving = ref(false);
 
@@ -146,16 +150,6 @@ const stats = ref({
   activeReservations: 0,
   totalReservations: 0
 });
-
-const presentToast = async (message: string, color: 'success' | 'danger' = 'success') => {
-  const toast = await toastController.create({
-    message,
-    duration: 3000,
-    color,
-    position: 'bottom'
-  });
-  await toast.present();
-};
 
 const startEditing = () => {
   isEditing.value = true;
@@ -186,7 +180,7 @@ const saveProfile = async () => {
     // Then handle password update if provided
     if (profileData.value.password) {
       if (!profileData.value.current_password) {
-        await presentToast('Current password is required to change password', 'danger');
+        await showToast('toast.profile.updateError', { color: 'danger' });
         return;
       }
       
@@ -198,15 +192,10 @@ const saveProfile = async () => {
     }
 
     isEditing.value = false;
-    await presentToast('Profile updated successfully', 'success');
+    await showToast('toast.profile.updateSuccess', { color: 'success' });
   } catch (error: any) {
     console.error('Profile update error:', error);
-    await presentToast(
-      error.response?.data?.message || 
-      error.response?.data?.errors?.current_password?.[0] ||
-      'Error updating profile', 
-      'danger'
-    );
+    await showToast('toast.profile.updateError', { color: 'danger' });
   } finally {
     isSaving.value = false;
   }
@@ -215,17 +204,17 @@ const saveProfile = async () => {
 // Add validation before save
 const validateForm = () => {
   if (!profileData.value.name.trim()) {
-    presentToast('Name is required', 'danger');
+    showToast('toast.profile.invalidInput', { color: 'danger' });
     return false;
   }
   
   if (profileData.value.password && profileData.value.password.length < 8) {
-    presentToast('Password must be at least 8 characters', 'danger');
+    showToast('toast.profile.invalidInput', { color: 'danger' });
     return false;
   }
   
   if (profileData.value.password !== profileData.value.password_confirmation) {
-    presentToast('Passwords do not match', 'danger');
+    showToast('toast.profile.invalidInput', { color: 'danger' });
     return false;
   }
   

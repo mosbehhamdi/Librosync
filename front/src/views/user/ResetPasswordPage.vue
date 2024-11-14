@@ -2,14 +2,14 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Reset Password</ion-title>
+        <ion-title>{{ t('auth.resetPassword.title') }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="ion-padding">
       <form @submit.prevent="handleSubmit">
         <ion-item>
-          <ion-label position="floating">New Password</ion-label>
+          <ion-label position="floating">{{ t('auth.resetPassword.newPassword') }}</ion-label>
           <ion-input
             type="password"
             v-model="password"
@@ -20,7 +20,7 @@
         </ion-item>
 
         <ion-item>
-          <ion-label position="floating">Confirm Password</ion-label>
+          <ion-label position="floating">{{ t('auth.resetPassword.confirmPassword') }}</ion-label>
           <ion-input
             type="password"
             v-model="password_confirmation"
@@ -39,7 +39,7 @@
           :disabled="isLoading"
         >
           <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
-          <span v-else>Reset Password</span>
+          <span v-else>{{ t('auth.resetPassword.submit') }}</span>
         </ion-button>
       </form>
     </ion-content>
@@ -53,6 +53,9 @@ import { useAuthStore } from '@/stores/auth';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, 
          IonItem, IonLabel, IonInput, IonButton, IonSpinner, 
          IonNote, toastController } from '@ionic/vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
@@ -70,6 +73,7 @@ onMounted(() => {
   email.value = route.query.email as string;
 
   if (!token.value || !email.value) {
+    presentToast(t('auth.validation.missingToken'));
     router.push('/login');
   }
 });
@@ -84,21 +88,15 @@ const handleSubmit = async () => {
       password.value,
       password_confirmation.value
     );
-    await presentToast({
-      message: 'Password has been reset successfully',
-      duration: 3000,
-      color: 'success'
-    });
+    await presentToast(t('auth.resetPassword.success'), 'success');
     router.push('/login');
   } catch (error: any) {
     if (error.response?.data?.errors) {
       errors.value = error.response.data.errors;
     } else {
-      await presentToast({
-        message: error.response?.data?.message || 'An error occurred',
-        duration: 3000,
-        color: 'danger'
-      });
+      await presentToast(
+        t(error.response?.data?.message || 'auth.resetPassword.error')
+      );
     }
   } finally {
     isLoading.value = false;

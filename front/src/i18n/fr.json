@@ -1,0 +1,191 @@
+{
+    "common": {
+      "actions": {
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "close": "Fermer",
+        "confirm": "Confirmer",
+        "search": "Rechercher",
+        "filter": "Filtrer",
+        "logout": "Déconnexion",
+        "back": "Retour"
+      },
+      "status": {
+        "success": "Succès",
+        "error": "Erreur",
+        "loading": "Chargement"
+      }
+    },
+    "menu": {
+      "title": "Menu",
+      "adminMenu": "Menu Administrateur",
+      "browseBooks": "Parcourir les Livres",
+      "myReservations": "Mes Réservations",
+      "myProfile": "Mon Profil",
+      "settings": "Paramètres",
+      "adminDashboard": "Tableau de Bord Admin",
+      "bookManagement": "Gestion des Livres",
+      "reservationManagement": "Gestion des Réservations",
+      "userManagement": "Gestion des Utilisateurs",
+      "library": "Bibliothèque"
+    },
+    "books": {
+      "management": "Gestion des Livres",
+      "addBook": "Ajouter un Livre",
+      "editBook": "Modifier le Livre",
+      "deleteBook": "Supprimer le Livre",
+      "fields": {
+        "title": "Titre",
+        "authors": "Auteurs",
+        "copies": "Exemplaires",
+        "available": "Disponibles",
+        "category": "Catégorie",
+        "isbn": "ISBN",
+        "publisher": "Éditeur"
+      }
+    },
+    "reservations": {
+      "status": {
+        "pending": "En Attente",
+        "ready": "Prêt pour Récupération",
+        "accepted": "Accepté",
+        "delivered": "Livré",
+        "cancelled": "Annulé",
+        "returned": "Retourné"
+      },
+      "actions": {
+        "reserve": "Réserver",
+        "cancel": "Annuler la Réservation",
+        "accept": "Accepter",
+        "deliver": "Livrer",
+        "return": "Retourner"
+      },
+      "noActive": "Aucune réservation active",
+      "noPast": "Aucune réservation passée",
+      "expires": "Expire",
+      "due": "Dû",
+      "reservedBy": "Réservé par"
+    },
+    "auth": {
+      "login": {
+        "title": "Connectez-vous à votre compte",
+        "email": "Adresse email",
+        "password": "Mot de passe",
+        "submit": "Se connecter",
+        "register": "Créer un nouveau compte"
+      },
+      "register": {
+        "title": "Créer un compte",
+        "name": "Nom complet",
+        "email": "Adresse email",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "submit": "S'inscrire",
+        "login": "Déjà un compte ? Connectez-vous"
+      }
+    },
+    "admin": {
+      "dashboard": "Tableau de Bord",
+      "books": "Livres",
+      "reservations": {
+        "activeTitle": "Réservations Actives",
+        "pastTitle": "Réservations Passées",
+        "historyTitle": "Historique des Réservations",
+        "queuePosition": "Position dans la File",
+        "reservedOn": "Réservé le"
+      },
+      "users": "Utilisateurs",
+      "filters": {
+        "filterByStatus": "Filtrer par Statut",
+        "search": "Rechercher",
+        "noResults": "Aucun résultat trouvé",
+        "searchReservations": "Rechercher des réservations..."
+      },
+      "confirmations": {
+        "cancelHeader": "Annuler la Réservation",
+        "acceptHeader": "Accepter la Réservation",
+        "deliverHeader": "Livrer le Livre",
+        "returnHeader": "Retourner le Livre",
+        "cancel": "Êtes-vous sûr de vouloir annuler cette réservation ?",
+        "accept": "Êtes-vous sûr de vouloir accepter cette réservation ?",
+        "deliver": "Êtes-vous sûr de vouloir livrer ce livre ?",
+        "return": "Êtes-vous sûr de vouloir retourner ce livre ?"
+      },
+      "actions": {
+        "successMessages": {
+          "cancel": "Réservation annulée avec succès",
+          "accept": "Réservation acceptée avec succès",
+          "deliver": "Livre livré avec succès",
+          "return": "Livre retourné avec succès"
+        }
+      }
+    },
+    "profile": {
+      "stats": {
+        "activeReservations": "Réservations Actives",
+        "totalReservations": "Total des Réservations"
+      },
+      "updateSuccess": "Profil mis à jour avec succès",
+      "updateError": "Échec de la mise à jour du profil"
+    },
+    "settings": {
+      "title": "Paramètres",
+      "profile": {
+        "title": "Paramètres du Profil",
+        "role": "Type de Compte",
+        "adminRole": "Administrateur",
+        "userRole": "Utilisateur",
+        "edit": "Modifier le Profil"
+      },
+      "language": {
+        "title": "Paramètres de Langue",
+        "select": "Sélectionner la Langue"
+      }
+    },
+    "bookManagement": {
+      "title": "Gestion des Livres",
+      "addBook": "Ajouter un Livre",
+      "editBook": "Modifier le Livre",
+      "deleteBook": "Supprimer le Livre",
+      "fields": {
+        "title": "Titre",
+        "authors": "Auteurs",
+        "copies": "Exemplaires",
+        "available": "Disponibles",
+        "category": "Catégorie",
+        "isbn": "ISBN",
+        "publisher": "Éditeur"
+      }
+    },
+    "user": {
+      "dashboard": {
+        "title": "Tableau de Bord",
+        "welcome": "Bienvenue, {name} !",
+        "description": "Voici votre tableau de bord personnel. Ici, vous pouvez gérer vos livres et suivre votre progression de lecture."
+      }
+    },
+    "toast": {
+      "auth": {
+        "resetCodeSent": "Code de réinitialisation envoyé à votre email",
+        "resetCodeError": "Échec de l'envoi du code de réinitialisation",
+        "codeVerified": "Code vérifié avec succès",
+        "verificationError": "Code de vérification invalide ou expiré",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "resetTokenInvalid": "Jeton de réinitialisation invalide. Veuillez réessayer.",
+        "resetSuccess": "Mot de passe réinitialisé avec succès",
+        "resetError": "Échec de la réinitialisation du mot de passe"
+      },
+      "reservation": {
+        "cancelSuccess": "Réservation annulée avec succès",
+        "createSuccess": "Réservation créée avec succès",
+        "updateSuccess": "Réservation mise à jour avec succès",
+        "error": "Échec de l'action de réservation",
+        "generalError": "Échec du traitement de la réservation",
+        "limitExceeded": "Nombre maximum de réservations atteint",
+        "overdueBooks": "Vous avez des livres en retard"
+      }
+    }
+  }
+  

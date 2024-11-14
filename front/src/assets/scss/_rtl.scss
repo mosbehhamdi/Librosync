@@ -1,0 +1,72 @@
+// Toast specific RTL styles
+.toast-rtl {
+  direction: rtl;
+  text-align: right;
+  
+  .toast-message {
+    margin-right: 0;
+    margin-left: 16px;
+  }
+  
+  .toast-button {
+    margin-right: 16px;
+    margin-left: 0;
+  }
+}
+
+// Global RTL styles for Arabic
+[dir="rtl"] {
+  .ion-page {
+    direction: rtl;
+    text-align: right;
+  }
+  
+  // Item padding adjustments
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 0;
+    
+    ion-icon[slot="start"] {
+      margin-right: 0;
+      margin-left: 16px;
+    }
+    
+    ion-icon[slot="end"] {
+      margin-left: 0;
+      margin-right: 16px;
+    }
+  }
+  
+  // Button icon adjustments
+  ion-button ion-icon {
+    margin-right: 0;
+    margin-left: 8px;
+    
+    &[slot="end"] {
+      margin-left: 0;
+      margin-right: 8px;
+    }
+  }
+  
+  // Select adjustments
+  ion-select {
+    text-align: right;
+  }
+  
+  // Badge adjustments
+  ion-badge {
+    margin-left: 0;
+    margin-right: 8px;
+  }
+  
+  // Item divider adjustments
+  ion-item-divider {
+    text-align: right;
+  }
+  
+  // Menu button adjustments
+  ion-menu-button {
+    margin-left: 0;
+    margin-right: 8px;
+  }
+} 

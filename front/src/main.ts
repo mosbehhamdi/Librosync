@@ -1,9 +1,13 @@
-import { createApp } from 'vue'
+import { createApp,watch } from 'vue'
 import App from './App.vue'
 import router from './router';
 
 import { IonicVue } from '@ionic/vue';
 import { createPinia } from 'pinia';
+import { createI18n } from 'vue-i18n';
+import en from './i18n/en.json';
+import fr from './i18n/fr.json';
+import ar from './i18n/ar.json';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -35,11 +39,23 @@ import '@ionic/vue/css/palettes/dark.system.css';
 /* Theme variables and Tailwind */
 import './theme/variables.css';
 
+const storedLanguage = localStorage.getItem('user-language') || 'en';
 const pinia = createPinia();
+const i18n = createI18n({
+  legacy: false,
+  locale: storedLanguage,
+  fallbackLocale: 'en',
+  messages: { en, fr, ar }
+});
+
+// Set initial RTL direction
+document.documentElement.dir = localStorage.getItem('user-language') === 'ar' ? 'rtl' : 'ltr';
+
 const app = createApp(App)
   .use(IonicVue)
   .use(pinia)
-  .use(router);
+  .use(router)
+  .use(i18n);
 
 // Import and use auth store after pinia is installed
 import { useAuthStore } from '@/stores/auth';
@@ -52,4 +68,10 @@ router.isReady().then(() => {
   authStore.initializeAuth().finally(() => {
     app.mount('#app');
   });
+});
+
+// Watch for language changes
+watch(() => i18n.global.locale.value, (newLocale) => {
+  document.documentElement.lang = newLocale;
+  document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr';
 });

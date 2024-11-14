@@ -1,0 +1,62 @@
+.rtl-mode {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-mode ion-button[slot="end"] {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.rtl-mode ion-button[slot="start"] {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+.rtl-mode ion-icon[slot="start"] {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+.rtl-mode ion-icon[slot="end"] {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+.rtl-mode ion-back-button {
+  transform: scaleX(-1);
+}
+
+.rtl-mode .ion-text-right {
+  text-align: left !important;
+}
+
+.rtl-mode .ion-text-left {
+  text-align: right !important;
+}
+
+.rtl-mode ion-header {
+  direction: rtl;
+}
+
+.rtl-mode ion-toolbar {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.rtl-mode ion-title {
+  text-align: right;
+}
+
+.rtl-mode ion-back-button {
+  margin-left: 0;
+  margin-right: -4px;
+}
+
+.rtl-mode ion-buttons[slot="start"] {
+  order: 2;
+}
+
+.rtl-mode ion-buttons[slot="end"] {
+  order: 1;
+} 

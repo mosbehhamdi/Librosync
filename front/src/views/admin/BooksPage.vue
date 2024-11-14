@@ -1,92 +1,89 @@
 <template>
-  <admin-layout>
-    <ion-content class="ion-padding">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Books Management</h1>
-        <ion-button @click="openAddModal">
-          <ion-icon :icon="addOutline" slot="start"></ion-icon>
-          Add Book
-        </ion-button>
-      </div>
+  <ion-content class="ion-padding">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Books Management</h1>
+      <ion-button @click="openAddModal">
+        <ion-icon :icon="addOutline" slot="start"></ion-icon>
+        Add Book
+      </ion-button>
+    </div>
 
-      <!-- Search and Filter -->
-      <ion-grid>
-        <ion-row>
-          <ion-col> <search-filter :initialSearch="filters.search" :initialCategory="filters.category"
-              label="Search books..." @search="handleSearch" />
-          </ion-col>
-          <ion-col size="12" size-md="4">
-            <ion-card class="mb-4">
-              <ion-card-content>
-              <ion-item>
-                  <ion-select v-model="filters.category" label="Dewey Category" label-placement="floating"
-                    @ionChange="handleFilter">
-                    <ion-select-option value="">All Categories</ion-select-option>
-                    <ion-select-option v-for="cat in deweyCategories" :key="cat.code" :value="cat.code">
-                      {{ cat.code }} - {{ cat.name }}
-                    </ion-select-option>
-                  </ion-select>
-                </ion-item>
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+    <!-- Search and Filter -->
+    <ion-grid>
+      <ion-row>
+        <ion-col> <search-filter :initialSearch="filters.search" :initialCategory="filters.category"
+            label="Search books..." @search="handleSearch" />
+        </ion-col>
+        <ion-col size="12" size-md="4">
+          <ion-card class="mb-4">
+            <ion-card-content>
+            <ion-item>
+                <ion-select v-model="filters.category" label="Dewey Category" label-placement="floating"
+                  @ionChange="handleFilter">
+                  <ion-select-option value="">All Categories</ion-select-option>
+                  <ion-select-option v-for="cat in deweyCategories" :key="cat.code" :value="cat.code">
+                    {{ cat.code }} - {{ cat.name }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
 
-      <!-- Books List -->
-      <ion-list v-if="bookStore.adminBooks.length">
-        <ion-item v-for="book in bookStore.adminBooks" :key="book.id" class="mb-2">
-          <ion-label>
-            <h2 class="text-lg font-semibold">{{ book.title }}</h2>
-            <p class="text-sm text-gray-600">
-              <ion-icon :icon="peopleOutline" class="align-text-bottom"></ion-icon>
-              {{ book.authors.join(', ') }}
-            </p>
-            <div class="flex gap-4 mt-1 text-sm text-gray-600">
-              <span>
-                <ion-icon :icon="copyOutline" class="align-text-bottom"></ion-icon>
-                {{ book.available_copies }}/{{ book.copies_count }} copies
-              </span>
-              <span>
-                <ion-icon :icon="libraryOutline" class="align-text-bottom"></ion-icon>
-                {{ getDeweyCategory(book.dewey_category) }}
-              </span>
-            </div>
-          </ion-label>
-
-          <div slot="end" class="flex gap-2">
-            <ion-button fill="clear" @click="openEditModal(book)">
-              <ion-icon :icon="createOutline" slot="icon-only"></ion-icon>
-            </ion-button>
-            <ion-button fill="clear" color="danger" @click="confirmDelete(book)">
-              <ion-icon :icon="trashOutline" slot="icon-only"></ion-icon>
-            </ion-button>
+    <!-- Books List -->
+    <ion-list v-if="bookStore.adminBooks.length">
+      <ion-item v-for="book in bookStore.adminBooks" :key="book.id" class="mb-2">
+        <ion-label>
+          <h2 class="text-lg font-semibold">{{ book.title }}</h2>
+          <p class="text-sm text-gray-600">
+            <ion-icon :icon="peopleOutline" class="align-text-bottom"></ion-icon>
+            {{ book.authors.join(', ') }}
+          </p>
+          <div class="flex gap-4 mt-1 text-sm text-gray-600">
+            <span>
+              <ion-icon :icon="copyOutline" class="align-text-bottom"></ion-icon>
+              {{ book.available_copies }}/{{ book.copies_count }} copies
+            </span>
+            <span>
+              <ion-icon :icon="libraryOutline" class="align-text-bottom"></ion-icon>
+              {{ getDeweyCategory(book.dewey_category) }}
+            </span>
           </div>
-        </ion-item>
-      </ion-list>
+        </ion-label>
 
-      <!-- Empty state -->
-      <ion-text v-else-if="!bookStore.isLoading" color="medium" class="text-center p-4">
-        <p>{{ bookStore.error || 'No books found' }}</p>
-      </ion-text>
+        <div slot="end" class="flex gap-2">
+          <ion-button fill="clear" @click="openEditModal(book)">
+            <ion-icon :icon="createOutline" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" color="danger" @click="confirmDelete(book)">
+            <ion-icon :icon="trashOutline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-item>
+    </ion-list>
 
-      <!-- Pagination -->
-      <ion-infinite-scroll v-if="bookStore.pagination.currentPage < bookStore.pagination.lastPage"
-        @ionInfinite="loadMore" threshold="100px">
-        <ion-infinite-scroll-content loading-spinner="bubbles"
-          loading-text="Loading more books..."></ion-infinite-scroll-content>
-      </ion-infinite-scroll>
+    <!-- Empty state -->
+    <ion-text v-else-if="!bookStore.isLoading" color="medium" class="text-center p-4">
+      <p>{{ bookStore.error || 'No books found' }}</p>
+    </ion-text>
 
-      <book-form-modal v-model:is-open="showFormModal" :book="selectedBook" @saved="handleBookSaved" />
+    <!-- Pagination -->
+    <ion-infinite-scroll v-if="bookStore.pagination.currentPage < bookStore.pagination.lastPage"
+      @ionInfinite="loadMore" threshold="100px">
+      <ion-infinite-scroll-content loading-spinner="bubbles"
+        loading-text="Loading more books..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
 
-    </ion-content>
-  </admin-layout>
+    <book-form-modal v-model:is-open="showFormModal" :book="selectedBook" @saved="handleBookSaved" />
+
+  </ion-content>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
-import AdminLayout from '@/components/admin/AdminLayout.vue';
 import BookFormModal from '@/components/admin/BookFormModal.vue';
 import SearchFilter from '@/components/admin/SearchFilter.vue'; // Import the new component
 import { useBookStore } from '@/stores/book';

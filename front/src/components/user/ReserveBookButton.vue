@@ -104,35 +104,17 @@ const handleReservationAction = async (actionType: string) => {
 
     if (response) {
       reservation.value = actionType === 'cancel' ? null : response.reservation;
-      await showToast(
-        actionType === 'cancel' ? 'Reservation cancelled successfully' : 'Reservation sent successfully',
-        'success'
-      );
+      await showToast(`toast.reservation.${actionType}Success`, { translate: true });
       await updateReservation();
     }
   } catch (error: any) {
-    await handleReservationError(error);
+    await showToast(error.response?.data?.message || 'toast.reservation.error', { 
+      color: 'danger',
+      translate: !error.response?.data?.message 
+    });
   } finally {
     isLoading.value = false;
   }
-};
-
-const handleReservationError = async (error: any) => {
-  let errorMessage = 'Failed to process reservation';
-  let color = 'danger';
-
-  // Handle specific error messages from the backend
-  if (error.response?.data?.message) {
-    errorMessage = error.response.data.message;
-    
-    // Use warning color for limit-related messages
-    if (errorMessage.includes('Maximum number of') || 
-        errorMessage.includes('overdue books')) {
-      color = 'warning';
-    }
-  }
-
-  await showToast(errorMessage, color);
 };
 
 // Optional: Debugging watch to log reservation changes

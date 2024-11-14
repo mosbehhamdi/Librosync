@@ -2,11 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Dashboard</ion-title>
+        <ion-title>{{ t('user.dashboard.title') }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="confirmLogout" :disabled="isLoading">
             <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
-            <span v-else>Logout</span>
+            <span v-else>{{ t('common.actions.logout') }}</span>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -17,10 +17,10 @@
         <!-- Welcome Section -->
         <div class="bg-white p-6 rounded-lg shadow-md">
           <h2 class="text-2xl font-bold text-gray-800 mb-2">
-            Welcome back, {{ authStore.user?.name }}!
+            {{ t('user.dashboard.welcome', { name: authStore.user?.name }) }}
           </h2>
           <p class="text-gray-600">
-            This is your personal dashboard. Here you can manage your books and reading progress.
+            {{ t('user.dashboard.description') }}
           </p>
         </div>
 
@@ -90,11 +90,13 @@ import {
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const isLoading = ref(false);
 const showConfirmation = ref(false);
+const { t } = useI18n();
 
 const confirmLogout = () => {
   showConfirmation.value = true;
@@ -102,7 +104,7 @@ const confirmLogout = () => {
 
 const presentToast = async (message: string, color: 'success' | 'danger' = 'success') => {
   const toast = await toastController.create({
-    message,
+    message: t(message),
     duration: 2000,
     color,
     position: 'top'
@@ -114,11 +116,11 @@ const handleLogout = async () => {
   isLoading.value = true;
   try {
     await authStore.logout();
-    await presentToast('Logged out successfully');
+    await presentToast('auth.logout.success');
     // Router navigation is handled in the auth store
   } catch (error) {
     console.error('Logout error:', error);
-    await presentToast('Logout failed', 'danger');
+    await presentToast('common.messages.error', 'danger');
   } finally {
     isLoading.value = false;
   }

@@ -48,12 +48,14 @@ import {
   IonButton, IonSpinner, IonItem, IonLabel, IonInput,
   toastController 
 } from '@ionic/vue';
+import { useToast } from '@/composables/useToast';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const code = ref('');
 const isLoading = ref(false);
 const isResending = ref(false);
+const { showToast } = useToast();
 
 const verifyCode = async () => {
   if (code.value.length !== 6) return;
@@ -61,20 +63,10 @@ const verifyCode = async () => {
   isLoading.value = true;
   try {
     await authStore.verifyEmail(code.value);
-    const toast = await toastController.create({
-      message: 'Email verified successfully!',
-      duration: 2000,
-      color: 'success'
-    });
-    await toast.present();
+    await showToast('toast.auth.verificationSuccess', { color: 'success' });
     router.push('/dashboard');
   } catch (error) {
-    const toast = await toastController.create({
-      message: 'Invalid or expired verification code',
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
+    await showToast('toast.auth.verificationError', { color: 'danger' });
   } finally {
     isLoading.value = false;
   }
@@ -84,19 +76,9 @@ const resendCode = async () => {
   isResending.value = true;
   try {
     await authStore.resendVerification();
-    const toast = await toastController.create({
-      message: 'New verification code sent!',
-      duration: 2000,
-      color: 'success'
-    });
-    await toast.present();
+    await showToast('toast.auth.codeSent', { color: 'success' });
   } catch (error) {
-    const toast = await toastController.create({
-      message: 'Failed to send verification code',
-      duration: 2000,
-      color: 'danger'
-    });
-    await toast.present();
+    await showToast('toast.auth.sendError', { color: 'danger' });
   } finally {
     isResending.value = false;
   }

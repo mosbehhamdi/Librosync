@@ -239,6 +239,7 @@ import { addOutline, removeCircleOutline } from 'ionicons/icons';
 import { deweyCategories } from '@/constants/dewey';
 import { useBookStore } from '@/stores/book';
 import { ref, watch } from 'vue';
+import { useToast } from '@/composables/useToast';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -274,16 +275,7 @@ const errors = ref({});
 
 const bookStore = useBookStore();
 
-const presentToast = async (message, color = 'primary') => {
-  const toast = await toastController.create({
-    message: message,
-    duration: 3000,
-    color: color,
-    position: 'bottom',
-    cssClass: 'bottom-left-toast'
-  });
-  await toast.present();
-};
+const { showToast } = useToast();
 
 const handleSubmit = async () => {
   errors.value = {}; // Reset errors
@@ -295,6 +287,7 @@ const handleSubmit = async () => {
     }
     emit('saved', formData.value);
     closeModal();
+    await showToast('toast.book.createSuccess', { color: 'success' });
   } catch (error) {
     if (error.response && error.response.data.errors) {
       const backendErrors = error.response.data.errors;
@@ -302,7 +295,7 @@ const handleSubmit = async () => {
         const fieldName = field.split('.')[0];
         errors.value[fieldName] = messages.join(' ');
       }
-      await presentToast('Please enter valid data', 'danger');
+      await showToast('toast.book.error', { color: 'danger' });
     } else if (error.response && error.response.data.error) {
       // Handle SQL error message for unique fields
       const errorMessage = error.response.data.error;
@@ -314,7 +307,7 @@ const handleSubmit = async () => {
         }
       });
 
-      await presentToast('Duplicate entry detected. Please check your input.', 'danger');
+      await showToast('Duplicate entry detected. Please check your input.', 'danger');
     }
   }
 };

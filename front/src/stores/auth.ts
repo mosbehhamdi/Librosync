@@ -120,9 +120,16 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('Auth state cleared');
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (credentials: { email: string; password: string }) => {
     try {
-      const response = await axiosInstance.post('/auth/login', { email, password });
+      // Ensure data types are correct
+      const loginData = {
+        email: String(credentials.email).trim(),
+        password: String(credentials.password)
+      };
+
+      const response = await axiosInstance.post<AuthResponse>('/auth/login', loginData);
+      
       return handleAuthResponse(response);
     } catch (error) {
       clearAuthState();
