@@ -10,13 +10,25 @@
         "search": "بحث",
         "filter": "تصفية",
         "logout": "تسجيل الخروج",
-        "back": "رجوع"
+        "back": "رجوع",
+        "yes": "نعم",
+        "no": "لا"
       },
       "status": {
         "success": "نجاح",
         "error": "خطأ",
         "loading": "جاري التحميل"
-      }
+      },
+      "messages": {
+        "updateSuccess": "تم التحديث بنجاح",
+        "updateError": "فشل التحديث",
+        "deleteSuccess": "تم الحذف بنجاح",
+        "deleteError": "فشل الحذف",
+        "saveSuccess": "تم الحفظ بنجاح",
+        "saveError": "فشل الحفظ",
+        "invalidInput": "مدخلات غير صالحة"
+      },
+      "unknownUser": "مستخدم غير معروف"
     },
     "menu": {
       "title": "القائمة",
@@ -31,19 +43,79 @@
       "userManagement": "إدارة المستخدمين",
       "library": "المكتبة"
     },
-    "books": {
-      "management": "إدارة الكتب",
-      "addBook": "إضافة كتاب",
-      "editBook": "تعديل الكتاب",
-      "deleteBook": "حذف الكتاب",
-      "fields": {
-        "title": "العنوان",
-        "authors": "المؤلفون",
-        "copies": "النسخ",
-        "available": "المتوفر",
-        "category": "التصنيف",
-        "isbn": "الرقم التسلسلي",
-        "publisher": "الناشر"
+    "book": {
+      "messages": {
+        "createSuccess": "تم إنشاء الكتاب بنجاح",
+        "updateSuccess": "تم تحديث الكتاب بنجاح",
+        "deleteSuccess": "تم حذف الكتاب بنجاح"
+      },
+      "errors": {
+        "duplicateIsbn": "هذا الرقم التسلسلي موجود بالفعل",
+        "duplicateNumber": "هذا الرقم موجود بالفعل",
+        "invalidInput": "يرجى التحقق من المدخلات",
+        "generic": "حدث خطأ أثناء حفظ الكتاب"
+      },
+      "validation": {
+        "title": {
+          "required": "العنوان مطلوب",
+          "max": "العنوان لا يمكن أن يتجاوز 255 حرفاً"
+        },
+        "authors": {
+          "required": "مطلوب مؤلف واحد على الأقل",
+          "string": "يجب أن يكون اسم المؤلف نصاً"
+        },
+        "copies": {
+          "required": "عدد النسخ مطلوب",
+          "integer": "يجب أن يكون عدد النسخ رقماً صحيحاً",
+          "min": "يجب أن يكون عدد النسخ 1 على الأقل",
+          "max": "لا يمكن أن تتجاوز النسخ المتاحة العدد الإجمالي"
+        },
+        "available": {
+          "required": "عدد النسخ المتاحة مطلوب",
+          "integer": "يجب أن يكون عدد النسخ المتاحة رقماً صحيحاً"
+        },
+        "parts": {
+          "required": "عدد الأجزاء مطلوب",
+          "integer": "يجب أن يكون عدد الأجزاء رقماً صحيحاً"
+        },
+        "edition": {
+          "required": "رقم الطبعة مطلوب",
+          "integer": "يجب أن يكون رقم الطبعة رقماً صحيحاً"
+        },
+        "dewey": {
+          "required": "تصنيف ديوي مطلوب",
+          "max": "تصنيف ديوي الفرعي طويل جداً"
+        },
+        "publisher": {
+          "max": "اسم الناشر طويل جداً"
+        },
+        "numbers": {
+          "max": "الرقم طويل جداً",
+          "uniqueCentral": "الرقم المركزي مستخدم بالفعل",
+          "uniqueLocal": "الرقم المحلي مستخدم بالفعل"
+        },
+        "isbn": {
+          "required": "الرقم التسلسلي (ISBN) مطلوب",
+          "format": "صيغة الرقم التسلسلي (ISBN) غير صحيحة"
+        },
+        "publication": {
+          "required": "سنة النشر مطلوبة",
+          "integer": "يجب أن تكون سنة النشر رقماً صحيحاً",
+          "min": "يجب أن تكون سنة النشر بعد سنة 1000",
+          "future": "لا يمكن أن تكون سنة النشر في المستقبل"
+        }
+      },
+      "form": {
+        "addTitle": "إضافة كتاب جديد",
+        "editTitle": "تعديل الكتاب",
+        "create": "إنشاء كتاب",
+        "update": "تحديث الكتاب",
+        "fillWrong": "تعبئة خاطئة",
+        "fillRight": "تعبئة صحيحة",
+        "fields": {
+          "title": "العنوان",
+          "authors": "المؤلفون"
+        }
       }
     },
     "reservations": {
@@ -53,7 +125,8 @@
         "accepted": "مقبول",
         "delivered": "تم التسليم",
         "cancelled": "ملغى",
-        "returned": "تم الإرجاع"
+        "returned": "تم الإرجاع",
+        "expired": "منتهي الصلاحية"
       },
       "actions": {
         "reserve": "حجز",
@@ -67,7 +140,30 @@
       "expires": "تنتهي في",
       "due": "مستحق",
       "reservedBy": "محجوز من قبل",
-      "historyTitle": "سجل الحجوزات"
+      "historyTitle": "سجل الحجوزات",
+      "title": "إدارة الحجوزات",
+      "filters": {
+        "filterByStatus": "تصفية حسب الحالة",
+        "search": "بحث",
+        "noResults": "لم يتم العثور على نتائج",
+        "searchReservations": "البحث في الحجوزات..."
+      },
+      "confirmations": {
+        "cancelHeader": "إلغاء الحجز",
+        "cancelConfirm": "هل أنت متأكد من إلغاء هذا الحجز؟",
+        "acceptHeader": "قبول الحجز",
+        "acceptConfirm": "هل أنت متأكد من قبول هذا الحجز؟",
+        "deliverHeader": "تسليم الكتاب",
+        "deliverConfirm": "هل أنت متأكد من تسليم هذا الكتاب؟",
+        "returnHeader": "إرجاع الكتاب",
+        "returnConfirm": "هل أنت متأكد من إرجاع هذا الكتاب؟"
+      },
+      "success": {
+        "cancel": "تم إلغاء الحجز بنجاح",
+        "accept": "تم قبول الحجز بنجاح",
+        "deliver": "تم تسليم الكتاب بنجاح",
+        "return": "تم إرجاع الكتاب بنجاح"
+      }
     },
     "auth": {
       "login": {
@@ -75,7 +171,9 @@
         "email": "البريد الإلكتروني",
         "password": "كلمة المرور",
         "submit": "دخول",
-        "register": "إنشاء حساب جديد"
+        "register": "إنشاء حساب جديد",
+        "invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+        "error": "حدث خطأ أثناء تسجيل الدخول"
       },
       "register": {
         "title": "إنشاء حساب",
@@ -125,11 +223,28 @@
     },
     "profile": {
       "stats": {
-        "activeReservations": "الحجوزات النشطة",
-        "totalReservations": "إجمالي الحجوزات"
+        "totalBooks": "إجمالي الكتب المحجوزة"
       },
       "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
-      "updateError": "فشل في تحديث الملف الشخصي"
+      "updateError": "فشل في تحديث الملف الشخصي",
+      "fields": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "currentPassword": "كلمة المرور الحالية",
+        "newPassword": "كلمة المرور الجديدة",
+        "confirmPassword": "تأكيد كلمة المرور الجددة",
+        "passwordPlaceholder": "اتركه فارغاً للاحتفاظ بكلمة المرور الحالية"
+      },
+      "actions": {
+        "edit": "تعديل الملف الشخصي",
+        "save": "حفظ التغييرات",
+        "cancel": "إلغاء"
+      },
+      "validation": {
+        "nameRequired": "الاسم مطلوب",
+        "passwordLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+        "passwordMismatch": "كلمات المرور غير متطابقة"
+      }
     },
     "settings": {
       "title": "الإعدادات",
@@ -145,26 +260,11 @@
         "select": "اختر اللغة"
       }
     },
-    "bookManagement": {
-      "title": "إدارة الكتب",
-      "addBook": "إضافة كتاب",
-      "editBook": "تعديل الكتاب",
-      "deleteBook": "حذف الكتاب",
-      "fields": {
-        "title": "العنوان",
-        "authors": "المؤلفون",
-        "copies": "النسخ",
-        "available": "المتوفر",
-        "category": "التصنيف",
-        "isbn": "الرقم التسلسلي",
-        "publisher": "الناشر"
-      }
-    },
     "user": {
       "dashboard": {
         "title": "لوحة التحكم",
         "welcome": "مرحباً بعودتك، {name}!",
-        "description": "هذه لوحة التحكم الشخصية الخاصة بك. هنا يمكنك إدارة تبك ومتابعة تقدم القراءة."
+        "description": "هذه لوحة التحكم الشخصية الخاصة بك. هنا يمكنك إدارة تبك ومتابعة تدم القراءة."
       }
     },
     "toast": {
@@ -181,11 +281,67 @@
       "reservation": {
         "cancelSuccess": "تم إلغاء الحجز بنجاح",
         "createSuccess": "تم إنشاء الحجز بنجاح",
-        "updateSuccess": "تم تحديث الحجز بنجاح",
+        "updateSuccess": "تم تحديث احجز بنجاح",
         "error": "فشل في إجراء الحجز",
         "generalError": "فشل في معالجة الحجز",
         "limitExceeded": "تم الوصول إلى الحد الأقصى للحجوزات",
         "overdueBooks": "لديك كتب متأخرة"
+      }
+    },
+    "queue": {
+      "estimatedWait": "وقت الانتظار المتوقع",
+      "days": "أيام",
+      "position": "موقعك في قائمة الانتظار: {position}",
+      "readyForPickup": "جاهز للاستلام"
+    },
+    "reservation": {
+      "actions": {
+        "joinWaitlist": "الانضمام لقائمة الانتظار",
+        "cancel": "إلغاء الحجز",
+        "reserve": "احجز الآن"
+      },
+      "queue": {
+        "position": "موقعك الحالي في قائمة الانتظار: {position}"
+      },
+      "messages": {
+        "reserveSuccess": "تم حجز الكتاب بنجاح",
+        "cancelSuccess": "تم إلغاء الحجز بنجاح",
+        "acceptSuccess": "تم قبول الحجز بنجاح",
+        "deliverSuccess": "تم تسليم الكتاب بنجاح",
+        "returnSuccess": "تم إرجاع الكتاب بنجاح",
+        "joinWaitlistSuccess": "تمت الإضافة إلى قائمة الانتظار بنجاح",
+        "queuePositionError": "فشل في الحصول على موقع الانتظار",
+        "unauthorized": "غير مصرح بهذا الإجراء",
+        "invalidStatus": "حالة الحجز غير صالحة",
+        "deliveryError": "يمكن تسليم الحجوزات المقبولة فقط"
+      },
+      "errors": {
+        "maxBooksReached": "تم الوصول إلى الحد الأقصى للكتب",
+        "alreadyReserved": "لديك حجز بالفعل لهذا الكتاب",
+        "overdueBooks": "لديك كتب متأخرة",
+        "notAvailable": "الكتاب غير متوفر",
+        "generic": "حدث خطأ في الحجز"
+      },
+      "labels": {
+        "activeTitle": "الحجوزات النشطة",
+        "pastTitle": "الحجوزات السابقة",
+        "historyTitle": "سجل الحجوزات",
+        "queuePosition": "الموقع في قائمة الانتظار",
+        "reservedOn": "تم الحجز في",
+        "expires": "تنتهي في",
+        "due": "مستحق",
+        "reservedBy": "محجوز من قبل",
+        "noActive": "لا توجد حجوزات نشطة",
+        "noPast": "لا توجد حجوزات سابقة",
+        "expiredTitle": "الحجوزات المنتهية",
+        "expiredOn": "انتهت في"
+      }
+    },
+    "books": {
+      "search": {
+        "initial": "أدخل كلمة البحث للعثور على الكتب",
+        "noResults": "لم يتم العثور على كتب لـ '{query}'",
+        "inCategory": "في التصنيف {category}"
       }
     }
   }

@@ -8,11 +8,11 @@
       <ion-spinner v-if="isLoading" name="crescent"></ion-spinner>
       <template v-else>
         <ion-icon :icon="reservationButton.icon" slot="start"></ion-icon>
-        {{ reservationButton.text }}
+        {{ t(`reservation.actions.${reservationButton.text}`) }}
       </template>
     </ion-button>
     <div v-if="queuePosition !== null">
-      <p>Your current queue position: {{ queuePosition }}</p>
+      <p>{{ t('reservation.queue.position', { position: queuePosition }) }}</p>
     </div>
   </div>
 </template>
@@ -21,8 +21,11 @@
 import { computed, ref, onMounted, watch, defineProps, defineEmits } from 'vue';
 import { useReservationStore } from '@/stores/reservation';
 import { useBookStore } from '@/stores/book';
-import { toastController } from '@ionic/vue';
 import { bookmarkOutline, timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { useI18n } from 'vue-i18n';
+import { useRtl } from '@/composables/useRtl';
+import { useToast } from '@/composables/useToast';
+import { useValidationErrors } from '@/composables/useValidationErrors';
 
 const { bookId, availableCopies, existingReservation } = defineProps<{
   bookId: number;
@@ -49,45 +52,33 @@ onMounted(async () => {
   }
 });
 
+const { t } = useI18n();
+const { isRtl } = useRtl();
+const { showToast } = useToast();
+const { handleValidationErrors } = useValidationErrors();
+
 const reservationButton = computed(() => {
   const buttonConfig = {
     color: 'warning',
     icon: timeOutline,
-    text: 'Join Waitlist',
+    text: 'joinWaitlist',
     action: 'joinWaitlist'
   };
 
   if (reservation.value) {
     buttonConfig.color = 'medium';
     buttonConfig.icon = checkmarkCircleOutline;
-    buttonConfig.text = 'Cancel Reservation';
+    buttonConfig.text = 'cancel';
     buttonConfig.action = 'cancel';
   } else if (availableCopies > 0) {
     buttonConfig.color = 'primary';
     buttonConfig.icon = bookmarkOutline;
-    buttonConfig.text = 'Reserve Now';
+    buttonConfig.text = 'reserve';
     buttonConfig.action = 'reserve';
   }
 
   return buttonConfig;
 });
-
-const showToast = async (message: string, color: string) => {
-  const toast = await toastController.create({
-    message,
-    duration: 3000,
-    color,
-    position: 'top',
-    cssClass: 'custom-toast',
-    buttons: [
-      {
-        text: 'Close',
-        role: 'cancel'
-      }
-    ]
-  });
-  await toast.present();
-};
 
 const updateReservation = async () => {
   emit('reservationUpdated', bookId);
@@ -104,14 +95,13 @@ const handleReservationAction = async (actionType: string) => {
 
     if (response) {
       reservation.value = actionType === 'cancel' ? null : response.reservation;
-      await showToast(`toast.reservation.${actionType}Success`, { translate: true });
+      await showToast(`reservation.messages.${actionType}Success`, { 
+        color: 'success' 
+      });
       await updateReservation();
     }
-  } catch (error: any) {
-    await showToast(error.response?.data?.message || 'toast.reservation.error', { 
-      color: 'danger',
-      translate: !error.response?.data?.message 
-    });
+  } catch (error) {
+    await handleValidationErrors(error);
   } finally {
     isLoading.value = false;
   }

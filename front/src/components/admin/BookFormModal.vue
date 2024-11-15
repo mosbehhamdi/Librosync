@@ -2,11 +2,11 @@
   <ion-modal :is-open="isOpen" @didDismiss="closeModal">
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ book ? 'Edit Book' : 'Add New Book' }}</ion-title>
+        <ion-title>{{ t(book ? 'book.form.editTitle' : 'book.form.addTitle') }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="closeModal">Close</ion-button>
-          <ion-button @click="fillWrongValues">Fill Wrong</ion-button>
-          <ion-button @click="fillRightValues">Fill Right</ion-button>
+          <ion-button @click="closeModal">{{ t('common.actions.close') }}</ion-button>
+          <ion-button @click="fillWrongValues">{{ t('book.form.fillWrong') }}</ion-button>
+          <ion-button @click="fillRightValues">{{ t('book.form.fillRight') }}</ion-button>
         </ion-buttons>  
       </ion-toolbar>
     </ion-header>
@@ -18,15 +18,17 @@
           <ion-item>
             <ion-input
               v-model="formData.title"
-              label="Title"
+              :label="t('book.form.fields.title')"
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.title" class="error-text">{{ errors.title }}</ion-text>
+          <ion-text color="danger" v-if="errors.title" class="error-text">
+            {{ t(errors.title) }}
+          </ion-text>
 
           <!-- Authors (with add/remove functionality) -->
           <ion-item>
-            <ion-label position="stacked">Authors</ion-label>
+            <ion-label position="stacked">{{ t('book.form.fields.authors') }}</ion-label>
             <div class="space-y-2">
               <div v-for="(author, index) in formData.authors" :key="index" class="flex gap-2">
                 <ion-input
@@ -48,7 +50,7 @@
               </ion-button>
             </div>
           </ion-item>
-          <ion-text color="danger" v-if="errors.authors" class="error-text">{{ errors.authors }}</ion-text>
+          <ion-text color="danger" v-if="errors.authors" class="error-text">{{ t(errors.authors) }}</ion-text>
 
           <!-- Copies and Parts -->
           <ion-item>
@@ -60,7 +62,7 @@
               min="1"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.copies_count" class="error-text">{{ errors.copies_count }}</ion-text>
+          <ion-text color="danger" v-if="errors.copies_count" class="error-text">{{ t(errors.copies_count) }}</ion-text>
 
           <ion-item>
             <ion-input
@@ -72,7 +74,7 @@
               :max="formData.copies_count"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.available_copies" class="error-text">{{ errors.available_copies }}</ion-text>
+          <ion-text color="danger" v-if="errors.available_copies" class="error-text">{{ t(errors.available_copies) }}</ion-text>
 
           <ion-item>
             <ion-input
@@ -83,7 +85,7 @@
               min="1"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.parts_count" class="error-text">{{ errors.parts_count }}</ion-text>
+          <ion-text color="danger" v-if="errors.parts_count" class="error-text">{{ t(errors.parts_count) }}</ion-text>
 
           <!-- Publication Details -->
           <ion-item>
@@ -93,7 +95,7 @@
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.publisher" class="error-text">{{ errors.publisher }}</ion-text>
+          <ion-text color="danger" v-if="errors.publisher" class="error-text">{{ t(errors.publisher) }}</ion-text>
 
           <ion-item>
             <ion-input
@@ -104,7 +106,7 @@
               min="1"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.edition_number" class="error-text">{{ errors.edition_number }}</ion-text>
+          <ion-text color="danger" v-if="errors.edition_number" class="error-text">{{ t(errors.edition_number) }}</ion-text>
 
           <!-- Dewey Classification -->
           <ion-item>
@@ -122,7 +124,7 @@
               </ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-text color="danger" v-if="errors.dewey_category" class="error-text">{{ errors.dewey_category }}</ion-text>
+          <ion-text color="danger" v-if="errors.dewey_category" class="error-text">{{ t(errors.dewey_category) }}</ion-text>
 
           <ion-item>
             <ion-input
@@ -131,7 +133,7 @@
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.dewey_subcategory" class="error-text">{{ errors.dewey_subcategory }}</ion-text>
+          <ion-text color="danger" v-if="errors.dewey_subcategory" class="error-text">{{ t(errors.dewey_subcategory) }}</ion-text>
 
           <!-- Additional Details -->
           <ion-item>
@@ -144,7 +146,7 @@
               step="0.01"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.price" class="error-text">{{ errors.price }}</ion-text>
+          <ion-text color="danger" v-if="errors.price" class="error-text">{{ t(errors.price) }}</ion-text>
 
           <ion-item>
             <ion-textarea
@@ -154,7 +156,7 @@
               rows="3"
             ></ion-textarea>
           </ion-item>
-          <ion-text color="danger" v-if="errors.comments" class="error-text">{{ errors.comments }}</ion-text>
+          <ion-text color="danger" v-if="errors.comments" class="error-text">{{ t(errors.comments) }}</ion-text>
 
           <!-- Reference Numbers -->
           <ion-item>
@@ -164,7 +166,7 @@
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.central_number" class="error-text">{{ errors.central_number }}</ion-text>
+          <ion-text color="danger" v-if="errors.central_number" class="error-text">{{ t(errors.central_number) }}</ion-text>
 
           <ion-item>
             <ion-input
@@ -173,7 +175,7 @@
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.local_number" class="error-text">{{ errors.local_number }}</ion-text>
+          <ion-text color="danger" v-if="errors.local_number" class="error-text">{{ t(errors.local_number) }}</ion-text>
 
           <!-- ISBN -->
           <ion-item>
@@ -183,7 +185,7 @@
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.isbn" class="error-text">{{ errors.isbn }}</ion-text>
+          <ion-text color="danger" v-if="errors.isbn" class="error-text">{{ t(errors.isbn) }}</ion-text>
 
           <!-- Dates -->
           <ion-item>
@@ -194,7 +196,7 @@
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.publication_date" class="error-text">{{ errors.publication_date }}</ion-text>
+          <ion-text color="danger" v-if="errors.publication_date" class="error-text">{{ t(errors.publication_date) }}</ion-text>
 
           <ion-item>
             <ion-input
@@ -204,7 +206,7 @@
               label-placement="floating"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.acquisition_date" class="error-text">{{ errors.acquisition_date }}</ion-text>
+          <ion-text color="danger" v-if="errors.acquisition_date" class="error-text">{{ t(errors.acquisition_date) }}</ion-text>
 
           <ion-item>
             <ion-input
@@ -216,11 +218,11 @@
               :max="new Date().getFullYear()"
             ></ion-input>
           </ion-item>
-          <ion-text color="danger" v-if="errors.publication_year" class="error-text">{{ errors.publication_year }}</ion-text>
+          <ion-text color="danger" v-if="errors.publication_year" class="error-text">{{ t(errors.publication_year) }}</ion-text>
         </ion-list>
         <ion-footer class="fixed-footer">
           <ion-button type="submit" expand="block">
-            {{ book ? 'Update Book' : 'Add Book' }}
+            {{ t(book ? 'book.form.update' : 'book.form.create') }}
           </ion-button>
         </ion-footer>
       </form>
@@ -233,13 +235,15 @@ import {
   IonModal, IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonInput, IonTextarea, IonSelect,
   IonSelectOption, IonButton, IonButtons, IonIcon, IonLabel,
-  IonText, toastController
+  IonText
 } from '@ionic/vue';
 import { addOutline, removeCircleOutline } from 'ionicons/icons';
 import { deweyCategories } from '@/constants/dewey';
 import { useBookStore } from '@/stores/book';
 import { ref, watch } from 'vue';
 import { useToast } from '@/composables/useToast';
+import { useValidationErrors } from '@/composables/useValidationErrors';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -271,44 +275,39 @@ const formData = ref({
   acquisition_date: new Date().toISOString().split('T')[0]
 });
 
-const errors = ref({});
+const errors = ref<Record<string, string>>({});
 
 const bookStore = useBookStore();
 
 const { showToast } = useToast();
 
+const { handleValidationErrors } = useValidationErrors();
+
+const { t } = useI18n();
+
 const handleSubmit = async () => {
-  errors.value = {}; // Reset errors
+  errors.value = {};
   try {
     if (props.book) {
       await bookStore.adminBookAction('update', formData.value, props.book.id);
+      await showToast('book.messages.updateSuccess', { color: 'success' });
     } else {
       await bookStore.adminBookAction('create', formData.value);
+      await showToast('book.messages.createSuccess', { color: 'success' });
     }
     emit('saved', formData.value);
     closeModal();
-    await showToast('toast.book.createSuccess', { color: 'success' });
   } catch (error) {
-    if (error.response && error.response.data.errors) {
+    if (error.response?.data?.errors) {
+      // Handle field-specific validation errors
       const backendErrors = error.response.data.errors;
       for (const [field, messages] of Object.entries(backendErrors)) {
         const fieldName = field.split('.')[0];
-        errors.value[fieldName] = messages.join(' ');
+        // The backend is already returning translation keys, so we can use them directly
+        errors.value[fieldName] = Array.isArray(messages) ? messages[0] : messages;
       }
-      await showToast('toast.book.error', { color: 'danger' });
-    } else if (error.response && error.response.data.error) {
-      // Handle SQL error message for unique fields
-      const errorMessage = error.response.data.error;
-      const uniqueFields = ['isbn', 'central_number', 'local_number'];
-      
-      uniqueFields.forEach(field => {
-        if (errorMessage.includes(`Duplicate entry`) && errorMessage.includes(`for key 'books.books_${field}_unique'`)) {
-          errors.value[field] = `This ${field.replace('_', ' ')} already exists.`;
-        }
-      });
-
-      await showToast('Duplicate entry detected. Please check your input.', 'danger');
     }
+    await handleValidationErrors(error);
   }
 };
 
@@ -349,10 +348,10 @@ const removeAuthor = (index) => {
 
 const fillWrongValues = () => {
   formData.value = {
-    title: 'title', // Empty title
-    authors: ['author'], // Empty author
-    copies_count: 1, // Invalid copies count
-    available_copies: 1, // More than copies_count
+    title: '', // Empty title to trigger validation
+    authors: [''], // Empty author to trigger validation
+    copies_count: 0, // Invalid copies count
+    available_copies: 10, // More than copies_count
     parts_count: 1, // Invalid parts count
     publisher: 'A very long publisher name that exceeds the maximum length allowed by the validation rules',
     edition_number: 1, // Invalid edition number
@@ -371,8 +370,8 @@ const fillWrongValues = () => {
 
 const fillRightValues = () => {
   formData.value = {
-    title: 'Valid Book Title',
-    authors: ['Author One', 'Author Two'],
+    title: t('book.form.examples.validTitle'),
+    authors: [t('book.form.examples.author1'), t('book.form.examples.author2')],
     copies_count: 5,
     available_copies: 3,
     parts_count: 1,

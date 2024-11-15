@@ -2,27 +2,24 @@ import { toastController } from '@ionic/vue';
 import { useI18n } from 'vue-i18n';
 import { useRtl } from '@/composables/useRtl';
 
+export interface ToastOptions {
+  color?: 'success' | 'danger' | 'warning' | 'primary';
+  duration?: number;
+  position?: 'top' | 'bottom' | 'middle';
+}
+
 export function useToast() {
   const { t } = useI18n();
   const { isRtl } = useRtl();
 
-  const showToast = async (
-    message: string,
-    options?: {
-      color?: 'success' | 'danger' | 'warning' | 'primary',
-      duration?: number,
-      position?: 'top' | 'bottom' | 'middle',
-      translate?: boolean,
-      buttons?: Array<{ text: string, role: string }>
-    }
-  ) => {
+  const showToast = async (messageKey: string, options?: ToastOptions) => {
     const toast = await toastController.create({
-      message: options?.translate ? t(message) : message,
+      message: t(messageKey),
       duration: options?.duration || 3000,
       color: options?.color || 'primary',
       position: options?.position || 'bottom',
       cssClass: isRtl.value ? 'toast-rtl' : '',
-      buttons: options?.buttons || [
+      buttons: [
         {
           text: t('common.actions.close'),
           role: 'cancel'

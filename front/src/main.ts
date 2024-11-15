@@ -39,7 +39,11 @@ import '@ionic/vue/css/palettes/dark.system.css';
 /* Theme variables and Tailwind */
 import './theme/variables.css';
 
-const storedLanguage = localStorage.getItem('user-language') || 'en';
+// Get the language preference
+const userLanguage = localStorage.getItem('user-language');
+const lastUserLanguage = localStorage.getItem('last-user-language');
+const storedLanguage = userLanguage || lastUserLanguage || 'en';
+
 const pinia = createPinia();
 const i18n = createI18n({
   legacy: false,
@@ -49,7 +53,8 @@ const i18n = createI18n({
 });
 
 // Set initial RTL direction
-document.documentElement.dir = localStorage.getItem('user-language') === 'ar' ? 'rtl' : 'ltr';
+document.documentElement.dir = storedLanguage === 'ar' ? 'rtl' : 'ltr';
+document.documentElement.lang = storedLanguage;
 
 const app = createApp(App)
   .use(IonicVue)

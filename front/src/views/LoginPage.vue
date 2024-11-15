@@ -103,8 +103,7 @@ onMounted(() => {
 const handleLogin = async () => {
   if (!email.value || !password.value) {
     await showToast('auth.validation.fillAllFields', { 
-      color: 'warning',
-      translate: true 
+      color: 'warning'
     });
     return;
   }
@@ -115,38 +114,14 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value,
     });
-    await showToast('auth.login.success', { 
-      color: 'success',
-      translate: true 
-    });
+    await router.replace(authStore.isAdmin ? '/admin/dashboard' : '/books');
   } catch (error: any) {
     console.error('Login error:', error);
     const response = error.response?.data;
     
-    if (response?.error) {
-      await showToast(response.error, { 
-        color: 'danger',
-        translate: false 
-      });
-    } else if (response?.message) {
-      await showToast(response.message, { 
-        color: 'danger',
-        translate: false
-      });
-    } else if (response?.errors) {
-      const errorMessages = Object.values(response.errors)
-        .flat()
-        .join(', ');
-      await showToast(errorMessages, { 
-        color: 'danger',
-        translate: false
-      });
-    } else {
-      await showToast(error.message || 'auth.login.error', { 
-        color: 'danger',
-        translate: !error.message 
-      });
-    }
+    await showToast(response?.toast?.message || 'auth.login.error', { 
+      color: response?.toast?.color || 'danger'
+    });
   } finally {
     isLoading.value = false;
   }

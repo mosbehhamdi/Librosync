@@ -105,19 +105,26 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Helper function to clear auth state
   const clearAuthState = () => {
+    // Save current language before clearing storage
+    const currentLang = localStorage.getItem('user-language') || 'en';
+    
+    // Clear auth-related storage
     user.value = null;
     token.value = null;
     localStorage.removeItem('user');
     localStorage.removeItem('auth');
-    localStorage.clear();
+    
+    // Preserve language settings
+    localStorage.setItem('last-user-language', currentLang);
+    localStorage.setItem('user-language', currentLang);
+    
     delete axiosInstance.defaults.headers.common['Authorization'];
     
+    // Clear cookies
     document.cookie.split(";").forEach(function(c) { 
       document.cookie = c.replace(/^ +/, "")
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-
-    console.log('Auth state cleared');
   };
 
   const login = async (credentials: { email: string; password: string }) => {
@@ -154,6 +161,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
+      const currentLang = localStorage.getItem('user-language') || 'en';
+      localStorage.setItem('last-user-language', currentLang);
       if (token.value) {
         await axiosInstance.post('/auth/logout').catch(() => {
           console.log('Logout API call failed, continuing with local cleanup');

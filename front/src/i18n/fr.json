@@ -10,12 +10,23 @@
         "search": "Rechercher",
         "filter": "Filtrer",
         "logout": "Déconnexion",
-        "back": "Retour"
+        "back": "Retour",
+        "yes": "Oui",
+        "no": "Non"
       },
       "status": {
         "success": "Succès",
         "error": "Erreur",
         "loading": "Chargement"
+      },
+      "messages": {
+        "updateSuccess": "Mise à jour réussie",
+        "updateError": "Échec de la mise à jour",
+        "deleteSuccess": "Suppression réussie",
+        "deleteError": "Échec de la suppression",
+        "saveSuccess": "Enregistrement réussi",
+        "saveError": "Échec de l'enregistrement",
+        "invalidInput": "Entrée invalide"
       }
     },
     "menu": {
@@ -30,43 +41,6 @@
       "reservationManagement": "Gestion des Réservations",
       "userManagement": "Gestion des Utilisateurs",
       "library": "Bibliothèque"
-    },
-    "books": {
-      "management": "Gestion des Livres",
-      "addBook": "Ajouter un Livre",
-      "editBook": "Modifier le Livre",
-      "deleteBook": "Supprimer le Livre",
-      "fields": {
-        "title": "Titre",
-        "authors": "Auteurs",
-        "copies": "Exemplaires",
-        "available": "Disponibles",
-        "category": "Catégorie",
-        "isbn": "ISBN",
-        "publisher": "Éditeur"
-      }
-    },
-    "reservations": {
-      "status": {
-        "pending": "En Attente",
-        "ready": "Prêt pour Récupération",
-        "accepted": "Accepté",
-        "delivered": "Livré",
-        "cancelled": "Annulé",
-        "returned": "Retourné"
-      },
-      "actions": {
-        "reserve": "Réserver",
-        "cancel": "Annuler la Réservation",
-        "accept": "Accepter",
-        "deliver": "Livrer",
-        "return": "Retourner"
-      },
-      "noActive": "Aucune réservation active",
-      "noPast": "Aucune réservation passée",
-      "expires": "Expire",
-      "due": "Dû",
-      "reservedBy": "Réservé par"
     },
     "auth": {
       "login": {
@@ -128,7 +102,21 @@
         "totalReservations": "Total des Réservations"
       },
       "updateSuccess": "Profil mis à jour avec succès",
-      "updateError": "Échec de la mise à jour du profil"
+      "updateError": "Échec de la mise à jour du profil",
+      "title": "Mon Profil",
+      "fields": {
+        "name": "Nom",
+        "email": "Email",
+        "currentPassword": "Mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "confirmPassword": "Confirmer le nouveau mot de passe",
+        "passwordPlaceholder": "Laissez vide pour garder le mot de passe actuel"
+      },
+      "validation": {
+        "nameRequired": "Le nom est requis",
+        "passwordLength": "Le mot de passe doit contenir au moins 8 caractères",
+        "passwordMismatch": "Les mots de passe ne correspondent pas"
+      }
     },
     "settings": {
       "title": "Paramètres",
@@ -142,21 +130,6 @@
       "language": {
         "title": "Paramètres de Langue",
         "select": "Sélectionner la Langue"
-      }
-    },
-    "bookManagement": {
-      "title": "Gestion des Livres",
-      "addBook": "Ajouter un Livre",
-      "editBook": "Modifier le Livre",
-      "deleteBook": "Supprimer le Livre",
-      "fields": {
-        "title": "Titre",
-        "authors": "Auteurs",
-        "copies": "Exemplaires",
-        "available": "Disponibles",
-        "category": "Catégorie",
-        "isbn": "ISBN",
-        "publisher": "Éditeur"
       }
     },
     "user": {
@@ -185,6 +158,144 @@
         "generalError": "Échec du traitement de la réservation",
         "limitExceeded": "Nombre maximum de réservations atteint",
         "overdueBooks": "Vous avez des livres en retard"
+      }
+    },
+    "queue": {
+      "estimatedWait": "Temps d'attente estimé",
+      "days": "jours",
+      "position": "Position dans la file: {position}",
+      "readyForPickup": "Prêt pour le retrait"
+    },
+    "reservation": {
+      "actions": {
+        "joinWaitlist": "Rejoindre la liste d'attente",
+        "cancel": "Annuler la réservation",
+        "reserve": "Réserver maintenant"
+      },
+      "queue": {
+        "position": "Votre position actuelle dans la file: {position}"
+      },
+      "messages": {
+        "reserveSuccess": "Livre réservé avec succès",
+        "cancelSuccess": "Réservation annulée avec succès",
+        "joinWaitlistSuccess": "Ajouté à la liste d'attente avec succès"
+      },
+      "errors": {
+        "maxBooksReached": "Nombre maximum de livres atteint",
+        "alreadyReserved": "Vous avez déjà une réservation pour ce livre",
+        "overdueBooks": "Vous avez des livres en retard",
+        "notAvailable": "Le livre n'est pas disponible",
+        "generic": "Une erreur s'est produite avec la réservation"
+      },
+      "status": {
+        "pending": "En attente",
+        "ready": "Prêt pour le retrait",
+        "accepted": "Accepté",
+        "delivered": "Livré",
+        "cancelled": "Annulé",
+        "returned": "Retourné",
+        "expired": "Expiré"
+      },
+      "confirmations": {
+        "cancelHeader": "Annuler la réservation",
+        "cancelConfirm": "Êtes-vous sûr de vouloir annuler cette réservation ?",
+        "acceptHeader": "Accepter la réservation",
+        "acceptConfirm": "Êtes-vous sûr de vouloir accepter cette réservation ?",
+        "deliverHeader": "Livrer le livre",
+        "deliverConfirm": "Êtes-vous sûr de vouloir livrer ce livre ?",
+        "returnHeader": "Retourner le livre",
+        "returnConfirm": "Êtes-vous sûr de vouloir retourner ce livre ?"
+      },
+      "messages": {
+        "reserveSuccess": "Livre réservé avec succès",
+        "cancelSuccess": "Réservation annulée avec succès",
+        "acceptSuccess": "Réservation acceptée avec succès",
+        "deliverSuccess": "Livre livré avec succès",
+        "returnSuccess": "Livre retourné avec succès",
+        "joinWaitlistSuccess": "Ajouté à la liste d'attente avec succès",
+        "queuePositionError": "Impossible d'obtenir la position dans la file",
+        "unauthorized": "Action non autorisée",
+        "invalidStatus": "Statut de réservation invalide",
+        "deliveryError": "Seules les réservations acceptées peuvent être livrées"
+      },
+      "queue": {
+        "position": "Position dans la file : {position}",
+        "estimatedWait": "Temps d'attente estimé",
+        "days": "{count} jours"
+      },
+      "dates": {
+        "due": "Date d'échéance",
+        "delivered": "Livré le",
+        "expires": "Expire le",
+        "created": "Réservé le"
+      },
+      "labels": {
+        "activeTitle": "Réservations Actives",
+        "pastTitle": "Réservations Passées",
+        "historyTitle": "Historique des Réservations",
+        "queuePosition": "Position dans la File",
+        "reservedOn": "Réservé le",
+        "expires": "Expire le",
+        "due": "À rendre le",
+        "reservedBy": "Réservé par",
+        "noActive": "Aucune réservation active",
+        "noPast": "Aucune réservation passée",
+        "expiredTitle": "Réservations Expirées",
+        "expiredOn": "Expiré le"
+      }
+    },
+    "book": {
+      "messages": {
+        "createSuccess": "Livre créé avec succès",
+        "updateSuccess": "Livre mis à jour avec succès",
+        "deleteSuccess": "Livre supprimé avec succès"
+      },
+      "errors": {
+        "duplicateIsbn": "Cet ISBN existe déjà",
+        "duplicateNumber": "Ce numéro existe déjà",
+        "invalidInput": "Veuillez vérifier vos entrées",
+        "generic": "Une erreur s'est produite lors de l'enregistrement du livre"
+      },
+      "validation": {
+        "title": {
+          "required": "Le titre est requis",
+          "max": "Le titre ne peut pas dépasser 255 caractères"
+        },
+        "authors": {
+          "required": "Au moins un auteur est requis",
+          "string": "Le nom de l'auteur doit être du texte"
+        },
+        "copies": {
+          "max": "Le nombre de copies disponibles ne peut pas dépasser le total",
+          "min": "Le nombre de copies doit être au moins 1"
+        },
+        "isbn": {
+          "format": "L'ISBN doit contenir 10 ou 13 chiffres"
+        }
+      },
+      "form": {
+        "addTitle": "Ajouter un Livre",
+        "editTitle": "Modifier le Livre",
+        "create": "Créer le Livre",
+        "update": "Mettre à jour le Livre",
+        "fillWrong": "Remplir Incorrectement",
+        "fillRight": "Remplir Correctement",
+        "fields": {
+          "title": "Titre",
+          "authors": "Auteurs",
+          "copies": "Nombre de copies",
+          "available": "Copies disponibles",
+          "parts": "Nombre de parties",
+          "publisher": "Éditeur",
+          "edition": "Numéro d'édition",
+          "deweyCategory": "Catégorie Dewey",
+          "deweySubcategory": "Sous-catégorie Dewey",
+          "price": "Prix",
+          "comments": "Commentaires",
+          "isbn": "ISBN",
+          "publicationYear": "Année de publication",
+          "acquisitionDate": "Date d'acquisition"
+        }
       }
     }
   }

@@ -149,9 +149,7 @@ const isFormValid = computed(() =>
 const handleRegister = async () => {
   if (!isFormValid.value) {
     await showToast('auth.validation.checkFields', {
-      color: 'warning',
-      translate: true
-    });
+      color: 'warning'    });
     return;
   }
 
@@ -164,9 +162,7 @@ const handleRegister = async () => {
       password_confirmation: passwordConfirmation.value,
     });
     await showToast('auth.register.success', {
-      color: 'success', 
-      translate: true
-    });
+      color: 'success'    });
     await router.replace('/books');
   } catch (error: any) {
     console.error('Registration error:', error);
@@ -179,9 +175,7 @@ const handleRegister = async () => {
         .join(', ');
     }
     await showToast(errorMessage, {
-      color: 'danger',
-      translate: !error.response?.data?.message
-    });
+      color: 'danger'    });
   } finally {
     isLoading.value = false;
   }

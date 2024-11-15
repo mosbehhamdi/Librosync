@@ -21,6 +21,11 @@ return new class extends Migration
                 'cancelled'   // Reservation was cancelled
             ])->default('pending');
 
+            // Status history tracking
+            $table->json('status_history')->nullable();
+            $table->boolean('overdue_notification_sent')->default(false);
+            $table->timestamp('notification_sent_at')->nullable();
+
             // Tracking positions and dates
             $table->integer('queue_position')->nullable();
             $table->timestamp('expires_at')->nullable();    // For 'ready' status expiration
@@ -34,6 +39,7 @@ return new class extends Migration
             $table->index(['status', 'user_id']);
             $table->index(['status', 'book_id']);
             $table->index('due_date');
+            $table->index('notification_sent_at');
         });
     }
 

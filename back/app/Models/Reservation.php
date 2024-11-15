@@ -38,6 +38,7 @@ class Reservation extends Model
     ];
 
     protected $casts = [
+        'status_history' => 'array',
         'expires_at' => 'datetime',
         'delivered_at' => 'datetime',
         'returned_at' => 'datetime',

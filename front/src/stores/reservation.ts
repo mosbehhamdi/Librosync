@@ -64,7 +64,14 @@ export const useReservationStore = defineStore('reservation', {
       book_id: null,
       user_id: null,
       status: null
-    }
+    },
+    reservationHistory: [] as Reservation[],
+    historyPagination: {
+      currentPage: 1,
+      lastPage: 1,
+      total: 0,
+      perPage: 15
+    } as PaginationState,
   }),
 
   getters: {
@@ -130,39 +137,56 @@ export const useReservationStore = defineStore('reservation', {
       });
     },
 
-    async fetchAdminReservations({ page = 1, search = '', book_id = null, user_id = null, status = null, type = 'current' }) {
-      return this.handleApiCall(async () => {
-        const endpoint = type === 'past' ? '/reservations/past' : '/reservations';
-        const response = await api.get(endpoint, {
-          params: { 
-            page, 
-            search, 
-            book_id, 
-            user_id, 
-            status,
-            order_by: 'updated_at',
-            order_direction: 'desc'
-          }
+    async fetchAdminReservations({ 
+        page = 1, 
+        search = '', 
+        book_id = null, 
+        user_id = null, 
+        status = null, 
+        type = 'current' 
+    }) {
+        return this.handleApiCall(async () => {
+            const params = {
+                page,
+                search,
+                book_id,
+                user_id,
+                status,
+                type,
+                per_page: this.pagination.perPage
+            };
+
+            // Remove null/undefined values
+            Object.keys(params).forEach(key => 
+                params[key] === null && delete params[key]
+            );
+
+            const response = await api.get('/reservations', { params });
+            
+            if (page === 1) {
+                this.adminRreservations = response.data.data;
+            } else {
+                // Append new reservations without sorting
+                this.adminRreservations = [...this.adminRreservations, ...response.data.data];
+            }
+            
+            this.pagination = {
+                currentPage: response.data.current_page,
+                lastPage: response.data.last_page,
+                total: response.data.total,
+                perPage: response.data.per_page
+            };
+        
+            return this.adminRreservations;
         });
-        
-        if (page === 1) {
-          this.adminRreservations = response.data.data;
-        } else {
-          this.adminRreservations.push(...response.data.data);
-        }
-        
-        this.pagination = {
-          currentPage: response.data.current_page,
-          lastPage: response.data.last_page,
-          total: response.data.total,
-          perPage: response.data.per_page
-        };
-      
-        return this.adminRreservations;
-      });
     },
 
     async adminReservationAction(action: 'cancel' | 'accept' | 'deliver' | 'return', reservationId: number) {
+      if (!reservationId) {
+        console.error('Invalid reservation ID:', reservationId);
+        throw new Error('Invalid reservation ID');
+      }
+
       this.isLoading = true;
       try {
         const response = await api.post(`/admin/reservations/${reservationId}/${action}`);
@@ -172,9 +196,16 @@ export const useReservationStore = defineStore('reservation', {
         
         // Update local state
         const updatedReservation = response.data.reservation;
-        const index = this.adminRreservations.findIndex(r => r.id === reservationId);
-        if (index !== -1) {
-          this.adminRreservations[index] = updatedReservation;
+        if (updatedReservation && typeof updatedReservation.id !== 'undefined') {
+          // Ensure adminRreservations is initialized
+          if (!Array.isArray(this.adminRreservations)) {
+            this.adminRreservations = [];
+          }
+
+          const index = this.adminRreservations.findIndex(r => r && r.id === reservationId);
+          if (index !== -1) {
+            this.adminRreservations[index] = updatedReservation;
+          }
         }
 
         return response.data;
@@ -227,11 +258,58 @@ export const useReservationStore = defineStore('reservation', {
       }
     },
 
-    async fetchReservationHistory() {
-      return this.handleApiCall(async () => {
-        const response = await api.get('/reservations/history');
-        this.reservationHistory = response.data;
-      });
+    async fetchReservationHistory({ 
+      page = 1, 
+      search = '', 
+      book_id = null, 
+      user_id = null 
+    } = {}) {
+      try {
+        this.isLoading = true;
+        console.log('Fetching history with params:', { page, search, book_id, user_id });
+        
+        const params = {
+          page,
+          search,
+          book_id,
+          user_id,
+          per_page: this.historyPagination.perPage
+        };
+
+        // Remove null/undefined values
+        Object.keys(params).forEach(key => 
+          params[key] === null && delete params[key]
+        );
+
+        const response = await api.get('/reservations/history', { params });
+        console.log('History response:', response.data);
+
+        if (!response.data || !Array.isArray(response.data.data)) {
+          console.error('Invalid response format:', response.data);
+          throw new Error('Invalid response format');
+        }
+        
+        if (page === 1) {
+          this.reservationHistory = response.data.data;
+        } else {
+          this.reservationHistory = [...this.reservationHistory, ...response.data.data];
+        }
+
+        this.historyPagination = {
+          currentPage: response.data.current_page || 1,
+          lastPage: response.data.last_page || 1,
+          total: response.data.total || 0,
+          perPage: response.data.per_page || 15
+        };
+
+        return this.reservationHistory;
+      } catch (error) {
+        console.error('Error fetching reservation history:', error);
+        this.error = error;
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     async fetchReservationStatistics() {
@@ -275,30 +353,23 @@ export const useReservationStore = defineStore('reservation', {
     },
 
     async initializeRealTimeUpdates() {
-        wsService.subscribe('reservations', (data) => {
-          if (data.type === 'fallback_activated') {
-            console.warn('WebSocket not available, using polling');
-            this.startPolling();
-            return;
-          }
-      
-          const reservation = data.reservation || data;
-          const index = this.adminRreservations.findIndex(r => r.id === reservation.id);
-          
-          if (index !== -1) {
-            // Remove the old reservation
-            this.adminRreservations.splice(index, 1);
-            // Add the updated reservation at the beginning (most recent)
-            this.adminRreservations.unshift(reservation);
-          } else if (data.type === 'new_reservation') {
-            this.adminRreservations.unshift(reservation);
-          }
-        });
-      
-        if (wsService.isFallbackMode()) {
+      wsService.subscribe('reservations', (data) => {
+        if (data.type === 'fallback_activated') {
+          console.warn('WebSocket not available, using polling');
           this.startPolling();
+          return;
         }
-      } ,
+
+        const reservation = data.reservation || data;
+        
+        // Handle the update through our centralized method
+        this.handleReservationUpdate(reservation);
+      });
+
+      if (wsService.isFallbackMode()) {
+        this.startPolling();
+      }
+    },
 
     startPolling(interval = 3000) {
       this.stopAutoRefresh();
@@ -307,15 +378,50 @@ export const useReservationStore = defineStore('reservation', {
         if (this.isLoading) return;
         
         try {
-          // Reset to first page when polling to get latest data
-          await this.fetchAdminReservations({
-            page: 1,
-            search: this.currentFilters?.search || '',
-            book_id: this.currentFilters?.book_id,
-            user_id: this.currentFilters?.user_id,
-            status: this.currentFilters?.status,
-            type: 'current'  // Ensure we're getting current reservations
+          const response = await api.get('/reservations', {
+            params: {
+              page: 1,
+              search: this.currentFilters?.search || '',
+              book_id: this.currentFilters?.book_id,
+              user_id: this.currentFilters?.user_id,
+              status: this.currentFilters?.status,
+              type: 'current',
+              per_page: this.pagination.perPage
+            }
           });
+
+          // Ensure adminRreservations is initialized
+          if (!Array.isArray(this.adminRreservations)) {
+            this.adminRreservations = [];
+          }
+
+          // Get the new reservations
+          const newReservations = response.data.data || [];
+
+          // Update existing reservations and add new ones
+          newReservations.forEach(newRes => {
+            if (!newRes || typeof newRes.id === 'undefined') {
+              console.warn('Invalid reservation object received:', newRes);
+              return;
+            }
+
+            const existingIndex = this.adminRreservations.findIndex(r => r && r.id === newRes.id);
+            if (existingIndex !== -1) {
+              // Update existing reservation
+              this.adminRreservations[existingIndex] = newRes;
+            } else {
+              // Add new reservation at the beginning
+              this.adminRreservations.unshift(newRes);
+            }
+          });
+
+          // Update pagination info but keep current page
+          this.pagination = {
+            ...this.pagination,
+            total: response.data.total,
+            lastPage: response.data.last_page,
+            perPage: response.data.per_page
+          };
         } catch (error) {
           console.error('Polling failed:', error);
         }
@@ -328,14 +434,32 @@ export const useReservationStore = defineStore('reservation', {
     },
 
     handleReservationUpdate(updatedReservation: Reservation) {
-      const index = this.adminRreservations.findIndex(r => r.id === updatedReservation.id);
-      if (index !== -1) {
-        this.adminRreservations[index] = updatedReservation;
-        
-        // If queue position changed, update all positions for the book
-        if (updatedReservation.queue_position !== this.adminRreservations[index].queue_position) {
-          this.updateQueuePositions(updatedReservation.book_id);
-        }
+      if (!updatedReservation || !updatedReservation.status) {
+        console.warn('Invalid reservation update received:', updatedReservation);
+        return;
+      }
+
+      // Ensure adminRreservations is initialized
+      if (!Array.isArray(this.adminRreservations)) {
+        this.adminRreservations = [];
+      }
+
+      // Find the index of the existing reservation
+      const existingIndex = this.adminRreservations.findIndex(
+        r => r && r.id === updatedReservation.id
+      );
+
+      if (existingIndex !== -1) {
+        // Update the reservation in place to maintain order
+        this.adminRreservations[existingIndex] = updatedReservation;
+      } else {
+        // If it's a new reservation, add it at the beginning
+        this.adminRreservations.unshift(updatedReservation);
+      }
+
+      // If queue position changed, update all positions for the book
+      if (updatedReservation.queue_position !== undefined) {
+        this.updateQueuePositions(updatedReservation.book_id);
       }
     },
 
@@ -347,6 +471,13 @@ export const useReservationStore = defineStore('reservation', {
       this.statistics = null;
       this.error = null;
       this.pagination = {
+        currentPage: 1,
+        lastPage: 1,
+        total: 0,
+        perPage: 15
+      };
+      this.reservationHistory = [];
+      this.historyPagination = {
         currentPage: 1,
         lastPage: 1,
         total: 0,

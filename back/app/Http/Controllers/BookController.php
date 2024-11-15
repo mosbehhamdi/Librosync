@@ -64,20 +64,49 @@ public function store(BookRequest $request)
 {
     try {
         $book = Book::create($request->validated());
-        return response()->json($book, 201);
+        return response()->json([
+            'data' => $book,
+            'toast' => [
+                'message' => 'book.messages.createSuccess',
+                'color' => 'success'
+            ]
+        ], 201);
     } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+        return response()->json([
+            'toast' => [
+                'message' => 'book.errors.createFailed',
+                'color' => 'danger'
+            ]
+        ], 500);
     }
 }
 
 public function update(BookRequest $request, $id)
 {
-    $book = Book::findOrFail($id);
     try {
+        $book = Book::findOrFail($id);
         $book->update($request->validated());
-        return response()->json($book);
+        return response()->json([
+            'data' => $book,
+            'toast' => [
+                'message' => 'book.messages.updateSuccess',
+                'color' => 'success'
+            ]
+        ]);
+    } catch (\ModelNotFoundException $e) {
+        return response()->json([
+            'toast' => [
+                'message' => 'book.errors.notFound',
+                'color' => 'danger'
+            ]
+        ], 404);
     } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+        return response()->json([
+            'toast' => [
+                'message' => 'book.errors.updateFailed',
+                'color' => 'danger'
+            ]
+        ], 500);
     }
 }
 

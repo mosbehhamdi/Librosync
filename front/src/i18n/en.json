@@ -10,7 +10,9 @@
       "search": "Search",
       "filter": "Filter",
       "logout": "Logout",
-      "back": "Back"
+      "back": "Back",
+      "yes": "Yes",
+      "no": "No"
     },
     "status": {
       "success": "Success",
@@ -25,7 +27,8 @@
       "saveSuccess": "Saved successfully",
       "saveError": "Save failed",
       "invalidInput": "Invalid input"
-    }
+    },
+    "unknownUser": "Unknown User"
   },
   "menu": {
     "title": "Menu",
@@ -97,22 +100,103 @@
       "invalidEmail": "Please enter a valid email address"
     }
   },
+  "book": {
+    "messages": {
+      "createSuccess": "Book created successfully",
+      "updateSuccess": "Book updated successfully",
+      "deleteSuccess": "Book deleted successfully"
+    },
+    "errors": {
+      "duplicateIsbn": "This ISBN already exists",
+      "duplicateNumber": "This number already exists",
+      "invalidInput": "Please check your input",
+      "generic": "An error occurred while saving the book"
+    },
+    "validation": {
+      "title": {
+        "required": "Title is required",
+        "max": "Title cannot exceed 255 characters"
+      },
+      "authors": {
+        "required": "At least one author is required",
+        "string": "Author name must be text"
+      },
+      "copies": {
+        "required": "Number of copies is required",
+        "integer": "Number of copies must be a whole number",
+        "min": "Number of copies must be at least 1",
+        "max": "Available copies cannot exceed total copies"
+      },
+      "available": {
+        "required": "Available copies is required",
+        "integer": "Available copies must be a whole number"
+      },
+      "parts": {
+        "required": "Number of parts is required",
+        "integer": "Number of parts must be a whole number"
+      },
+      "edition": {
+        "required": "Edition number is required",
+        "integer": "Edition number must be a whole number"
+      },
+      "dewey": {
+        "required": "Dewey category is required",
+        "max": "Dewey subcategory is too long"
+      },
+      "publisher": {
+        "max": "Publisher name is too long"
+      },
+      "numbers": {
+        "max": "Number is too long",
+        "uniqueCentral": "This central number is already in use",
+        "uniqueLocal": "This local number is already in use"
+      },
+      "isbn": {
+        "required": "ISBN is required",
+        "format": "ISBN must be 10 or 13 digits"
+      },
+      "publication": {
+        "required": "Publication year is required",
+        "integer": "Publication year must be a number",
+        "min": "Publication year must be after 1000",
+        "future": "Publication year cannot be in the future"
+      }
+    },
+    "form": {
+      "addTitle": "Add New Book",
+      "editTitle": "Edit Book",
+      "create": "Create Book",
+      "update": "Update Book",
+      "fillWrong": "Fill Wrong",
+      "fillRight": "Fill Right",
+      "fields": {
+        "title": "Title",
+        "authors": "Authors",
+        "addAuthor": "Add Author",
+        "authorPlaceholder": "Author name",
+        "copies": "Number of Copies",
+        "available": "Available Copies",
+        "parts": "Number of Parts",
+        "publisher": "Publisher",
+        "edition": "Edition Number",
+        "deweyCategory": "Dewey Category",
+        "deweySubcategory": "Dewey Subcategory",
+        "price": "Price",
+        "comments": "Comments",
+        "centralNumber": "Central Number",
+        "localNumber": "Local Number",
+        "isbn": "ISBN",
+        "publicationDate": "Publication Date",
+        "publicationYear": "Publication Year",
+        "acquisitionDate": "Acquisition Date"
+      }
+    }
+  },
   "bookManagement": {
     "title": "Books Management",
     "addBook": "Add Book",
     "editBook": "Edit Book",
     "deleteBook": "Delete Book",
-    "fields": {
-      "title": "Title",
-      "authors": "Authors",
-      "copies": "Copies",
-      "available": "Available",
-      "category": "Category",
-      "isbn": "ISBN",
-      "publisher": "Publisher",
-      "waitingTime": "Estimated Wait Time",
-      "waitingDays": "{days} days"
-    },
     "form": {
       "copies": "Number of Copies",
       "available": "Available Copies",
@@ -136,21 +220,23 @@
       }
     }
   },
-  "reservations": {
+  "reservation": {
     "status": {
-      "pending": "Waiting",
-      "ready": "Ready for Pickup",
+      "pending": "Pending",
+      "ready": "Ready",
       "accepted": "Accepted",
       "delivered": "Delivered",
+      "returned": "Returned",
       "cancelled": "Cancelled",
-      "returned": "Returned"
+      "expired": "Expired"
     },
     "actions": {
       "reserve": "Reserve",
-      "cancel": "Cancel Reservation",
+      "cancel": "Cancel",
       "accept": "Accept",
       "deliver": "Deliver",
       "return": "Return",
+      "joinWaitlist": "Join Waitlist",
       "cancelHeader": "Cancel Reservation",
       "cancelConfirm": "Are you sure you want to cancel this reservation?",
       "acceptHeader": "Accept Reservation",
@@ -159,6 +245,28 @@
       "deliverConfirm": "Are you sure you want to deliver this book?",
       "returnHeader": "Return Book",
       "returnConfirm": "Are you sure you want to return this book?"
+    },
+    "confirmations": {
+      "cancelHeader": "Cancel Reservation",
+      "cancelConfirm": "Are you sure you want to cancel this reservation?",
+      "acceptHeader": "Accept Reservation",
+      "acceptConfirm": "Are you sure you want to accept this reservation?",
+      "deliverHeader": "Deliver Book",
+      "deliverConfirm": "Are you sure you want to deliver this book?",
+      "returnHeader": "Return Book",
+      "returnConfirm": "Are you sure you want to return this book?"
+    },
+    "messages": {
+      "reserveSuccess": "Book reserved successfully",
+      "cancelSuccess": "Reservation cancelled successfully",
+      "acceptSuccess": "Reservation accepted successfully",
+      "deliverSuccess": "Book delivered successfully",
+      "returnSuccess": "Book returned successfully",
+      "joinWaitlistSuccess": "Added to waitlist successfully",
+      "queuePositionError": "Failed to get queue position",
+      "unauthorized": "Unauthorized action",
+      "invalidStatus": "Invalid reservation status",
+      "deliveryError": "Can only deliver accepted reservations"
     },
     "labels": {
       "activeTitle": "Active Reservations",
@@ -170,7 +278,27 @@
       "due": "Due",
       "reservedBy": "Reserved by",
       "noActive": "No active reservations",
-      "noPast": "No past reservations"
+      "noPast": "No past reservations",
+      "expiredTitle": "Expired Reservations",
+      "expiredOn": "Expired on"
+    },
+    "queue": {
+      "position": "Queue Position: {position}",
+      "estimatedWait": "Estimated wait time",
+      "days": "{count} days"
+    },
+    "dates": {
+      "due": "Due Date",
+      "delivered": "Delivered On",
+      "expires": "Expires On",
+      "created": "Reserved On"
+    },
+    "errors": {
+      "maxBooksReached": "Maximum books limit reached",
+      "alreadyReserved": "You already have a reservation for this book",
+      "overdueBooks": "You have overdue books",
+      "notAvailable": "Book is not available",
+      "generic": "An error occurred with the reservation"
     }
   },
   "admin": {
@@ -250,12 +378,6 @@
       "updateSuccess": "Profile updated successfully",
       "updateError": "Failed to update profile"
     },
-    "book": {
-      "createSuccess": "Book created successfully",
-      "updateSuccess": "Book updated successfully",
-      "deleteSuccess": "Book deleted successfully",
-      "error": "Book action failed"
-    },
     "auth": {
       "verificationSuccess": "Email verified successfully",
       "verificationError": "Invalid or expired verification code",
@@ -296,5 +418,18 @@
       "passwordLength": "Password must be at least 8 characters",
       "passwordMismatch": "Passwords do not match"
     }
+  },
+  "books": {
+    "search": {
+      "initial": "Enter a search term to find books",
+      "noResults": "No books found for '{query}'",
+      "inCategory": "in category {category}"
+    }
+  },
+  "queue": {
+    "estimatedWait": "Estimated wait",
+    "days": "days",
+    "position": "Queue Position: {position}",
+    "readyForPickup": "Ready for pickup"
   }
 } 

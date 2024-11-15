@@ -193,15 +193,12 @@ const cancelReservation = async (id: number) => {
     await reservationStore.userReservationAction('cancel', id);
     await reservationStore.fetchUserReservations();
     await showToast('toast.reservation.cancelSuccess', { 
-      color: 'success',
-      translate: true 
+      color: 'success'
     });
   } catch (error) {
     console.error('Error cancelling reservation:', error);
     await showToast('toast.reservation.error', { 
-      color: 'danger',
-      translate: true 
-    });
+      color: 'danger'    });
   }
 };
 </script> 

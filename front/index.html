@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" :lang="locale" :dir="isRtl ? 'rtl' : 'ltr'">
+<html>
   <head>
     <meta charset="utf-8" />
     <title>Ionic App</title>
@@ -20,12 +20,20 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Ionic App" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <script>
+      // Set initial language and direction
+      const userLang = localStorage.getItem('user-language') || 
+                      localStorage.getItem('last-user-language') || 
+                      'en';
+      document.documentElement.lang = userLang;
+      document.documentElement.dir = userLang === 'ar' ? 'rtl' : 'ltr';
+    </script>
   </head>
 
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
-
 </html>
 

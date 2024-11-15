@@ -38,7 +38,7 @@ class AuthController extends Controller
 
         // Generate verification code
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         // Save verification code
         VerificationCode::create([
             'user_id' => $user->id,
@@ -77,7 +77,10 @@ class AuthController extends Controller
             if (!$token) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Invalid credentials'
+                    'toast' => [
+                        'message' => 'auth.login.invalid_credentials',
+                        'color' => 'danger'
+                    ]
                 ], 401);
             }
 

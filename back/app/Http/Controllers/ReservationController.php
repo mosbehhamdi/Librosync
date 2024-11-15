@@ -27,14 +27,29 @@ class ReservationController extends Controller
         try {
             // Apply search filter
             if ($search = $request->input('search')) {
-                $query->whereHas('book', function($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                      ->orWhereJsonContains('authors', $search)
-                      ->orWhere('publisher', 'like', "%{$search}%");
+                $query->where(function($q) use ($search) {
+                    $q->whereHas('book', function($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%")
+                          ->orWhereJsonContains('authors', $search);
+                    })
+                    ->orWhereHas('user', function($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%");
+                    });
                 });
             }
 
-            // Apply status filter - modified to handle multiple statuses
+            // Apply book filter
+            if ($bookId = $request->input('book_id')) {
+                $query->where('book_id', $bookId);
+            }
+
+            // Apply user filter
+            if ($userId = $request->input('user_id')) {
+                $query->where('user_id', $userId);
+            }
+
+            // Apply status filter
             if ($status = $request->input('status')) {
                 if (is_array($status)) {
                     $query->whereIn('status', $status);
@@ -43,12 +58,17 @@ class ReservationController extends Controller
                 }
             }
 
-            // For user view, include all historical reservations
-            if (!auth()->user()->isAdmin()) {
-                // No additional filtering needed - we want all user's reservations
+            // Apply type filter (active/past)
+            if ($type = $request->input('type')) {
+                if ($type === 'active') {
+                    $query->whereIn('status', Reservation::ACTIVE_STATUSES);
+                } elseif ($type === 'past') {
+                    $query->whereIn('status', Reservation::PAST_STATUSES);
+                }
             }
 
-            $reservations = $query->orderByRaw("COALESCE(updated_at, created_at) DESC")
+            $reservations = $query
+                ->orderBy('updated_at', 'desc')
                 ->paginate($request->input('per_page', 15));
 
             return response()->json([
@@ -297,23 +317,47 @@ class ReservationController extends Controller
     public function history(): JsonResponse
     {
         try {
-            if (auth()->user()->isAdmin()) {
-                $reservations = Reservation::with(['user', 'book'])
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-            } else {
-                $reservations = auth()->user()->reservations()
-                    ->with(['book'])
-                    ->orderBy('created_at', 'desc')
-                    ->get()
-                    ->map(function ($reservation) {
-                        // Add additional information for better history tracking
-                        $reservation->action_date = $reservation->updated_at;
-                        $reservation->action_type = $this->getActionType($reservation->status);
-                        return $reservation;
-                    });
-            }
-            return response()->json($reservations);
+            $query = auth()->user()->isAdmin()
+                ? Reservation::with(['user', 'book'])
+                : auth()->user()->reservations()->with(['book']);
+
+            // Don't filter by status for history - we want all statuses
+            $reservations = $query
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+
+            $data = $reservations->map(function ($reservation) {
+                return [
+                    'id' => $reservation->id,
+                    'book' => $reservation->book,
+                    'user' => $reservation->user,
+                    'status' => $reservation->status,
+                    'created_at' => $reservation->created_at,
+                    'updated_at' => $reservation->updated_at,
+                    'expires_at' => $reservation->expires_at,
+                    'delivered_at' => $reservation->delivered_at,
+                    'returned_at' => $reservation->returned_at,
+                    'due_date' => $reservation->due_date,
+                    'queue_position' => $reservation->queue_position,
+                    // Add status change timestamps
+                    'status_history' => [
+                        'reserved' => $reservation->created_at,
+                        'ready' => $reservation->ready_at,
+                        'accepted' => $reservation->accepted_at,
+                        'delivered' => $reservation->delivered_at,
+                        'returned' => $reservation->returned_at,
+                        'cancelled' => $reservation->cancelled_at
+                    ]
+                ];
+            });
+
+            return response()->json([
+                'data' => $data,
+                'current_page' => $reservations->currentPage(),
+                'last_page' => $reservations->lastPage(),
+                'total' => $reservations->total(),
+                'per_page' => $reservations->perPage(),
+            ]);
         } catch (\Exception $e) {
             \Log::error('Error fetching reservation history:', ['error' => $e->getMessage()]);
             return response()->json([

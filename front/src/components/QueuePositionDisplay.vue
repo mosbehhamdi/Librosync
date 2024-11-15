@@ -11,7 +11,7 @@
     <div v-if="showWaitTime" class="wait-time">
       <ion-note color="medium">
         <ion-icon :icon="timeOutline"></ion-icon>
-        Estimated wait: {{ estimatedWaitTime }} days
+        {{ t('reservations.waitingTime.estimate') }}: {{ estimatedWaitTime }} {{ t('reservations.waitingTime.days') }}
       </ion-note>
     </div>
   </div>
@@ -22,6 +22,7 @@ import { computed } from 'vue';
 import { IonChip, IonLabel, IonIcon, IonNote } from '@ionic/vue';
 import { timeOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { useRtl } from '@/composables/useRtl';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
   position: number | null;
@@ -54,9 +55,11 @@ const positionColor = computed(() => {
   return 'medium';
 });
 
+const { t } = useI18n();
+
 const positionText = computed(() => {
-  if (!isPending.value) return 'Ready for pickup';
-  return `Queue Position: ${props.position}`;
+  if (!isPending.value) return t('reservations.status.ready');
+  return t('reservations.queuePosition') + ': ' + props.position;
 });
 
 const { rtlClass } = useRtl();
